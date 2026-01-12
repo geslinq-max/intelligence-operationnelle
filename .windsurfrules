@@ -1,0 +1,29 @@
+﻿PROJET : CAPITAL ÉNERGIE
+(Anciennement "Intelligence Opérationnelle" - NE PLUS UTILISER CE NOM)
+
+
+STANDARD ORTHOGRAPHIQUE
+
+Correction stricte obligatoire : "station", "recours", "éligibilité"
+Mention légale unique : "Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise."
+
+═
+PROTOCOLE PDF - RÈGLE "CLEAN-BEFORE-WRITE"
+
+Avant toute écriture de texte dynamique :
+1. Appeler cleanZone(doc, x, y, w, h) pour effacer les calques précédents
+2. La fonction cleanZone utilise doc.setFillColor(255,255,255) + doc.rect(x,y,w,h,'F')
+3. Zone footer : nettoyer (0, 275, 210, 25) avant injection mentions légales
+
+
+PAGINATION DYNAMIQUE
+
+- Calculer doc.getNumberOfPages() UNE SEULE FOIS après création de toutes les pages
+- Boucle de post-traitement finale pour injecter les footers
+- INTERDIT : numérateur > total réel (ex: 8/6)
+
+
+ZÉRO GHOST TEXT
+
+Interdiction d'empiler des couches de texte.
+Chaque modification doit supprimer l'ancienne logique.
