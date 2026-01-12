@@ -114,15 +114,18 @@ function StatusBadge({ status, onClick }: { status: ProspectStatus; onClick?: ()
 function ProspectCard({ 
   prospect, 
   onStatusChange,
-  onCopyMessage 
+  onCopyMessage,
+  onSendEmail
 }: { 
   prospect: Prospect;
   onStatusChange: (newStatus: ProspectStatus) => void;
   onCopyMessage: () => void;
+  onSendEmail: (prospect: Prospect) => Promise<void>;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const handleCopy = async () => {
     if (prospect.message_personnalise) {
@@ -133,11 +136,14 @@ function ProspectCard({
     }
   };
 
-  const handleEmail = () => {
-    if (prospect.email && prospect.message_personnalise) {
-      const subject = encodeURIComponent(`Partenariat CEE - ${prospect.raison_sociale}`);
-      const body = encodeURIComponent(prospect.message_personnalise);
-      window.open(`mailto:${prospect.email}?subject=${subject}&body=${body}`, '_blank');
+  const handleEmail = async () => {
+    if (prospect.email && prospect.message_personnalise && !isSending) {
+      setIsSending(true);
+      try {
+        await onSendEmail(prospect);
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
@@ -222,10 +228,19 @@ function ProspectCard({
           {prospect.email && (
             <button
               onClick={handleEmail}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 text-sm rounded-lg transition-colors"
+              disabled={isSending}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                isSending 
+                  ? 'bg-slate-600 text-slate-400 cursor-wait' 
+                  : 'bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400'
+              }`}
             >
-              <Mail className="w-4 h-4" />
-              Email
+              {isSending ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Mail className="w-4 h-4" />
+              )}
+              {isSending ? 'Envoi...' : 'Email'}
             </button>
           )}
           {prospect.site_web && (
@@ -278,10 +293,19 @@ function ProspectCard({
                 </button>
                 <button
                   onClick={handleEmail}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-sm rounded-lg transition-colors"
+                  disabled={isSending}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-sm rounded-lg transition-colors ${
+                    isSending 
+                      ? 'bg-slate-600 cursor-wait' 
+                      : 'bg-cyan-600 hover:bg-cyan-500'
+                  }`}
                 >
-                  <Send className="w-4 h-4" />
-                  Envoyer
+                  {isSending ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  {isSending ? 'Envoi...' : 'Envoyer'}
                 </button>
               </div>
             </div>
@@ -310,6 +334,48 @@ export default function ProspectionPage() {
   const [selectedZone, setSelectedZone] = useState('Toutes les zones');
   const [sortBy, setSortBy] = useState<'score' | 'nom' | 'ville'>('score');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Notification state
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    type: 'success' | 'error';
+    message: string;
+  }>({ show: false, type: 'success', message: '' });
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ show: true, type, message });
+    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 4000);
+  };
+
+  const handleSendEmail = async (prospect: Prospect) => {
+    if (!prospect.email || !prospect.message_personnalise) return;
+    
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: prospect.email,
+          toName: prospect.contact_nom || prospect.raison_sociale,
+          subject: `Partenariat CEE - ${prospect.raison_sociale}`,
+          message: prospect.message_personnalise,
+          prospectId: prospect.id,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showNotification('success', `Email envoyé avec succès à ${prospect.email}`);
+        // Mettre à jour le statut du prospect
+        handleStatusChange(prospect.id, 'contacte');
+      } else {
+        showNotification('error', result.error || 'Erreur lors de l\'envoi');
+      }
+    } catch (error) {
+      showNotification('error', 'Erreur de connexion au serveur');
+    }
+  };
 
   const handleStatusChange = (prospectId: string, newStatus: ProspectStatus) => {
     setProspects(prev => prev.map(p => 
@@ -382,6 +448,28 @@ export default function ProspectionPage() {
   return (
     <div className="min-h-screen bg-slate-950">
       <Sidebar />
+      
+      {/* Notification Toast */}
+      {notification.show && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-2 duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-emerald-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          {notification.type === 'success' ? (
+            <Check className="w-5 h-5" />
+          ) : (
+            <span className="w-5 h-5 flex items-center justify-center font-bold">!</span>
+          )}
+          <span className="font-medium">{notification.message}</span>
+          <button 
+            onClick={() => setNotification(prev => ({ ...prev, show: false }))}
+            className="ml-2 hover:opacity-70"
+          >
+            ×
+          </button>
+        </div>
+      )}
       
       <main className="p-4 lg:p-8 pt-20 lg:pt-8 transition-all duration-300 lg:ml-64">
         {/* Header */}
@@ -563,6 +651,7 @@ export default function ProspectionPage() {
                 prospect={prospect}
                 onStatusChange={(newStatus) => handleStatusChange(prospect.id, newStatus)}
                 onCopyMessage={() => {}}
+                onSendEmail={handleSendEmail}
               />
             ))
           )}
