@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
+import { useSubscription, type SubscriptionTier } from '@/contexts/SubscriptionContext';
 import { 
   Check, 
   Shield, 
@@ -13,7 +15,10 @@ import {
   FileCheck,
   Phone,
   Loader2,
-  X
+  X,
+  Sparkles,
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 
 // ============================================================================
@@ -107,14 +112,119 @@ const forfaits: Forfait[] = [
 // COMPOSANT MODAL
 // ============================================================================
 
+// ============================================================================
+// ANIMATION DE SUCCÈS PLEIN ÉCRAN
+// ============================================================================
+
+function SuccessAnimation({ 
+  forfait,
+  onComplete 
+}: { 
+  forfait: Forfait;
+  onComplete: () => void;
+}) {
+  const [stage, setStage] = useState<'enter' | 'show' | 'exit'>('enter');
+
+  useEffect(() => {
+    // Entrée
+    const enterTimer = setTimeout(() => setStage('show'), 100);
+    // Affichage pendant 3s puis sortie
+    const showTimer = setTimeout(() => setStage('exit'), 3500);
+    // Redirection après sortie
+    const exitTimer = setTimeout(() => onComplete(), 4200);
+
+    return () => {
+      clearTimeout(enterTimer);
+      clearTimeout(showTimer);
+      clearTimeout(exitTimer);
+    };
+  }, [onComplete]);
+
+  const gradientClass = forfait.id === 'essentiel' 
+    ? 'from-blue-600 to-cyan-600'
+    : forfait.id === 'serenite'
+    ? 'from-emerald-600 to-teal-600'
+    : 'from-violet-600 to-purple-600';
+
+  return (
+    <div className={`
+      fixed inset-0 z-[100] flex items-center justify-center
+      bg-gradient-to-br ${gradientClass}
+      transition-all duration-700
+      ${stage === 'enter' ? 'opacity-0 scale-95' : ''}
+      ${stage === 'show' ? 'opacity-100 scale-100' : ''}
+      ${stage === 'exit' ? 'opacity-0 scale-105' : ''}
+    `}>
+      {/* Particules décoratives */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${2 + Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Contenu principal */}
+      <div className={`
+        text-center px-8 transition-all duration-500 delay-300
+        ${stage === 'show' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+      `}>
+        {/* Icône succès */}
+        <div className="relative mb-8">
+          <div className="w-28 h-28 bg-white/20 rounded-full flex items-center justify-center mx-auto backdrop-blur-sm">
+            <CheckCircle2 className="w-16 h-16 text-white" />
+          </div>
+          <div className="absolute -top-2 -right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+            <Sparkles className="w-6 h-6 text-amber-500" />
+          </div>
+        </div>
+
+        {/* Texte */}
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          Bienvenue dans la Cellule d'Expertise
+        </h1>
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 rounded-full backdrop-blur-sm mb-6">
+          {forfait.icon}
+          <span className="text-2xl font-bold text-white">
+            Forfait {forfait.nom} Activé
+          </span>
+        </div>
+        <p className="text-white/80 text-lg max-w-md mx-auto mb-8">
+          Votre accès a été configuré avec succès. Vous allez être redirigé vers votre tableau de bord.
+        </p>
+
+        {/* Indicateur de redirection */}
+        <div className="flex items-center justify-center gap-2 text-white/70">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span>Redirection en cours...</span>
+          <ArrowRight className="w-5 h-5" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// COMPOSANT MODAL DE CONFIRMATION
+// ============================================================================
+
 function ConfirmationModal({ 
   isOpen, 
   onClose, 
-  forfait 
+  forfait,
+  onConfirm
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   forfait: Forfait | null;
+  onConfirm: () => void;
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -122,11 +232,11 @@ function ConfirmationModal({
 
   const handleConfirm = () => {
     setIsProcessing(true);
-    // Simulation de traitement
+    // Simulation du paiement
     setTimeout(() => {
       setIsProcessing(false);
-      onClose();
-    }, 3000);
+      onConfirm();
+    }, 2000);
   };
 
   return (
@@ -134,18 +244,20 @@ function ConfirmationModal({
       {/* Overlay */}
       <div 
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={!isProcessing ? onClose : undefined}
       />
       
       {/* Modal */}
       <div className="relative bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
         {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {!isProcessing && (
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
 
         {/* Content */}
         <div className="text-center">
@@ -298,12 +410,40 @@ function ForfaitCard({
 // ============================================================================
 
 export default function TarifsPage() {
+  const router = useRouter();
+  const { setTier, tier: currentTier } = useSubscription();
   const [selectedForfait, setSelectedForfait] = useState<Forfait | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [activatedForfait, setActivatedForfait] = useState<Forfait | null>(null);
 
   const handleSelectForfait = (forfait: Forfait) => {
     setSelectedForfait(forfait);
     setIsModalOpen(true);
+  };
+
+  const handleConfirmSubscription = () => {
+    if (!selectedForfait) return;
+    
+    // Fermer le modal
+    setIsModalOpen(false);
+    
+    // Mettre à jour le statut d'abonnement
+    const tierMap: Record<ForfaitNiveau, SubscriptionTier> = {
+      essentiel: 'essentiel',
+      serenite: 'serenite',
+      expert: 'expert',
+    };
+    setTier(tierMap[selectedForfait.id]);
+    
+    // Afficher l'animation de succès
+    setActivatedForfait(selectedForfait);
+    setShowSuccess(true);
+  };
+
+  const handleSuccessComplete = () => {
+    // Rediriger vers le Dashboard
+    router.push('/dashboard');
   };
 
   return (
@@ -389,7 +529,16 @@ export default function TarifsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         forfait={selectedForfait}
+        onConfirm={handleConfirmSubscription}
       />
+
+      {/* Animation de succès plein écran */}
+      {showSuccess && activatedForfait && (
+        <SuccessAnimation
+          forfait={activatedForfait}
+          onComplete={handleSuccessComplete}
+        />
+      )}
     </div>
   );
 }

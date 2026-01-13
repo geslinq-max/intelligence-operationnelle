@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard } from 'lucide-react';
 import { useBranding, THEMES } from '@/contexts/ThemeContext';
+import { useSubscription, SUBSCRIPTION_TIERS } from '@/contexts/SubscriptionContext';
 import { supabase } from '@/lib/supabase/client';
 
 const navigation = [
@@ -56,6 +57,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { theme, logoUrl, cabinetNom } = useBranding();
+  const { config: subscriptionConfig } = useSubscription();
   const themeConfig = THEMES[theme];
 
   return (
@@ -149,12 +151,19 @@ export default function Sidebar() {
           href="/profile"
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors group"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">U</span>
+          <div className={`w-8 h-8 bg-gradient-to-br ${subscriptionConfig.gradient} rounded-full flex items-center justify-center relative`}>
+            <span className="text-white text-sm font-medium">{subscriptionConfig.icon}</span>
+            {subscriptionConfig.id !== 'prospect' && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900" />
+            )}
           </div>
           <div className="flex-1">
             <p className="text-white text-sm font-medium group-hover:text-cyan-400 transition-colors">Mon profil</p>
-            <p className="text-slate-500 text-xs">Analyste Senior</p>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${subscriptionConfig.bgColor} ${subscriptionConfig.color} border ${subscriptionConfig.borderColor}`}>
+                {subscriptionConfig.nom}
+              </span>
+            </div>
           </div>
         </Link>
         
