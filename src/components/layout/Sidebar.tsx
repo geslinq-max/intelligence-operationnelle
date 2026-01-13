@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard } from 'lucide-react';
+import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard, Crown, Target, Briefcase, Zap, ChevronDown, Shield } from 'lucide-react';
 import { useBranding, THEMES } from '@/contexts/ThemeContext';
-import { useSubscription, SUBSCRIPTION_TIERS } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useAuth, ROLE_CONFIG, type UserRole } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 
-const navigation = [
+// Navigation de base (accessible à tous)
+const baseNavigation = [
   {
     name: 'Dashboard',
     href: '/dashboard',
@@ -17,6 +19,7 @@ const navigation = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
       </svg>
     ),
+    roles: ['artisan', 'partenaire', 'manager', 'fondateur'] as UserRole[],
   },
   {
     name: 'Vérificateur de Dossiers',
@@ -26,6 +29,7 @@ const navigation = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
+    roles: ['artisan', 'partenaire', 'manager', 'fondateur'] as UserRole[],
   },
   {
     name: 'Artisans Partenaires',
@@ -35,6 +39,7 @@ const navigation = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       </svg>
     ),
+    roles: ['manager', 'fondateur'] as UserRole[],
   },
   {
     name: 'Prospection',
@@ -45,20 +50,66 @@ const navigation = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
       </svg>
     ),
+    roles: ['manager', 'fondateur'] as UserRole[],
   },
   {
     name: 'Forfaits & Tarifs',
     href: '/tarifs',
     icon: <CreditCard className="w-5 h-5" />,
+    roles: ['artisan', 'partenaire', 'manager', 'fondateur'] as UserRole[],
   },
 ];
+
+// Navigation RBAC (espaces par rôle)
+const rbacNavigation = [
+  {
+    name: 'Le Cerveau',
+    href: '/admin',
+    icon: <Crown className="w-5 h-5" />,
+    roles: ['fondateur'] as UserRole[],
+    color: 'text-amber-400',
+    bgActive: 'bg-amber-500/20 border-amber-500/30',
+  },
+  {
+    name: 'Espace Direction',
+    href: '/direction',
+    icon: <Target className="w-5 h-5" />,
+    roles: ['manager', 'fondateur'] as UserRole[],
+    color: 'text-violet-400',
+    bgActive: 'bg-violet-500/20 border-violet-500/30',
+  },
+  {
+    name: 'Cockpit Partenaire',
+    href: '/partenaire',
+    icon: <Briefcase className="w-5 h-5" />,
+    roles: ['partenaire', 'manager', 'fondateur'] as UserRole[],
+    color: 'text-cyan-400',
+    bgActive: 'bg-cyan-500/20 border-cyan-500/30',
+  },
+];
+
+// Configuration des icônes par rôle
+const ROLE_ICONS = {
+  fondateur: Crown,
+  manager: Target,
+  partenaire: Briefcase,
+  artisan: Zap,
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const { theme, logoUrl, cabinetNom } = useBranding();
   const { config: subscriptionConfig } = useSubscription();
+  const { user, switchRole, isAuthenticated } = useAuth();
   const themeConfig = THEMES[theme];
+
+  // Filtrer la navigation selon le rôle de l'utilisateur
+  const userRole = user?.role || 'artisan';
+  const filteredBaseNav = baseNavigation.filter(item => item.roles.includes(userRole));
+  const filteredRbacNav = rbacNavigation.filter(item => item.roles.includes(userRole));
+  const RoleIcon = ROLE_ICONS[userRole];
 
   return (
     <>
@@ -117,18 +168,102 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
+      {/* Sélecteur de rôle (Démo) */}
+      <div className="p-4 border-b border-slate-700">
+        <div className="relative">
+          <button
+            onClick={() => setShowRoleMenu(!showRoleMenu)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+              ROLE_CONFIG[userRole].color
+            } bg-slate-800 hover:bg-slate-700`}
+          >
+            <RoleIcon className="w-5 h-5" />
+            <div className="flex-1 text-left">
+              <p className="text-white text-sm font-medium">{ROLE_CONFIG[userRole].label}</p>
+              <p className="text-slate-500 text-xs">{ROLE_CONFIG[userRole].cle}</p>
+            </div>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showRoleMenu ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Menu déroulant des rôles */}
+          {showRoleMenu && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-50 overflow-hidden">
+              <p className="px-3 py-2 text-xs text-slate-500 border-b border-slate-700">Changer de rôle (Démo)</p>
+              {(['fondateur', 'manager', 'partenaire', 'artisan'] as UserRole[]).map((role) => {
+                const config = ROLE_CONFIG[role];
+                const Icon = ROLE_ICONS[role];
+                const isCurrentRole = role === userRole;
+                
+                return (
+                  <button
+                    key={role}
+                    onClick={() => {
+                      switchRole(role);
+                      setShowRoleMenu(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-colors ${
+                      isCurrentRole ? 'bg-slate-700' : 'hover:bg-slate-700'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${config.color}`} />
+                    <div className="flex-1 text-left">
+                      <p className="text-white text-sm">{config.label}</p>
+                      <p className="text-slate-500 text-xs">{config.cle}</p>
+                    </div>
+                    {isCurrentRole && (
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation RBAC */}
+      {filteredRbacNav.length > 0 && (
+        <nav className="p-4 border-b border-slate-700">
+          <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-3">
+            Espace {ROLE_CONFIG[userRole].label}
+          </p>
+          <ul className="space-y-1">
+            {filteredRbacNav.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                      isActive
+                        ? `${item.bgActive} ${item.color} border`
+                        : `text-slate-400 hover:bg-slate-800 ${item.color.replace('text-', 'hover:text-')}`
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      )}
+
+      {/* Navigation de base */}
+      <nav className="flex-1 p-4 overflow-y-auto">
         <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-3">
-          Navigation
+          Outils
         </p>
         <ul className="space-y-1">
-          {navigation.map((item) => {
+          {filteredBaseNav.map((item) => {
             const isActive = pathname === item.href;
             return (
               <li key={item.name}>
                 <Link
                   href={item.href}
+                  onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
                       ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
@@ -142,7 +277,6 @@ export default function Sidebar() {
             );
           })}
         </ul>
-
       </nav>
 
       {/* Footer */}

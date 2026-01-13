@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { BrandingProvider } from "@/contexts/ThemeContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import SupabaseInit from "@/components/SupabaseInit";
 
 const geistSans = Geist({
@@ -48,11 +49,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <BrandingProvider>
-          <SubscriptionProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </SubscriptionProvider>
+          <AuthProvider>
+            <SubscriptionProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </SubscriptionProvider>
+          </AuthProvider>
         </BrandingProvider>
         <ServiceWorkerRegister />
         <SupabaseInit />
