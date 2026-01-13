@@ -1,0 +1,289 @@
+{
+  "meta": {
+    "dateTraitement": "2026-01-13T04:30:19.865Z",
+    "fichier": "devis-test-simulation.pdf",
+    "dureeTraitement": 165
+  },
+  "donnees": {
+    "fichier": {
+      "chemin": "C:\\Users\\gesli\\intelligence-operationnelle\\entree-emails\\devis-test-simulation.pdf",
+      "nom": "devis-test-simulation.pdf",
+      "taille": 4141,
+      "dateAnalyse": "2026-01-13T04:30:20.029Z",
+      "pages": 2
+    },
+    "client": {
+      "nom": "",
+      "adresse": "",
+      "codePostal": "00012",
+      "ville": "RGE QualiPAC N",
+      "telephone": "0478123456",
+      "email": "jean.dupont@email.fr"
+    },
+    "entreprise": {
+      "raisonSociale": "",
+      "siret": "12345678900012",
+      "rge": "RGE QualiPAC, RGE requise",
+      "adresse": "",
+      "telephone": ""
+    },
+    "travaux": {
+      "type": "pompe à chaleur, chauffage",
+      "description": "",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "surface": null,
+      "puissance": 10
+    },
+    "montants": {
+      "totalHT": 12670,
+      "tva": 0.5,
+      "totalTTC": 13366.85,
+      "acompte": null,
+      "primesCEE": null,
+      "resteACharge": null
+    },
+    "materiel": {
+      "reference": "ATL-AEX-AI10",
+      "marque": "Atlantic",
+      "modele": "",
+      "caracteristiques": ""
+    },
+    "extraction": {
+      "confiance": 80,
+      "champsExtraits": 4,
+      "champsTotaux": 5,
+      "alertes": []
+    }
+  },
+  "conformite": {
+    "dateVerification": "2026-01-13T04:30:20.033Z",
+    "fichier": "devis-test-simulation.pdf",
+    "fichesCEE": [
+      "BAR-TH-104"
+    ],
+    "controles": [
+      {
+        "id": "presence_ficheCEE",
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "poids": 20,
+        "status": "CONFORME",
+        "message": "Fiche(s) CEE détectée(s): BAR-TH-104",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_montantTTC",
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Montant TTC: 13366.85 €",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_siret",
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "SIRET: 12345678900012",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_rge",
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Qualification: RGE QualiPAC, RGE requise",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_materiel",
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Matériel: Atlantic - ATL-AEX-AI10",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_client",
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Contact: jean.dupont@email.fr",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "coherence_tva",
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "poids": 5,
+        "status": "CONFORME",
+        "message": "TVA réduite 5.5% appliquée",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_puissance_coherente",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Puissance 10 kW cohérente",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_montant_coherent",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Montant 13366.85 € dans la fourchette marché",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      }
+    ],
+    "resume": {
+      "conformes": 9,
+      "alertes": 0,
+      "bloquants": 0,
+      "nonVerifies": 0
+    },
+    "indiceSécurite": 100,
+    "decision": "ACCEPTÉ",
+    "recommandations": [
+      "Dossier éligible à la prime CEE"
+    ]
+  },
+  "rapport": {
+    "client": {
+      "nom": "jean.dupont@email.fr",
+      "contact": "jean.dupont@email.fr",
+      "localisation": "RGE QualiPAC N 00012"
+    },
+    "travaux": {
+      "type": "pompe à chaleur, chauffage",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "puissance": "10 kW",
+      "surface": null
+    },
+    "financier": {
+      "montantTTC": 13366.85,
+      "montantHT": 12670,
+      "tva": 0.5
+    },
+    "materiel": {
+      "marque": "Atlantic",
+      "reference": "ATL-AEX-AI10"
+    },
+    "indiceSécurite": 100,
+    "decision": "ACCEPTÉ",
+    "pointsConformes": [
+      {
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "detail": "Fiche(s) CEE détectée(s): BAR-TH-104"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "detail": "Montant TTC: 13366.85 €"
+      },
+      {
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "detail": "SIRET: 12345678900012"
+      },
+      {
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "detail": "Qualification: RGE QualiPAC, RGE requise"
+      },
+      {
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "detail": "Matériel: Atlantic - ATL-AEX-AI10"
+      },
+      {
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "detail": "Contact: jean.dupont@email.fr"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "detail": "TVA réduite 5.5% appliquée"
+      },
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "detail": "Puissance 10 kW cohérente"
+      },
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "detail": "Montant 13366.85 € dans la fourchette marché"
+      }
+    ],
+    "pointsAlerte": [],
+    "pointsBloquants": [],
+    "recommandations": [
+      "Dossier éligible à la prime CEE"
+    ],
+    "estimationPrime": {
+      "fiche": "BAR-TH-104",
+      "montant": 1187.5,
+      "formule": "puissance_kW × 12500 × 9.50 / 1000"
+    }
+  }
+}

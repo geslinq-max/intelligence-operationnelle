@@ -1,0 +1,57 @@
+DESTINATAIRE: TestClient-Demo
+SUJET: 🎉 Bienvenue chez Capital Énergie - Votre espace est prêt !
+
+PIÈCES JOINTES:
+  - Guide-Serenite.pdf: clients\TestClient-Demo\Guide-Serenite-TestClient-Demo.pdf
+  - Facture-Abonnement.pdf: 
+
+═══════════════════════════════════════════════════════════════════════════════
+CORPS DU MESSAGE:
+═══════════════════════════════════════════════════════════════════════════════
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ⚡ CAPITAL ÉNERGIE
+                    Cellule d'Expertise Réglementaire
+═══════════════════════════════════════════════════════════════════════════════
+
+Bonjour,
+
+Nous avons le plaisir de vous accueillir parmi nos clients privilégiés !
+
+Votre espace de travail ⭐ Forfait Sérénité est désormais actif.
+
+───────────────────────────────────────────────────────────────────────────────
+📁 ACCÈS À VOTRE DOSSIER DE DÉPÔT
+───────────────────────────────────────────────────────────────────────────────
+
+Déposez vos devis à analyser dans le dossier suivant :
+C:\Users\gesli\intelligence-operationnelle\clients\TestClient-Demo\depot
+
+Vos rapports d'audit seront automatiquement générés dans :
+C:\Users\gesli\intelligence-operationnelle\clients\TestClient-Demo\rapports
+
+───────────────────────────────────────────────────────────────────────────────
+📎 PIÈCES JOINTES
+───────────────────────────────────────────────────────────────────────────────
+
+1. Guide de Sérénité (PDF)
+   → Retrouvez les 3 étapes pour utiliser notre service
+
+2. Première facture d'abonnement (PDF)
+   → Votre facture pour le mois en cours
+
+───────────────────────────────────────────────────────────────────────────────
+📞 BESOIN D'AIDE ?
+───────────────────────────────────────────────────────────────────────────────
+
+Notre équipe est à votre disposition :
+• Email : contact@capital-energie.fr
+• Téléphone : 01 23 45 67 89
+• Site : https://capital-energie.fr
+
+À très bientôt !
+
+L'équipe Capital Énergie
+
+───────────────────────────────────────────────────────────────────────────────
+Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise.

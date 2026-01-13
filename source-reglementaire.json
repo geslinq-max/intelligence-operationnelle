@@ -1,0 +1,159 @@
+{
+  "version": "2025.02",
+  "dateMAJ": "2025-02-01",
+  "source": "DGEC - Ministère de la Transition Écologique (SIMULATION)",
+  "urlOfficielle": "https://www.ecologie.gouv.fr/cee",
+  "fiches": {
+    "BAR-TH-104": {
+      "code": "BAR-TH-104",
+      "nom": "Pompe à chaleur de type air/eau ou eau/eau",
+      "secteur": "Résidentiel",
+      "categorie": "Thermique",
+      "dateEntreeVigueur": "2025-02-01",
+      "criteresTechniques": {
+        "efficaciteEnergetique": {
+          "parametre": "ηs",
+          "seuil": 126,
+          "unite": "%",
+          "condition": ">=",
+          "description": "Efficacité énergétique saisonnière (NOUVEAU SEUIL)"
+        },
+        "cop": {
+          "parametre": "COP",
+          "seuil": 3.8,
+          "unite": "",
+          "condition": ">=",
+          "description": "Coefficient de performance (RELEVÉ)"
+        }
+      },
+      "montants": {
+        "plafondTTC": 22000,
+        "plancherTTC": 9000,
+        "primeCEE": {
+          "standard": 2800,
+          "modeste": 4500,
+          "tresModeste": 5500
+        }
+      },
+      "documentsObligatoires": [
+        "devis_signe",
+        "facture",
+        "attestation_honneur",
+        "avis_imposition",
+        "fiche_technique_pac",
+        "certificat_rge",
+        "photo_installation"
+      ],
+      "qualificationsRGE": ["QualiPAC", "Qualibat 5412", "Qualibat 5413"],
+      "notes": "Nouveau seuil ηs applicable au 1er février 2025"
+    },
+    "BAR-TH-106": {
+      "code": "BAR-TH-106",
+      "nom": "Chaudière individuelle à haute performance énergétique",
+      "secteur": "Résidentiel",
+      "categorie": "Thermique",
+      "dateEntreeVigueur": "2024-01-01",
+      "criteresTechniques": {
+        "efficaciteEnergetique": {
+          "parametre": "ηs",
+          "seuil": 90,
+          "unite": "%",
+          "condition": ">=",
+          "description": "Efficacité énergétique saisonnière"
+        }
+      },
+      "montants": {
+        "plafondTTC": 8000,
+        "plancherTTC": 3000,
+        "primeCEE": {
+          "standard": 800,
+          "modeste": 1200,
+          "tresModeste": 1400
+        }
+      },
+      "documentsObligatoires": [
+        "devis_signe",
+        "facture",
+        "attestation_honneur",
+        "avis_imposition",
+        "fiche_technique_chaudiere",
+        "certificat_rge"
+      ],
+      "qualificationsRGE": ["Qualigaz", "Qualibat 5211"]
+    },
+    "BAR-EN-101": {
+      "code": "BAR-EN-101",
+      "nom": "Isolation des combles ou de toiture",
+      "secteur": "Résidentiel",
+      "categorie": "Enveloppe",
+      "dateEntreeVigueur": "2025-02-01",
+      "criteresTechniques": {
+        "resistanceThermique": {
+          "parametre": "R",
+          "seuil": 8,
+          "unite": "m².K/W",
+          "condition": ">=",
+          "description": "Résistance thermique de l'isolant (AUGMENTÉ)"
+        }
+      },
+      "montants": {
+        "plafondParM2": 45,
+        "plancherParM2": 18,
+        "primeCEE": {
+          "standard": 12,
+          "modeste": 18,
+          "tresModeste": 25
+        }
+      },
+      "documentsObligatoires": [
+        "devis_signe",
+        "facture",
+        "attestation_honneur",
+        "avis_imposition",
+        "fiche_technique_isolant",
+        "certificat_rge"
+      ],
+      "qualificationsRGE": ["Qualibat 7141", "Qualibat 7142"]
+    },
+    "BAR-TH-171": {
+      "code": "BAR-TH-171",
+      "nom": "Pompe à chaleur hybride (NOUVELLE FICHE)",
+      "secteur": "Résidentiel",
+      "categorie": "Thermique",
+      "dateEntreeVigueur": "2025-02-01",
+      "criteresTechniques": {
+        "efficaciteEnergetique": {
+          "parametre": "ηs",
+          "seuil": 120,
+          "unite": "%",
+          "condition": ">=",
+          "description": "Efficacité énergétique saisonnière"
+        }
+      },
+      "montants": {
+        "plafondTTC": 18000,
+        "plancherTTC": 10000,
+        "primeCEE": {
+          "standard": 2000,
+          "modeste": 3500,
+          "tresModeste": 4500
+        }
+      },
+      "documentsObligatoires": [
+        "devis_signe",
+        "facture",
+        "attestation_honneur",
+        "avis_imposition",
+        "fiche_technique",
+        "certificat_rge"
+      ],
+      "qualificationsRGE": ["QualiPAC", "Qualigaz"]
+    }
+  },
+  "metadata": {
+    "checksum": "xyz789ghi012",
+    "datePublication": "2025-01-15",
+    "entreeVigueur": "2025-02-01",
+    "simulation": true
+  }
+}

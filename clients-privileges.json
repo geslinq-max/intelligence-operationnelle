@@ -1,0 +1,100 @@
+{
+  "version": "2025.01",
+  "dateCreation": "2025-01-13",
+  "source": "Service de Gestion des Forfaits - Capital Énergie",
+  "forfaits": {
+    "essentiel": {
+      "nom": "Essentiel",
+      "prix": 149,
+      "unite": "€/mois",
+      "dossiersMax": 3,
+      "priorite": "normale",
+      "prioriteNiveau": 1,
+      "fonctionnalites": [
+        "Audit de conformité CEE",
+        "Rapport de sécurité",
+        "Support email"
+      ],
+      "couleur": "#64748b",
+      "badge": "🔵"
+    },
+    "serenite": {
+      "nom": "Sérénité",
+      "prix": 390,
+      "unite": "€/mois",
+      "dossiersMax": 15,
+      "priorite": "haute",
+      "prioriteNiveau": 2,
+      "fonctionnalites": [
+        "Audit de conformité CEE",
+        "Rapport de sécurité",
+        "Alertes réglementaires",
+        "Support prioritaire",
+        "Espace partenaire dédié"
+      ],
+      "couleur": "#0891b2",
+      "badge": "⭐"
+    },
+    "expert": {
+      "nom": "Expert",
+      "prix": 890,
+      "unite": "€/mois",
+      "dossiersMax": -1,
+      "priorite": "critique",
+      "prioriteNiveau": 3,
+      "fonctionnalites": [
+        "Audit de conformité CEE",
+        "Rapport de sécurité",
+        "Alertes réglementaires",
+        "Support prioritaire 24/7",
+        "Espace partenaire dédié",
+        "Accompagnement personnalisé",
+        "Dossiers illimités"
+      ],
+      "couleur": "#7c3aed",
+      "badge": "👑"
+    }
+  },
+  "clients": [
+    {
+      "id": "client-001",
+      "nom": "EcoTherm Solutions",
+      "email": "contact@ecotherm.fr",
+      "forfait": "serenite",
+      "dateDebut": "2025-01-01",
+      "dossiersTraitesCeMois": 0,
+      "moisEnCours": "2026-01"
+    },
+    {
+      "id": "client-002",
+      "nom": "Chauff'Eco SARL",
+      "email": "direction@chauffeco.fr",
+      "forfait": "essentiel",
+      "dateDebut": "2025-01-05",
+      "dossiersTraitesCeMois": 0,
+      "moisEnCours": "2026-01"
+    },
+    {
+      "id": "client-003",
+      "nom": "IsoConfort Pro",
+      "email": "admin@isoconfort.fr",
+      "forfait": "expert",
+      "dateDebut": "2024-11-15",
+      "dossiersTraitesCeMois": 0,
+      "moisEnCours": "2026-01"
+    },
+    {
+      "id": "client-004",
+      "nom": "Thermo Plus",
+      "email": "contact@thermoplus.fr",
+      "forfait": "essentiel",
+      "dateDebut": "2025-01-10",
+      "dossiersTraitesCeMois": 0,
+      "moisEnCours": "2026-01"
+    }
+  ],
+  "metadata": {
+    "derniereMAJ": "2026-01-13",
+    "prochainRenouvellement": "2025-02-01"
+  }
+}

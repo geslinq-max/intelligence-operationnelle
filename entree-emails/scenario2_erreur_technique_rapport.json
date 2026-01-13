@@ -1,0 +1,295 @@
+{
+  "meta": {
+    "dateTraitement": "2026-01-13T04:35:54.006Z",
+    "fichier": "scenario2_erreur_technique.pdf",
+    "dureeTraitement": 51
+  },
+  "donnees": {
+    "fichier": {
+      "chemin": "C:\\Users\\gesli\\intelligence-operationnelle\\entree-emails\\scenario2_erreur_technique.pdf",
+      "nom": "scenario2_erreur_technique.pdf",
+      "taille": 2578,
+      "dateAnalyse": "2026-01-13T04:35:54.050Z",
+      "pages": 1
+    },
+    "client": {
+      "nom": "",
+      "adresse": "",
+      "codePostal": "11122",
+      "ville": "DEVIS\nDate",
+      "telephone": "0611223344",
+      "email": "pierre.durand@email.fr"
+    },
+    "entreprise": {
+      "raisonSociale": "",
+      "siret": "11122233300044",
+      "rge": "RGE QualiPAC, RGE requise",
+      "adresse": "",
+      "telephone": ""
+    },
+    "travaux": {
+      "type": "pompe à chaleur",
+      "description": "",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "surface": null,
+      "puissance": 8
+    },
+    "montants": {
+      "totalHT": 4500,
+      "tva": 0.5,
+      "totalTTC": 4747.5,
+      "acompte": null,
+      "primesCEE": null,
+      "resteACharge": null
+    },
+    "materiel": {
+      "reference": "GEN-BUD-8K",
+      "marque": "",
+      "modele": "",
+      "caracteristiques": ""
+    },
+    "extraction": {
+      "confiance": 80,
+      "champsExtraits": 4,
+      "champsTotaux": 5,
+      "alertes": []
+    }
+  },
+  "conformite": {
+    "dateVerification": "2026-01-13T04:35:54.056Z",
+    "fichier": "scenario2_erreur_technique.pdf",
+    "fichesCEE": [
+      "BAR-TH-104"
+    ],
+    "controles": [
+      {
+        "id": "presence_ficheCEE",
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "poids": 20,
+        "status": "CONFORME",
+        "message": "Fiche(s) CEE détectée(s): BAR-TH-104",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_montantTTC",
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Montant TTC: 4747.50 €",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_siret",
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "SIRET: 11122233300044",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_rge",
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Qualification: RGE QualiPAC, RGE requise",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_materiel",
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "poids": 10,
+        "status": "ALERTE",
+        "message": "Référence matériel non détectée",
+        "statut": {
+          "code": "ALERTE",
+          "emoji": "⚠️",
+          "label": "Alerte",
+          "poids": 10
+        }
+      },
+      {
+        "id": "presence_client",
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Contact: pierre.durand@email.fr",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "coherence_tva",
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "poids": 5,
+        "status": "CONFORME",
+        "message": "TVA réduite 5.5% appliquée",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_puissance_coherente",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Puissance 8 kW cohérente",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_montant_coherent",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "poids": 10,
+        "status": "BLOQUANT",
+        "message": "Montant 4747.5 € anormal",
+        "statut": {
+          "code": "BLOQUANT",
+          "emoji": "❌",
+          "label": "Bloquant",
+          "poids": 30
+        }
+      }
+    ],
+    "resume": {
+      "conformes": 7,
+      "alertes": 1,
+      "bloquants": 1,
+      "nonVerifies": 0
+    },
+    "indiceSécurite": 88,
+    "decision": "REJETÉ",
+    "recommandations": [
+      "Corriger les points bloquants avant soumission",
+      "Référence matériel non détectée",
+      "Montant 4747.5 € anormal"
+    ]
+  },
+  "rapport": {
+    "client": {
+      "nom": "pierre.durand@email.fr",
+      "contact": "pierre.durand@email.fr",
+      "localisation": "DEVIS\nDate 11122"
+    },
+    "travaux": {
+      "type": "pompe à chaleur",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "puissance": "8 kW",
+      "surface": null
+    },
+    "financier": {
+      "montantTTC": 4747.5,
+      "montantHT": 4500,
+      "tva": 0.5
+    },
+    "materiel": {
+      "marque": "Non détectée",
+      "reference": "GEN-BUD-8K"
+    },
+    "indiceSécurite": 88,
+    "decision": "REJETÉ",
+    "pointsConformes": [
+      {
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "detail": "Fiche(s) CEE détectée(s): BAR-TH-104"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "detail": "Montant TTC: 4747.50 €"
+      },
+      {
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "detail": "SIRET: 11122233300044"
+      },
+      {
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "detail": "Qualification: RGE QualiPAC, RGE requise"
+      },
+      {
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "detail": "Contact: pierre.durand@email.fr"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "detail": "TVA réduite 5.5% appliquée"
+      },
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "detail": "Puissance 8 kW cohérente"
+      }
+    ],
+    "pointsAlerte": [
+      {
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "detail": "Référence matériel non détectée"
+      }
+    ],
+    "pointsBloquants": [
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "detail": "Montant 4747.5 € anormal"
+      }
+    ],
+    "recommandations": [
+      "Corriger les points bloquants avant soumission",
+      "Référence matériel non détectée",
+      "Montant 4747.5 € anormal"
+    ],
+    "estimationPrime": {
+      "fiche": "BAR-TH-104",
+      "montant": 950,
+      "formule": "puissance_kW × 12500 × 9.50 / 1000"
+    }
+  }
+}

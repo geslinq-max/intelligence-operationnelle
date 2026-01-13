@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capital Énergie - Tableau de Bord Stratégique</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+    
+    /* En-tête */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .logo { font-size: 28px; font-weight: 700; }
+    .logo span { color: #0891b2; }
+    .subtitle { color: #94a3b8; font-size: 14px; margin-top: 5px; }
+    .confidential {
+      background: rgba(220, 38, 38, 0.2);
+      color: #fca5a5;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .date { color: #64748b; font-size: 12px; margin-top: 10px; }
+    
+    /* Grille principale */
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
+    
+    /* Cartes KPI */
+    .kpi-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .kpi-card.primary::before { background: #0891b2; }
+    .kpi-card.success::before { background: #059669; }
+    .kpi-card.warning::before { background: #d97706; }
+    .kpi-card.purple::before { background: #7c3aed; }
+    
+    .kpi-label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .kpi-value { font-size: 36px; font-weight: 700; margin-bottom: 4px; }
+    .kpi-subtext { color: #64748b; font-size: 13px; }
+    .kpi-icon { position: absolute; top: 20px; right: 20px; font-size: 24px; opacity: 0.5; }
+    
+    /* Section graphiques */
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    
+    .chart-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .chart-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    
+    /* Graphique barres horizontales */
+    .bar-chart { display: flex; flex-direction: column; gap: 16px; }
+    .bar-item { display: flex; align-items: center; gap: 12px; }
+    .bar-label { width: 100px; font-size: 13px; color: #94a3b8; }
+    .bar-container { flex: 1; height: 24px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-size: 12px; font-weight: 600; min-width: 40px; }
+    .bar-fill.essentiel { background: linear-gradient(90deg, #64748b, #94a3b8); }
+    .bar-fill.serenite { background: linear-gradient(90deg, #0891b2, #22d3ee); }
+    .bar-fill.expert { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .bar-value { width: 80px; text-align: right; font-weight: 600; font-size: 14px; }
+    
+    /* Graphique circulaire CSS */
+    .pie-container { display: flex; align-items: center; gap: 30px; }
+    .pie-chart {
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #7c3aed 0deg 203.04182509505702deg,
+        #0891b2 203.04182509505702deg 292.0152091254753deg,
+        #64748b 292.0152091254753deg 360deg
+      );
+      position: relative;
+    }
+    .pie-chart::after {
+      content: '';
+      position: absolute;
+      top: 30px; left: 30px; right: 30px; bottom: 30px;
+      background: #1e293b;
+      border-radius: 50%;
+    }
+    .pie-legend { display: flex; flex-direction: column; gap: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .legend-dot.essentiel { background: #64748b; }
+    .legend-dot.serenite { background: #0891b2; }
+    .legend-dot.expert { background: #7c3aed; }
+    
+    /* Tableau santé clients */
+    .clients-section { margin-bottom: 40px; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    
+    .clients-table {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .clients-table thead { background: rgba(255,255,255,0.05); }
+    .clients-table th { 
+      padding: 16px 20px; 
+      text-align: left; 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #64748b;
+      font-weight: 600;
+    }
+    .clients-table td { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .clients-table tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .client-name { font-weight: 600; }
+    .client-email { color: #64748b; font-size: 12px; }
+    
+    .forfait-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .forfait-badge.essentiel { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
+    .forfait-badge.serenite { background: rgba(8, 145, 178, 0.2); color: #22d3ee; }
+    .forfait-badge.expert { background: rgba(124, 58, 237, 0.2); color: #a78bfa; }
+    
+    .quota-bar { width: 120px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .quota-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .quota-fill.excellent { background: #059669; }
+    .quota-fill.modere { background: #0891b2; }
+    .quota-fill.attention { background: #d97706; }
+    .quota-fill.critique { background: #dc2626; }
+    
+    .sante-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .sante-indicator.excellent { color: #059669; }
+    .sante-indicator.modere { color: #0891b2; }
+    .sante-indicator.attention { color: #d97706; }
+    .sante-indicator.critique { color: #dc2626; }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: #64748b;
+      font-size: 12px;
+    }
+    .footer-brand { font-weight: 600; color: #0891b2; }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .charts-row { grid-template-columns: 1fr; }
+      .header { flex-direction: column; text-align: center; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- En-tête -->
+    <header class="header">
+      <div>
+        <div class="logo">⚡ Capital <span>Énergie</span></div>
+        <div class="subtitle">Indicateurs du Système d'Audit</div>
+        <div class="date">Généré le 13/01/2026 08:16:15</div>
+      </div>
+      <div class="confidential">🔒 Document Confidentiel - Direction</div>
+    </header>
+    
+    <!-- KPIs principaux -->
+    <div class="grid">
+      <div class="kpi-card primary">
+        <span class="kpi-icon">💰</span>
+        <div class="kpi-label">MRR (Revenu Mensuel)</div>
+        <div class="kpi-value">1 578 €</div>
+        <div class="kpi-subtext">HT • 1 893,6 € TTC</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <span class="kpi-icon">👤</span>
+        <div class="kpi-label">Estimation Salaire Net</div>
+        <div class="kpi-value">1 231 €</div>
+        <div class="kpi-subtext">Après charges (×0.78)</div>
+      </div>
+      
+      <div class="kpi-card warning">
+        <span class="kpi-icon">📊</span>
+        <div class="kpi-label">ARR (Revenu Annuel)</div>
+        <div class="kpi-value">18 936 €</div>
+        <div class="kpi-subtext">Projection sur 12 mois</div>
+      </div>
+      
+      <div class="kpi-card purple">
+        <span class="kpi-icon">📁</span>
+        <div class="kpi-label">Dossiers Protégés</div>
+        <div class="kpi-value">0</div>
+        <div class="kpi-subtext">Ce mois • 4 clients actifs</div>
+      </div>
+    </div>
+    
+    <!-- Graphiques -->
+    <div class="charts-row">
+      <!-- Répartition par forfait -->
+      <div class="chart-card">
+        <div class="chart-title">📊 Répartition Clients par Forfait</div>
+        <div class="bar-chart">
+          <div class="bar-item">
+            <div class="bar-label">👑 Expert</div>
+            <div class="bar-container">
+              <div class="bar-fill expert" style="width: 25%">1</div>
+            </div>
+            <div class="bar-value">25%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">⭐ Sérénité</div>
+            <div class="bar-container">
+              <div class="bar-fill serenite" style="width: 25%">1</div>
+            </div>
+            <div class="bar-value">25%</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">🔵 Essentiel</div>
+            <div class="bar-container">
+              <div class="bar-fill essentiel" style="width: 50%">2</div>
+            </div>
+            <div class="bar-value">50%</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Répartition MRR -->
+      <div class="chart-card">
+        <div class="chart-title">💰 Répartition du MRR</div>
+        <div class="pie-container">
+          <div class="pie-chart"></div>
+          <div class="pie-legend">
+            <div class="legend-item">
+              <div class="legend-dot expert"></div>
+              <span>Expert: 890 € (56%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot serenite"></div>
+              <span>Sérénité: 390 € (25%)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot essentiel"></div>
+              <span>Essentiel: 298 € (19%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Santé Clients -->
+    <div class="clients-section">
+      <div class="section-title">🏥 Santé Client - Consommation des Quotas</div>
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Forfait</th>
+            <th>Dossiers</th>
+            <th>Quota Utilisé</th>
+            <th>Santé</th>
+            <th>MRR</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>
+              <div class="client-name">EcoTherm Solutions</div>
+              <div class="client-email">contact@ecotherm.fr</div>
+            </td>
+            <td>
+              <span class="forfait-badge serenite">⭐ Sérénité</span>
+            </td>
+            <td>0 / 15</td>
+            <td>
+              <div class="quota-bar">
+                <div class="quota-fill excellent" style="width: 0%"></div>
+              </div>
+            </td>
+            <td>
+              <span class="sante-indicator excellent">
+                ✅ Excellent
+              </span>
+            </td>
+            <td style="font-weight: 600;">390 €</td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div class="client-name">Chauff'Eco SARL</div>
+              <div class="client-email">direction@chauffeco.fr</div>
+            </td>
+            <td>
+              <span class="forfait-badge essentiel">🔵 Essentiel</span>
+            </td>
+            <td>0 / 3</td>
+            <td>
+              <div class="quota-bar">
+                <div class="quota-fill excellent" style="width: 0%"></div>
+              </div>
+            </td>
+            <td>
+              <span class="sante-indicator excellent">
+                ✅ Excellent
+              </span>
+            </td>
+            <td style="font-weight: 600;">149 €</td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div class="client-name">IsoConfort Pro</div>
+              <div class="client-email">admin@isoconfort.fr</div>
+            </td>
+            <td>
+              <span class="forfait-badge expert">👑 Expert</span>
+            </td>
+            <td>0 / ∞</td>
+            <td>
+              <div class="quota-bar">
+                <div class="quota-fill excellent" style="width: 30%"></div>
+              </div>
+            </td>
+            <td>
+              <span class="sante-indicator excellent">
+                ✅ Excellent
+              </span>
+            </td>
+            <td style="font-weight: 600;">890 €</td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div class="client-name">Thermo Plus</div>
+              <div class="client-email">contact@thermoplus.fr</div>
+            </td>
+            <td>
+              <span class="forfait-badge essentiel">🔵 Essentiel</span>
+            </td>
+            <td>0 / 3</td>
+            <td>
+              <div class="quota-bar">
+                <div class="quota-fill excellent" style="width: 0%"></div>
+              </div>
+            </td>
+            <td>
+              <span class="sante-indicator excellent">
+                ✅ Excellent
+              </span>
+            </td>
+            <td style="font-weight: 600;">149 €</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise.</p>
+      <p style="margin-top: 10px;">
+        <span class="footer-brand">Capital Énergie</span> © 2025 • Indicateurs du Système d'Audit
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

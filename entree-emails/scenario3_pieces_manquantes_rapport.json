@@ -1,0 +1,295 @@
+{
+  "meta": {
+    "dateTraitement": "2026-01-13T04:35:54.090Z",
+    "fichier": "scenario3_pieces_manquantes.pdf",
+    "dureeTraitement": 10
+  },
+  "donnees": {
+    "fichier": {
+      "chemin": "C:\\Users\\gesli\\intelligence-operationnelle\\entree-emails\\scenario3_pieces_manquantes.pdf",
+      "nom": "scenario3_pieces_manquantes.pdf",
+      "taille": 2599,
+      "dateAnalyse": "2026-01-13T04:35:54.100Z",
+      "pages": 1
+    },
+    "client": {
+      "nom": "",
+      "adresse": "",
+      "codePostal": "55566",
+      "ville": "DEVIS\nDate",
+      "telephone": "",
+      "email": "sophie.lefebvre@email.fr"
+    },
+    "entreprise": {
+      "raisonSociale": "",
+      "siret": "",
+      "rge": "RGE QualiPAC, RGE requise",
+      "adresse": "",
+      "telephone": ""
+    },
+    "travaux": {
+      "type": "pompe à chaleur",
+      "description": "",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "surface": null,
+      "puissance": 14
+    },
+    "montants": {
+      "totalHT": 14500,
+      "tva": 0.5,
+      "totalTTC": 15297.5,
+      "acompte": null,
+      "primesCEE": null,
+      "resteACharge": null
+    },
+    "materiel": {
+      "reference": "",
+      "marque": "Atlantic",
+      "modele": "",
+      "caracteristiques": ""
+    },
+    "extraction": {
+      "confiance": 80,
+      "champsExtraits": 4,
+      "champsTotaux": 5,
+      "alertes": []
+    }
+  },
+  "conformite": {
+    "dateVerification": "2026-01-13T04:35:54.103Z",
+    "fichier": "scenario3_pieces_manquantes.pdf",
+    "fichesCEE": [
+      "BAR-TH-104"
+    ],
+    "controles": [
+      {
+        "id": "presence_ficheCEE",
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "poids": 20,
+        "status": "CONFORME",
+        "message": "Fiche(s) CEE détectée(s): BAR-TH-104",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_montantTTC",
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Montant TTC: 15297.50 €",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_siret",
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "poids": 15,
+        "status": "BLOQUANT",
+        "message": "SIRET de l'artisan manquant sur le devis",
+        "statut": {
+          "code": "BLOQUANT",
+          "emoji": "❌",
+          "label": "Bloquant",
+          "poids": 30
+        }
+      },
+      {
+        "id": "presence_rge",
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "poids": 15,
+        "status": "CONFORME",
+        "message": "Qualification: RGE QualiPAC, RGE requise",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "presence_materiel",
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "poids": 10,
+        "status": "ALERTE",
+        "message": "Marque détectée (Atlantic) mais référence manquante",
+        "statut": {
+          "code": "ALERTE",
+          "emoji": "⚠️",
+          "label": "Alerte",
+          "poids": 10
+        }
+      },
+      {
+        "id": "presence_client",
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Contact: sophie.lefebvre@email.fr",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "coherence_tva",
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "poids": 5,
+        "status": "CONFORME",
+        "message": "TVA réduite 5.5% appliquée",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_puissance_coherente",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Puissance 14 kW cohérente",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      },
+      {
+        "id": "BAR-TH-104_montant_coherent",
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "poids": 10,
+        "status": "CONFORME",
+        "message": "Montant 15297.5 € dans la fourchette marché",
+        "statut": {
+          "code": "CONFORME",
+          "emoji": "✅",
+          "label": "Conforme",
+          "poids": 0
+        }
+      }
+    ],
+    "resume": {
+      "conformes": 7,
+      "alertes": 1,
+      "bloquants": 1,
+      "nonVerifies": 0
+    },
+    "indiceSécurite": 83,
+    "decision": "REJETÉ",
+    "recommandations": [
+      "Corriger les points bloquants avant soumission",
+      "SIRET de l'artisan manquant sur le devis",
+      "Marque détectée (Atlantic) mais référence manquante"
+    ]
+  },
+  "rapport": {
+    "client": {
+      "nom": "sophie.lefebvre@email.fr",
+      "contact": "sophie.lefebvre@email.fr",
+      "localisation": "DEVIS\nDate 55566"
+    },
+    "travaux": {
+      "type": "pompe à chaleur",
+      "fichesCEE": [
+        "BAR-TH-104"
+      ],
+      "puissance": "14 kW",
+      "surface": null
+    },
+    "financier": {
+      "montantTTC": 15297.5,
+      "montantHT": 14500,
+      "tva": 0.5
+    },
+    "materiel": {
+      "marque": "Atlantic",
+      "reference": "Non détectée"
+    },
+    "indiceSécurite": 83,
+    "decision": "REJETÉ",
+    "pointsConformes": [
+      {
+        "categorie": "Document",
+        "description": "Présence d'une fiche CEE identifiée",
+        "detail": "Fiche(s) CEE détectée(s): BAR-TH-104"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Montant TTC présent",
+        "detail": "Montant TTC: 15297.50 €"
+      },
+      {
+        "categorie": "Qualification",
+        "description": "Mention RGE présente",
+        "detail": "Qualification: RGE QualiPAC, RGE requise"
+      },
+      {
+        "categorie": "Bénéficiaire",
+        "description": "Coordonnées client présentes",
+        "detail": "Contact: sophie.lefebvre@email.fr"
+      },
+      {
+        "categorie": "Financier",
+        "description": "Taux TVA cohérent (5.5% ou 10% pour travaux énergie)",
+        "detail": "TVA réduite 5.5% appliquée"
+      },
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Puissance entre 5 et 25 kW pour résidentiel individuel",
+        "detail": "Puissance 14 kW cohérente"
+      },
+      {
+        "categorie": "Fiche CEE",
+        "description": "[BAR-TH-104] Montant TTC cohérent avec le marché (8 000 € - 25 000 €)",
+        "detail": "Montant 15297.5 € dans la fourchette marché"
+      }
+    ],
+    "pointsAlerte": [
+      {
+        "categorie": "Technique",
+        "description": "Référence matériel identifiée",
+        "detail": "Marque détectée (Atlantic) mais référence manquante"
+      }
+    ],
+    "pointsBloquants": [
+      {
+        "categorie": "Administratif",
+        "description": "SIRET de l'installateur présent",
+        "detail": "SIRET de l'artisan manquant sur le devis"
+      }
+    ],
+    "recommandations": [
+      "Corriger les points bloquants avant soumission",
+      "SIRET de l'artisan manquant sur le devis",
+      "Marque détectée (Atlantic) mais référence manquante"
+    ],
+    "estimationPrime": {
+      "fiche": "BAR-TH-104",
+      "montant": 1662.5,
+      "formule": "puissance_kW × 12500 × 9.50 / 1000"
+    }
+  }
+}

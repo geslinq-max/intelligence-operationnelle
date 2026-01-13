@@ -1,0 +1,68 @@
+{
+  "version": "2025.02",
+  "dateVerification": "2025-01-13",
+  "source": "Service de Veille Réglementaire - Capital Énergie",
+  "alertesActives": [
+    {
+      "id": "alerte-001",
+      "fiche": "BAR-TH-104",
+      "type": "SEUIL_RELEVE",
+      "severite": "CRITIQUE",
+      "dateEffet": "2025-02-01",
+      "titre": "Nouveau seuil ηs pour les PAC air/eau",
+      "description": "Le seuil d'efficacité énergétique saisonnière (ηs) passe de 111% à 126% pour les pompes à chaleur air/eau.",
+      "impact": "Les devis établis avec des PAC ayant un ηs inférieur à 126% ne seront plus éligibles après le 1er février 2025.",
+      "recommandation": "Vérifiez que vos fournisseurs proposent des modèles conformes au nouveau seuil. Anticipez la mise à jour de vos fiches techniques.",
+      "delaiRestant": 19
+    },
+    {
+      "id": "alerte-002",
+      "fiche": "BAR-TH-104",
+      "type": "SEUIL_RELEVE",
+      "severite": "IMPORTANTE",
+      "dateEffet": "2025-02-01",
+      "titre": "COP minimum relevé à 3.8",
+      "description": "Le coefficient de performance (COP) minimum passe de 3.4 à 3.8.",
+      "impact": "Certains modèles d'entrée de gamme pourraient ne plus être éligibles.",
+      "recommandation": "Consultez les fiches techniques de vos équipements habituels pour vérifier leur conformité.",
+      "delaiRestant": 19
+    },
+    {
+      "id": "alerte-003",
+      "fiche": "BAR-TH-104",
+      "type": "NOUVEAU_DOCUMENT",
+      "severite": "IMPORTANTE",
+      "dateEffet": "2025-02-01",
+      "titre": "Photo d'installation obligatoire",
+      "description": "Une photo de l'installation réalisée devient obligatoire pour valider le dossier CEE.",
+      "impact": "Les dossiers sans photo d'installation seront rejetés.",
+      "recommandation": "Intégrez systématiquement la prise de photo dans votre process de fin de chantier.",
+      "delaiRestant": 19
+    },
+    {
+      "id": "alerte-004",
+      "fiche": "BAR-EN-101",
+      "type": "SEUIL_RELEVE",
+      "severite": "INFO",
+      "dateEffet": "2025-02-01",
+      "titre": "Résistance thermique R portée à 8 m².K/W",
+      "description": "Pour l'isolation des combles, la résistance thermique minimum passe de 7 à 8 m².K/W.",
+      "impact": "Une épaisseur d'isolant légèrement supérieure sera nécessaire.",
+      "recommandation": "Prévoyez une marge de sécurité sur les épaisseurs d'isolant proposées.",
+      "delaiRestant": 19
+    }
+  ],
+  "nouvellesFiches": [
+    {
+      "code": "BAR-TH-171",
+      "nom": "Pompe à chaleur hybride",
+      "dateEntreeVigueur": "2025-02-01",
+      "description": "Nouvelle fiche pour les systèmes combinant PAC et chaudière gaz.",
+      "opportunite": "Nouvelle opportunité commerciale pour les clients souhaitant une solution de transition."
+    }
+  ],
+  "metadata": {
+    "prochaineVerification": "2025-01-20",
+    "sourceOfficielle": "https://www.ecologie.gouv.fr/cee"
+  }
+}

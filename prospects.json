@@ -1,0 +1,52 @@
+{
+  "version": "2025.01",
+  "dateCreation": "2025-01-13",
+  "source": "Annuaire RGE - Capture manuelle",
+  "region": "Grand Est - Aube (10)",
+  "prospects": [
+    {
+      "id": "prospect-001",
+      "nom": "CELSIUS",
+      "dirigeant": "Responsable",
+      "email": "sascelsius10@gmail.com",
+      "ville": "Troyes",
+      "departement": "10",
+      "type": "installateur_pac",
+      "profil": "artisan",
+      "statut": "nouveau"
+    },
+    {
+      "id": "prospect-002",
+      "nom": "ID3 ENERGIES",
+      "dirigeant": "Responsable",
+      "email": "contact.id3energies@gmail.com",
+      "ville": "Troyes",
+      "departement": "10",
+      "type": "installateur_pac",
+      "profil": "pme",
+      "statut": "nouveau"
+    },
+    {
+      "id": "prospect-003",
+      "nom": "FREDERIC MACHIN EURL",
+      "dirigeant": "M. Machin",
+      "email": "machin.frederic@orange.fr",
+      "ville": "Sainte Savine",
+      "departement": "10",
+      "type": "installateur_pac",
+      "profil": "artisan",
+      "statut": "nouveau"
+    },
+    {
+      "id": "prospect-004",
+      "nom": "ALAIN GARTISER",
+      "dirigeant": "M. Gartiser",
+      "email": "kcouvreux@alain-gartiser.fr",
+      "ville": "Troyes",
+      "departement": "10",
+      "type": "installateur_pac",
+      "profil": "leader",
+      "statut": "nouveau"
+    }
+  ]
+}

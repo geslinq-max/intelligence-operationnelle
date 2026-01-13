@@ -23,5 +23,10 @@
       ]
     }
   ],
-  "rewrites": []
+  "rewrites": [
+    {
+      "source": "/tableau-de-bord",
+      "destination": "/stats-patron.html"
+    }
+  ]
 }
