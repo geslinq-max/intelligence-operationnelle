@@ -50,8 +50,8 @@ const forfaits: Forfait[] = [
     id: 'essentiel',
     nom: 'Essentiel',
     slogan: 'Sécurisez vos premiers chantiers',
-    prix: 49,
-    periode: '/mois',
+    prix: 149,
+    periode: '/mois HT',
     description: 'L\'accès fondamental au Système d\'Audit pour démarrer sereinement.',
     features: [
       'Accès au Système d\'Audit de base',
@@ -68,8 +68,8 @@ const forfaits: Forfait[] = [
     id: 'serenite',
     nom: 'Sérénité',
     slogan: 'L\'audit prioritaire pour votre croissance',
-    prix: 149,
-    periode: '/mois',
+    prix: 349,
+    periode: '/mois HT',
     description: 'Validation accélérée par la Cellule d\'Expertise pour maximiser vos opportunités.',
     features: [
       'Accès complet au Système d\'Audit',
@@ -89,8 +89,8 @@ const forfaits: Forfait[] = [
     id: 'expert',
     nom: 'Expert',
     slogan: 'Puissance maximale pour ETI/PME',
-    prix: 349,
-    periode: '/mois',
+    prix: 860,
+    periode: '/mois HT',
     description: 'Solution complète avec accompagnement stratégique dédié.',
     features: [
       'Accès illimité à toutes les fonctionnalités',
@@ -288,6 +288,9 @@ function ConfirmationModal({
               <p className="text-3xl font-bold text-white mb-1">
                 {forfait.prix} €<span className="text-lg text-slate-400">{forfait.periode}</span>
               </p>
+              <p className="text-emerald-400 text-sm font-medium mb-2">
+                ✓ Rentabilisé dès le 1er dossier certifié
+              </p>
               <p className="text-slate-400 mb-6">
                 {forfait.slogan}
               </p>
@@ -370,7 +373,8 @@ function ForfaitCard({
           {forfait.prix} €
           <span className="text-lg text-slate-400 font-normal">{forfait.periode}</span>
         </p>
-        <p className="text-slate-500 text-xs mt-1">HT • Sans engagement</p>
+        <p className="text-emerald-400 text-sm font-medium mt-2">✓ Rentabilisé dès le 1er dossier certifié</p>
+        <p className="text-slate-500 text-xs mt-1">Sans engagement</p>
       </div>
 
       {/* Description */}
