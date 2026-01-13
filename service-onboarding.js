@@ -20,6 +20,7 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const { genererFacturePDF, getInfosClient } = require('./service-facturation.js');
 const { genererCharteConfidentialite } = require('./service-juridique.js');
+const { surveillerDossier, declencherFlashSucces } = require('./service-notifications.js');
 
 // ============================================================================
 // CONFIGURATION
@@ -579,5 +580,7 @@ module.exports = {
   genererMailBienvenue,
   sauvegarderMailBienvenue,
   activerClient,
+  surveillerDossier,
+  declencherFlashSucces,
   CONFIG,
 };
