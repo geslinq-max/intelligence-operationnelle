@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, HelpCircle, Menu, X, BarChart3 } from 'lucide-react';
+import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard } from 'lucide-react';
 import { useBranding, THEMES } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase/client';
 
@@ -44,6 +44,11 @@ const navigation = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
       </svg>
     ),
+  },
+  {
+    name: 'Forfaits & Tarifs',
+    href: '/tarifs',
+    icon: <CreditCard className="w-5 h-5" />,
   },
 ];
 
