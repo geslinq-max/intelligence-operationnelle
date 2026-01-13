@@ -242,16 +242,32 @@ export default function EntreprisesPage() {
               key={entreprise.id}
               className="relative bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer"
             >
-              {/* Bouton Aperçu Mode Miroir - Position Absolue */}
+              {/* Bouton Aperçu Mode Miroir - Position Absolue + FORÇAGE VISUEL */}
               {entreprise.statut === 'client_actif' && (
                 <Link
                   href={`/espace-client?id=${entreprise.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-violet-50 text-violet-600 rounded-full shadow-lg hover:shadow-xl border border-violet-200 transition-all group"
+                  style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    backgroundColor: '#ffffff',
+                    color: '#7c3aed',
+                    border: '3px solid #7c3aed',
+                    borderRadius: '9999px',
+                    boxShadow: '0 10px 25px rgba(124, 58, 237, 0.4)',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    textDecoration: 'none',
+                  }}
                 >
-                  <Eye className="w-4 h-4" />
-                  <span className="text-xs font-semibold">Aperçu</span>
-                  <span className="text-sm">👁️</span>
+                  <Eye className="w-5 h-5" />
+                  <span>Aperçu 👁️</span>
                 </Link>
               )}
               <div className="flex items-start justify-between mb-4">
