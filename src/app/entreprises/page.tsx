@@ -240,8 +240,20 @@ export default function EntreprisesPage() {
           {entreprises.map((entreprise) => (
             <div
               key={entreprise.id}
-              className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer"
+              className="relative bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer"
             >
+              {/* Bouton Aperçu Mode Miroir - Position Absolue */}
+              {entreprise.statut === 'client_actif' && (
+                <Link
+                  href={`/espace-client?id=${entreprise.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-violet-50 text-violet-600 rounded-full shadow-lg hover:shadow-xl border border-violet-200 transition-all group"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span className="text-xs font-semibold">Aperçu</span>
+                  <span className="text-sm">👁️</span>
+                </Link>
+              )}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 mr-4">
                   <h3 className="text-white font-semibold text-lg">
@@ -260,21 +272,6 @@ export default function EntreprisesPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-2">
-                    {/* Bouton Aperçu - Position stratégique en haut à droite */}
-                    {entreprise.statut === 'client_actif' && (
-                      <Link
-                        href={`/espace-client?id=${entreprise.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="group relative flex items-center justify-center w-9 h-9 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/40 hover:border-emerald-400 rounded-lg transition-all shadow-sm hover:shadow-emerald-500/30"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span className="text-base">👁️</span>
-                        {/* Tooltip au survol */}
-                        <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                          Voir l'Espace Partenaire
-                        </span>
-                      </Link>
-                    )}
                     {entreprise.statut === 'client_actif' && (
                       <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${FORFAIT_BADGES[entreprise.forfait].bgColor} ${FORFAIT_BADGES[entreprise.forfait].textColor}`}>
                         <span>{FORFAIT_BADGES[entreprise.forfait].badge}</span>
