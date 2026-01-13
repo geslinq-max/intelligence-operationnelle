@@ -49,26 +49,29 @@ const MODELES_EMAILS = {
   essentiel: {
     forfait: 'Essentiel',
     badge: '🔵',
-    objet: (vars) => `Protégez vos 3 prochains dossiers CEE gratuitement - ${vars.nomEntreprise}`,
+    objet: (vars) => `Audit Flash gratuit pour ${vars.nomEntreprise} - Potentiel CEE identifié`,
     corps: (vars) => `Bonjour ${vars.nomGerant},
 
 En tant qu'artisan RGE, vous méritez de vous concentrer sur vos chantiers, pas sur la paperasse administrative.
 
-J'ai créé Capital Énergie pour offrir aux artisans comme vous une solution simple et accessible. Mon Système d'Audit analyse vos dossiers CEE en quelques instants et détecte les risques de blocage de paiement AVANT le dépôt.
+Notre Cellule d'Expertise a développé Capital Énergie pour offrir aux artisans comme vous une solution simple et accessible. Notre Système d'Audit analyse vos dossiers CEE en quelques instants et détecte les risques de blocage de paiement AVANT le dépôt.
+
+📊 **PREUVE DE VALEUR**
+Notre Système d'Audit a déjà identifié un potentiel de **2 500 à 5 000 €** sécurisables sur vos typologies de chantiers.
 
 🔵 **OFFRE ESSENTIEL - Idéale pour démarrer**
 
-Pour vous permettre de tester sans risque, je vous propose :
+Pour vous permettre de tester sans risque, nous vous proposons :
 
-✅ **3 audits de dossiers offerts** - Envoyez-moi vos 3 prochains devis
+✅ **3 audits de dossiers offerts** - Envoyez-nous vos 3 prochains devis
 ✅ **Indice de Sécurité immédiat** - Vous savez si le dossier passera
-✅ **Correction guidée** - Je vous indique exactement quoi corriger
+✅ **Correction guidée** - Nous vous indiquons exactement quoi corriger
 
 C'est gratuit, sans engagement, et ça prend 2 minutes.
 
-👉 **Répondez simplement à cet email avec vos devis en pièce jointe.**
+👉 **Recevez votre Audit Flash personnalisé : répondez simplement à cet email avec un devis en pièce jointe.**
 
-Je vous renvoie l'analyse dans la journée.
+Notre Cellule vous renvoie l'analyse dans la journée.
 
 Bien cordialement,
 
@@ -83,28 +86,29 @@ Ce rapport est une estimation par IA. Validation technique par un professionnel 
   serenite: {
     forfait: 'Sérénité',
     badge: '⭐',
-    objet: (vars) => `Sécurisez 15 dossiers/mois avec un accompagnement prioritaire - ${vars.nomEntreprise}`,
+    objet: (vars) => `Audit Flash PME : Potentiel CEE de ${vars.nomEntreprise} - Protection Sérénité`,
     corps: (vars) => `Bonjour ${vars.nomGerant},
 
-Je me permets de vous contacter car ${vars.nomEntreprise} fait partie des entreprises RGE qui traitent un volume significatif de dossiers CEE.
+Notre Cellule d'Expertise se permet de vous contacter car ${vars.nomEntreprise} fait partie des PME RGE qui traitent un volume significatif de dossiers CEE.
 
-À ce niveau d'activité, une erreur administrative peut avoir des conséquences lourdes sur votre trésorerie. C'est exactement pour des entreprises comme la vôtre que j'ai conçu le forfait Sérénité.
+À ce niveau d'activité, une erreur administrative peut avoir des conséquences lourdes sur votre trésorerie. C'est exactement pour des entreprises comme la vôtre que nous avons conçu la protection Sérénité.
 
-⭐ **FORFAIT SÉRÉNITÉ - Accompagnement PME**
+📊 **PREUVE DE VALEUR**
+Notre Système d'Audit a déjà identifié un potentiel de **8 000 à 15 000 €** sécurisables sur vos typologies de chantiers.
 
-Voici ce que je vous propose :
+⭐ **PROTECTION SÉRÉNITÉ - Accompagnement PME**
+
+Voici ce que nous vous proposons :
 
 ✅ **15 dossiers sécurisés par mois** - Volume adapté à votre activité
 ✅ **Priorité de traitement haute** - Vos dossiers passent en premier
-✅ **Alertes réglementaires** - Je vous préviens des changements de règles
+✅ **Alertes réglementaires** - Nous vous prévenons des changements de règles
 ✅ **Espace partenaire dédié** - Suivi en temps réel de vos dossiers
 ✅ **Support prioritaire** - Réponse sous 24h garantie
 
-Pour vous démontrer la valeur de cet accompagnement, je vous offre un audit complet de vos 5 derniers dossiers, totalement gratuit.
+👉 **Recevez votre Audit Flash personnalisé : envoyez-nous 3 de vos derniers devis et notre Cellule vous renvoie un rapport détaillé avec l'Indice de Sécurité de chacun.**
 
-👉 **Envoyez-moi vos dossiers et je vous renvoie un rapport détaillé avec l'Indice de Sécurité de chacun.**
-
-Vous pourrez ainsi mesurer concrètement les risques évités.
+Vous pourrez ainsi mesurer concrètement les risques évités et le potentiel sécurisable.
 
 Dans l'attente de collaborer avec vous,
 
@@ -119,16 +123,19 @@ Ce rapport est une estimation par IA. Validation technique par un professionnel 
   expert: {
     forfait: 'Expert',
     badge: '👑',
-    objet: (vars) => `Partenariat stratégique CEE pour ${vars.nomEntreprise} - Accompagnement illimité`,
+    objet: (vars) => `Audit Flash Leader : Potentiel CEE stratégique de ${vars.nomEntreprise} - Accompagnement Expert illimité`,
     corps: (vars) => `Bonjour ${vars.nomGerant},
 
 ${vars.nomEntreprise} est identifiée comme un acteur majeur de la rénovation énergétique dans votre région.
 
 À votre niveau d'activité, la sécurisation de vos dossiers CEE n'est plus une option mais une nécessité stratégique. Un seul dossier bloqué peut représenter des dizaines de milliers d'euros de trésorerie immobilisée.
 
-C'est pourquoi je souhaite vous présenter notre accompagnement Expert, conçu spécifiquement pour les leaders du secteur.
+C'est pourquoi notre Cellule d'Expertise souhaite vous présenter l'accompagnement Expert, conçu spécifiquement pour les leaders du secteur.
 
-👑 **FORFAIT EXPERT - Accompagnement Stratégique**
+📊 **PREUVE DE VALEUR**
+Notre Système d'Audit a déjà identifié un potentiel de **25 000 à 50 000 €** sécurisables sur vos typologies de chantiers.
+
+👑 **ACCOMPAGNEMENT EXPERT - Illimité & Stratégique**
 
 Ce partenariat premium inclut :
 
@@ -139,13 +146,11 @@ Ce partenariat premium inclut :
 ✅ **Support 24/7** - Disponibilité totale
 ✅ **Rapports de direction** - Tableaux de bord stratégiques
 
-Je vous propose un rendez-vous de 30 minutes pour vous présenter concrètement comment nous pouvons sécuriser l'intégralité de votre flux de dossiers.
+👉 **Recevez votre Audit Flash Démonstration personnalisé : nous joignons à cet email un exemple d'audit réalisé par notre Cellule. Vous pourrez ainsi apprécier le niveau de détail et de précision de notre Système d'Audit.**
 
-En amont de cet échange, je me permets de joindre à cet email un exemple d'audit que nous réalisons. Vous pourrez ainsi apprécier le niveau de détail et de précision de notre Système d'Audit.
+Répondez à cet email avec 3 de vos derniers devis et notre Cellule vous renvoie une analyse stratégique complète.
 
-👉 **Répondez à cet email pour convenir d'un créneau, ou appelez-moi directement au ${CONFIG.expediteur.telephone}.**
-
-Je reste à votre disposition,
+Notre équipe reste à votre disposition,
 
 ${CONFIG.expediteur.nom}
 Fondateur de ${CONFIG.expediteur.cabinet}

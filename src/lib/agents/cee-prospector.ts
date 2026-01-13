@@ -1,5 +1,5 @@
 /**
- * Agent de Prospection CEE
+ * Cellule de Prospection CEE
  * 
  * Identifie des entreprises cibles pour les opérations IND-UT-102
  * et génère des messages de prospection personnalisés.
@@ -10,14 +10,14 @@
  * - Pompage industriel
  * - Ventilation / CVC
  * 
- * Note : Cet agent fonctionne en mode LOCAL (annuaire simulé).
+ * Note : Cette Cellule fonctionne en mode LOCAL (annuaire simulé).
  * Pour connexion à un annuaire réel (API Entreprise, RGE), 
  * une clé API supplémentaire serait nécessaire.
  */
 
 // Log de statut au chargement
 if (typeof window !== 'undefined') {
-  console.log('🛠️  [CEE-Prospector] Mode LOCAL - Annuaire de démonstration');
+  console.log('🛠️  [Cellule-Prospection] Mode LOCAL - Annuaire de démonstration');
 }
 
 // ============================================================================
@@ -327,36 +327,38 @@ function generatePersonalizedMessage(prospect: Partial<Prospect>): string {
     // Version directe et percutante
     `${prenom},
 
-J'ai vu que vous travaillez sur ${contexte}${ville ? ` à ${ville}` : ''}.
+Notre Cellule d'Expertise a identifié votre activité sur ${contexte}${ville ? ` à ${ville}` : ''}.
 
-Saviez-vous que je peux diviser vos devis par 3 grâce à la prime CEE de ${SCORING_CONFIG.PRIME_REFERENCE.toLocaleString('fr-FR')} € ?
+📊 **PREUVE DE VALEUR**
+Notre Système d'Audit a déjà identifié un potentiel de ${SCORING_CONFIG.PRIME_REFERENCE.toLocaleString('fr-FR')} € sécurisables sur vos typologies de chantiers.
 
 Et le meilleur : vous n'avez aucune paperasse à faire.
 
 Pour un moteur de 25 kW avec variateur, vos clients récupèrent quasi 3 000 € de prime, déduits directement du devis.
 
-Je m'occupe de tout : dossier, validation, versement.
+Notre Cellule s'occupe de tout : dossier, validation, versement.
 
-Vous facturez, je gère l'administratif.
+Vous facturez, nous gérons l'administratif.
 
-Intéressé pour en discuter 10 minutes ?`,
+👉 **Recevez votre Audit Flash personnalisé : répondez à ce message avec un devis en pièce jointe.**`,
 
     // Version plus formelle
     `Bonjour ${prenom},
 
-En recherchant des professionnels spécialisés dans ${accroche}, je suis tombé sur votre entreprise.
+En recherchant des professionnels spécialisés dans ${accroche}, notre Cellule d'Expertise a identifié votre entreprise.
 
-Je travaille avec des artisans comme vous pour maximiser les primes CEE sur les opérations moteurs.
+Nous travaillons avec des artisans comme vous pour maximiser les primes CEE sur les opérations moteurs.
 
-Concrètement : sur un variateur de vitesse 25 kW, la prime atteint ${SCORING_CONFIG.PRIME_REFERENCE.toLocaleString('fr-FR')} €.
+📊 **PREUVE DE VALEUR**
+Notre Système d'Audit a déjà identifié un potentiel de ${SCORING_CONFIG.PRIME_REFERENCE.toLocaleString('fr-FR')} € sécurisables sur vos typologies de chantiers.
 
-Ma proposition :
-✓ Je constitue le dossier CEE
-✓ Je gère toute la conformité
+Notre proposition :
+✓ Nous constituons le dossier CEE
+✓ Nous gérons toute la conformité
 ✓ Vous déduisez la prime directement du devis client
 ✓ Zéro paperasse pour vous
 
-Seriez-vous disponible pour un échange de 10 minutes cette semaine ?`,
+👉 **Recevez votre Audit Flash personnalisé : envoyez-nous un devis et notre Cellule vous renvoie l'analyse dans la journée.**`,
   ];
   
   // Retourner une version aléatoire
