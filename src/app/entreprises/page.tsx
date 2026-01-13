@@ -240,41 +240,27 @@ export default function EntreprisesPage() {
           {entreprises.map((entreprise) => (
             <div
               key={entreprise.id}
-              className="relative bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer"
+              className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all cursor-pointer"
             >
-              {/* Bouton Aperçu Mode Miroir - Position Absolue + FORÇAGE VISUEL */}
-              {entreprise.statut === 'client_actif' && (
-                <Link
-                  href={`/espace-client?id=${entreprise.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    zIndex: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
-                    backgroundColor: '#ffffff',
-                    color: '#7c3aed',
-                    border: '3px solid #7c3aed',
-                    borderRadius: '9999px',
-                    boxShadow: '0 10px 25px rgba(124, 58, 237, 0.4)',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <Eye className="w-5 h-5" />
-                  <span>Aperçu 👁️</span>
-                </Link>
-              )}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 mr-4">
-                  <h3 className="text-white font-semibold text-lg">
-                    {entreprise.raison_sociale}
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-white font-semibold text-lg">
+                      {entreprise.raison_sociale}
+                    </h3>
+                    {/* Bouton Aperçu - Intégré proprement */}
+                    {entreprise.statut === 'client_actif' && (
+                      <Link
+                        href={`/espace-client?id=${entreprise.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="group flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-700/50 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 border border-slate-600 hover:border-cyan-500/50 transition-all"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span className="text-xs font-medium hidden group-hover:inline transition-all">Voir l'Espace</span>
+                        <span className="text-xs font-medium group-hover:hidden">👁️</span>
+                      </Link>
+                    )}
+                  </div>
                   <p className="text-slate-400 text-sm mb-3">
                     {entreprise.secteur} • {entreprise.ville}
                   </p>
