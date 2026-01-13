@@ -315,11 +315,11 @@ export default function PortalPage() {
 
         {/* KPIs */}
         <div className="grid md:grid-cols-3 gap-4">
-          {/* ROI - Agent Architect */}
+          {/* ROI - Cellule d'Expertise */}
           <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 border border-cyan-500/30">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm font-medium text-cyan-400">Agent Architect</span>
+              <span className="text-sm font-medium text-cyan-400">Cellule d'Expertise</span>
             </div>
             <p className="text-3xl font-bold text-white mb-1">
               {gainNet5Ans.toLocaleString('fr-FR')} €
@@ -353,7 +353,7 @@ export default function PortalPage() {
           <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl p-6 border border-amber-500/30">
             <div className="flex items-center gap-2 mb-3">
               <FileCheck className="w-5 h-5 text-amber-400" />
-              <span className="text-sm font-medium text-amber-400">Agent Compliance</span>
+              <span className="text-sm font-medium text-amber-400">Système d'Audit</span>
             </div>
             <p className="text-3xl font-bold text-white mb-1">
               {ceeCodes.length}

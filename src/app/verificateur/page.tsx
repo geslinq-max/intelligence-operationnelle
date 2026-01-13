@@ -432,7 +432,7 @@ export default function VerificateurPage() {
                   </div>
                 )}
 
-                {/* Vérification calcul Agent B */}
+                {/* Vérification calcul Certification */}
                 <div className="mt-4 pt-4 border-t border-slate-700">
                   <p className="text-slate-400 text-sm mb-2">Certification croisée</p>
                   <div className="flex items-center gap-2">

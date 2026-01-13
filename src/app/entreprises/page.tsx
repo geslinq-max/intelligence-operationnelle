@@ -5,6 +5,7 @@ import { Sidebar } from '@/components';
 import AddCompanyModal, { type CompanyFormData } from '@/components/modals/AddCompanyModal';
 import { ComplianceBadgeList } from '@/components/ui/ComplianceBadge';
 import { FolderOpen, Send, Hammer } from 'lucide-react';
+import BouclierTresorerie from '@/components/ui/BouclierTresorerie';
 
 type EntrepriseStatut = 'client_actif' | 'prospect' | 'chantier_en_cours' | 'transmis';
 type ForfaitNiveau = 'essentiel' | 'serenite' | 'expert';
@@ -174,12 +175,25 @@ export default function EntreprisesPage() {
     return e.cee_codes.length > 0 && e.compliance_fiche && e.signed_at;
   };
 
+  const isDossierPretOuConforme = (e: typeof initialEntreprises[0]) => {
+    return e.statut === 'client_actif' && isDossierComplet(e);
+  };
+
+  const dossiersPrets = entreprises.filter(isDossierPretOuConforme);
+  const capitalSecurise = dossiersPrets.reduce((sum, e) => sum + (e.economie || 0) + e.subventions, 0);
+
   return (
     <div className="min-h-screen bg-slate-950">
       <Sidebar />
 
       <main className="ml-64 p-8">
         <header className="mb-8">
+          {/* Bouclier de Trésorerie */}
+          <BouclierTresorerie 
+            montantTotal={capitalSecurise} 
+            nombreDossiers={dossiersPrets.length} 
+          />
+
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white">Artisans Partenaires</h1>
