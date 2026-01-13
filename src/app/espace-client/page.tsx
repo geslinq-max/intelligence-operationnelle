@@ -15,8 +15,11 @@ import {
   ChevronRight,
   AlertCircle,
   ArrowLeft,
-  Eye
+  Eye,
+  Download,
+  Award
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 type DossierStatus = 'depot' | 'analyse' | 'certification' | 'valide';
 
@@ -417,6 +420,218 @@ function BarreSanteAdministrative({ documents, dossierNom, onDocumentDepose }: B
   );
 }
 
+interface AttestationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  dossier: Dossier;
+}
+
+function AttestationModal({ isOpen, onClose, dossier }: AttestationModalProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const formatCurrencyPDF = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR').format(amount);
+  };
+
+  const generatePDF = async () => {
+    setIsGenerating(true);
+    
+    await new Promise(r => setTimeout(r, 2000));
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const dateValidite = new Date();
+    dateValidite.setFullYear(dateValidite.getFullYear() + 1);
+    
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CAPITAL ENERGIE', pageWidth / 2, 25, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Cellule d\'Expertise', pageWidth / 2, 35, { align: 'center' });
+    
+    doc.setTextColor(52, 211, 153);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ATTESTATION DE CONFORMITE', pageWidth / 2, 75, { align: 'center' });
+    
+    doc.setDrawColor(52, 211, 153);
+    doc.setLineWidth(0.5);
+    doc.line(40, 80, pageWidth - 40, 80);
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    
+    const today = new Date().toLocaleDateString('fr-FR', { 
+      day: 'numeric', month: 'long', year: 'numeric' 
+    });
+    doc.text(`Date d'emission : ${today}`, 20, 100);
+    doc.text(`Reference du dossier : ${dossier.id}`, 20, 110);
+    
+    doc.setFontSize(11);
+    const bodyText = [
+      'La Cellule d\'Expertise CAPITAL ENERGIE certifie que le dossier :',
+      '',
+      `     "${dossier.nom}"`,
+      '',
+      'a ete integralement audite et valide par notre Systeme d\'Audit.',
+      '',
+      'L\'ensemble des pieces justificatives requises ont ete verifiees :',
+      '  - Devis signe',
+      '  - Note technique',
+      '  - Attestation sur l\'honneur',
+      '  - Photos avant/apres travaux',
+      '',
+      'Ce dossier repond aux criteres d\'eligibilite aux aides a la',
+      'renovation energetique.'
+    ];
+    
+    let yPos = 130;
+    bodyText.forEach(line => {
+      doc.text(line, 20, yPos);
+      yPos += 7;
+    });
+    
+    const capitalSecurise = dossier.montantEconomies + dossier.montantSubventions;
+    
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(30, yPos + 5, pageWidth - 60, 35, 3, 3, 'F');
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.text('Capital Securise :', pageWidth / 2, yPos + 18, { align: 'center' });
+    
+    doc.setTextColor(16, 185, 129);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${formatCurrencyPDF(capitalSecurise)} EUR`, pageWidth / 2, yPos + 32, { align: 'center' });
+    
+    yPos += 55;
+    
+    doc.setFillColor(52, 211, 153);
+    doc.roundedRect(pageWidth / 2 - 40, yPos, 80, 25, 3, 3, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CERTIFIE CONFORME', pageWidth / 2, yPos + 10, { align: 'center' });
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    const validiteStr = dateValidite.toLocaleDateString('fr-FR');
+    doc.text(`Valide jusqu'au ${validiteStr}`, pageWidth / 2, yPos + 18, { align: 'center' });
+    
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(8);
+    doc.text(
+      'Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise.',
+      pageWidth / 2, 
+      280, 
+      { align: 'center' }
+    );
+    
+    doc.save(`Attestation_${dossier.nom.replace(/\s+/g, '_')}.pdf`);
+    
+    setIsGenerating(false);
+    setIsSuccess(true);
+    
+    setTimeout(() => {
+      setIsSuccess(false);
+      onClose();
+    }, 1500);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+        {isSuccess ? (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center animate-pulse">
+              <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-emerald-400 mb-2">
+              Attestation generee !
+            </h3>
+            <p className="text-slate-400 text-sm">Telechargement en cours...</p>
+          </div>
+        ) : isGenerating ? (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <Award className="w-10 h-10 text-cyan-400 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-semibold text-cyan-400 mb-2">
+              Generation en cours...
+            </h3>
+            <p className="text-slate-400 text-sm">
+              Generation de votre certificat par la Cellule d'Expertise
+            </p>
+            <div className="mt-4 flex justify-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-emerald-400" />
+                Attestation de Conformite
+              </h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-900/50 border border-emerald-500/30 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">{dossier.nom}</p>
+                  <p className="text-emerald-400 text-sm">Dossier 100% complet</p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-slate-700">
+                <p className="text-slate-400 text-sm mb-1">Capital Securise</p>
+                <p className="text-2xl font-bold text-emerald-400">
+                  {formatCurrencyPDF(dossier.montantEconomies + dossier.montantSubventions)} EUR
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={generatePDF}
+              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Telecharger l'Attestation PDF
+            </button>
+            
+            <p className="text-slate-500 text-xs text-center mt-4">
+              Cellule d'Expertise • Document officiel CAPITAL ENERGIE
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function useCountAnimation(target: number, duration: number = 2500) {
   const [count, setCount] = useState<number>(0);
   const startTimeRef = useRef<number | null>(null);
@@ -552,7 +767,13 @@ function EspaceClientContent() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [attestationDossier, setAttestationDossier] = useState<Dossier | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const isDossierComplet = (dossier: Dossier) => {
+    const sante = calculerSanteAdministrative(dossier.documents);
+    return sante.pourcentage === 100;
+  };
 
   const dossiersValides = dossiers.filter(d => d.status === 'valide' || d.status === 'certification');
   const capitalSecurise = dossiersValides.reduce(
@@ -621,6 +842,15 @@ function EspaceClientContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Bannière Mode Consultation (patron uniquement) */}
+      {/* Modal Attestation de Conformité */}
+      {attestationDossier && (
+        <AttestationModal
+          isOpen={true}
+          onClose={() => setAttestationDossier(null)}
+          dossier={attestationDossier}
+        />
+      )}
+
       {isModeMiroir && clientInfo && (
         <div className="bg-gradient-to-r from-amber-600/90 to-orange-600/90 border-b border-amber-500">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -854,6 +1084,17 @@ function EspaceClientContent() {
                           dossierNom={dossier.nom}
                           onDocumentDepose={(docKey) => handleDocumentDepose(dossier.id, docKey)}
                         />
+                        
+                        {/* Bouton Télécharger Attestation - visible uniquement si 100% complet */}
+                        {isDossierComplet(dossier) && (
+                          <button
+                            onClick={() => setAttestationDossier(dossier)}
+                            className="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 border border-emerald-500/40 hover:border-emerald-400 text-emerald-400 font-medium rounded-lg transition-all flex items-center justify-center gap-2 group"
+                          >
+                            <Award className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            <span>📄 Télécharger l'Attestation</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
