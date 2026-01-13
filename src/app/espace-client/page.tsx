@@ -186,9 +186,138 @@ function getBarreColor(pourcentage: number): { bg: string; glow: string } {
   }
 }
 
-function BarreSanteAdministrative({ documents }: { documents: Partial<Record<DocumentType, boolean>> }) {
+interface DepotModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  dossierNom: string;
+  documentManquant: { key: DocumentType; label: string };
+  onDepot: (docKey: DocumentType) => void;
+}
+
+function DepotModal({ isOpen, onClose, dossierNom, documentManquant, onDepot }: DepotModalProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [isCertifying, setIsCertifying] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setIsUploading(false);
+    
+    setIsCertifying(true);
+    await new Promise(r => setTimeout(r, 2000));
+    setIsCertifying(false);
+    
+    setIsSuccess(true);
+    onDepot(documentManquant.key);
+    
+    setTimeout(() => {
+      setIsSuccess(false);
+      onClose();
+    }, 1500);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+        {isSuccess ? (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center animate-pulse">
+              <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-emerald-400 mb-2">
+              Document certifié !
+            </h3>
+            <p className="text-slate-400 text-sm">La Cellule d'Expertise a validé votre document</p>
+          </div>
+        ) : isCertifying ? (
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <Shield className="w-10 h-10 text-cyan-400 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-semibold text-cyan-400 mb-2">
+              Certification en cours...
+            </h3>
+            <p className="text-slate-400 text-sm">La Cellule d'Expertise analyse votre document</p>
+            <div className="mt-4 flex justify-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : isUploading ? (
+          <div className="text-center py-8">
+            <Loader2 className="w-12 h-12 text-amber-400 animate-spin mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-white">Téléchargement...</h3>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-white">Dépôt de document</h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4 mb-6">
+              <p className="text-slate-400 text-sm mb-1">Dépôt requis pour</p>
+              <p className="text-white font-medium">{dossierNom}</p>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <p className="text-slate-400 text-sm mb-1">Document demandé</p>
+                <p className="text-amber-400 font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {documentManquant.label}
+                </p>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+              accept=".pdf,.jpg,.jpeg,.png"
+            />
+            
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Upload className="w-5 h-5" />
+              Déposer le document
+            </button>
+            
+            <p className="text-slate-500 text-xs text-center mt-4">
+              Système d'Audit • Formats acceptés : PDF, JPG, PNG
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface BarreSanteProps {
+  documents: Partial<Record<DocumentType, boolean>>;
+  dossierNom: string;
+  onDocumentDepose?: (docKey: DocumentType) => void;
+}
+
+function BarreSanteAdministrative({ documents, dossierNom, onDocumentDepose }: BarreSanteProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [animatedWidth, setAnimatedWidth] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
   const sante = calculerSanteAdministrative(documents);
   const colors = getBarreColor(sante.pourcentage);
 
@@ -199,31 +328,64 @@ function BarreSanteAdministrative({ documents }: { documents: Partial<Record<Doc
     return () => clearTimeout(timer);
   }, [sante.pourcentage]);
 
+  useEffect(() => {
+    if (sante.pourcentage === 100 && !isComplete) {
+      setIsComplete(true);
+    }
+  }, [sante.pourcentage, isComplete]);
+
+  const handleDepot = (docKey: DocumentType) => {
+    if (onDocumentDepose) {
+      onDocumentDepose(docKey);
+    }
+  };
+
+  const premierManquant = sante.manquants[0];
+
   return (
     <div className="mt-3 relative">
-      {/* Barre de progression animée */}
+      {/* Modal de dépôt */}
+      {premierManquant && (
+        <DepotModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          dossierNom={dossierNom}
+          documentManquant={premierManquant}
+          onDepot={handleDepot}
+        />
+      )}
+
+      {/* Barre de progression animée - cliquable si documents manquants */}
       <div 
-        className="relative h-2 bg-slate-700/50 rounded-full overflow-hidden cursor-help"
+        className={`relative h-2 bg-slate-700/50 rounded-full overflow-hidden ${
+          sante.manquants.length > 0 ? 'cursor-pointer hover:ring-2 hover:ring-cyan-500/50' : 'cursor-default'
+        } ${isComplete ? 'animate-pulse' : ''}`}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => sante.manquants.length > 0 && setModalOpen(true)}
       >
         <div
-          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out ${colors.bg} ${colors.glow}`}
+          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out ${colors.bg} ${colors.glow} ${
+            isComplete ? 'animate-[shimmer_2s_ease-in-out_infinite]' : ''
+          }`}
           style={{ width: `${animatedWidth}%` }}
         />
       </div>
 
-      {/* Libellé dynamique */}
+      {/* Libellé dynamique - cliquable */}
       <div className="flex items-center justify-between mt-1.5">
-        <span className={`text-xs font-medium ${
-          sante.estComplet ? 'text-emerald-400' : 
-          sante.pourcentage >= 31 ? 'text-amber-400' : 'text-red-400'
-        }`}>
+        <button
+          onClick={() => sante.manquants.length > 0 && setModalOpen(true)}
+          className={`text-xs font-medium flex items-center gap-1 ${
+            sante.estComplet ? 'text-emerald-400' : 
+            sante.pourcentage >= 31 ? 'text-amber-400 hover:text-amber-300' : 'text-red-400 hover:text-red-300'
+          } ${sante.manquants.length > 0 ? 'cursor-pointer underline-offset-2 hover:underline' : ''}`}
+        >
           {sante.estComplet 
             ? '✅ Dossier Complet' 
-            : `⚠️ Manque ${sante.manquants.length} document${sante.manquants.length > 1 ? 's' : ''}`
+            : <><Upload className="w-3 h-3" /> Déposer {sante.manquants.length} pièce{sante.manquants.length > 1 ? 's' : ''}</>
           }
-        </span>
+        </button>
         <span className="text-xs text-slate-500">
           {sante.presentsCount}/{sante.total} pièces
         </span>
@@ -245,6 +407,9 @@ function BarreSanteAdministrative({ documents }: { documents: Partial<Record<Doc
                 </li>
               ))}
             </ul>
+            <p className="text-xs text-cyan-400 mt-3 pt-2 border-t border-slate-700">
+              👆 Cliquez pour déposer
+            </p>
           </div>
         </div>
       )}
@@ -395,6 +560,18 @@ function EspaceClientContent() {
     0
   );
   const animatedCapital = useCountAnimation(capitalSecurise, 2500);
+
+  const handleDocumentDepose = (dossierId: string, docKey: DocumentType) => {
+    setDossiers(prev => prev.map(d => {
+      if (d.id === dossierId) {
+        return {
+          ...d,
+          documents: { ...d.documents, [docKey]: true }
+        };
+      }
+      return d;
+    }));
+  };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -672,7 +849,11 @@ function EspaceClientContent() {
                         )}
                         
                         {/* Barre de Santé Administrative */}
-                        <BarreSanteAdministrative documents={dossier.documents} />
+                        <BarreSanteAdministrative 
+                          documents={dossier.documents} 
+                          dossierNom={dossier.nom}
+                          onDocumentDepose={(docKey) => handleDocumentDepose(dossier.id, docKey)}
+                        />
                       </div>
                     </div>
                   </div>
