@@ -151,7 +151,8 @@ export default function GestionPage() {
 
   const qualifiedDossiers = entreprisesWithMaturity.filter(e => e.maturity.percentage >= 70);
   const totalPipeline = qualifiedDossiers.reduce((sum, e) => sum + e.economie + e.subventions, 0);
-  const totalCommission = totalPipeline * 0.10;
+  const mrrHT = qualifiedDossiers.reduce((sum, e) => sum + (e.economie > 0 ? 390 : 0), 0);
+  const salaireNetEstime = mrrHT * 0.78;
   
   const readyToSend = entreprisesWithMaturity.filter(e => e.maturity.percentage === 100 && !e.transmitted);
   const inProgress = entreprisesWithMaturity.filter(e => e.maturity.percentage > 30 && e.maturity.percentage < 100);
@@ -159,11 +160,11 @@ export default function GestionPage() {
   
   // Dossiers transmis (à facturer) - non payés
   const transmittedDossiers = entreprisesWithMaturity.filter(e => e.transmitted && !e.paid);
-  const totalToInvoice = transmittedDossiers.reduce((sum, e) => sum + (e.economie + e.subventions) * 0.10, 0);
+  const totalToInvoice = transmittedDossiers.reduce((sum, e) => sum + 390, 0);
   
   // Dossiers payés (historique)
   const paidDossiers = entreprisesWithMaturity.filter(e => e.paid);
-  const totalPaid = paidDossiers.reduce((sum, e) => sum + (e.economie + e.subventions) * 0.10, 0);
+  const totalPaid = paidDossiers.reduce((sum, e) => sum + 390, 0);
 
   // Handler pour confirmer encaissement
   const handleConfirmPayment = (dossierId: string) => {
@@ -192,7 +193,7 @@ export default function GestionPage() {
             <div>
               <h1 className="text-3xl font-bold text-white">Espace Gestion</h1>
               <p className="text-slate-400">
-                Suivi confidentiel de votre pipeline et commissions
+                Suivi confidentiel de vos revenus récurrents (MRR)
               </p>
             </div>
           </div>
@@ -217,22 +218,41 @@ export default function GestionPage() {
             </p>
           </div>
 
-          {/* Commission */}
+          {/* MRR HT */}
           <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
                 <Euro className="w-6 h-6 text-cyan-400" />
               </div>
               <span className="text-xs text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded-full">
-                10%
+                MRR
               </span>
             </div>
-            <p className="text-slate-400 text-sm mb-1">Pipeline Commissions</p>
+            <p className="text-slate-400 text-sm mb-1">Revenus Récurrents HT</p>
             <p className="text-2xl font-bold text-cyan-400">
-              {formatCurrency(totalCommission)}
+              {formatCurrency(mrrHT)}
             </p>
             <p className="text-slate-500 text-xs mt-2">
-              Estimé sur qualifiés
+              Forfaits actifs
+            </p>
+          </div>
+
+          {/* Salaire Net Estimé */}
+          <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                <Banknote className="w-6 h-6 text-indigo-400" />
+              </div>
+              <span className="text-xs text-indigo-400 bg-indigo-500/20 px-2 py-1 rounded-full">
+                ×0.78
+              </span>
+            </div>
+            <p className="text-slate-400 text-sm mb-1">Salaire Net Estimé</p>
+            <p className="text-2xl font-bold text-indigo-400">
+              {formatCurrency(salaireNetEstime)}
+            </p>
+            <p className="text-slate-500 text-xs mt-2">
+              Après charges
             </p>
           </div>
 
@@ -291,7 +311,7 @@ export default function GestionPage() {
           <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
             <h2 className="text-white font-semibold flex items-center gap-2">
               <Building2 className="w-5 h-5 text-slate-400" />
-              Tableau de Bord Commissions
+              Tableau de Bord Revenus & Forfaits
             </h2>
             <span className="text-xs text-slate-500">
               Mise à jour : {new Date().toLocaleDateString('fr-FR')}
@@ -315,7 +335,7 @@ export default function GestionPage() {
                     Économies + Subv.
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Commission (10%)
+                    Forfait Mensuel
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Statut
@@ -325,7 +345,7 @@ export default function GestionPage() {
               <tbody className="divide-y divide-slate-700/50">
                 {entreprisesWithMaturity.map((entreprise) => {
                   const totalValue = entreprise.economie + entreprise.subventions;
-                  const commission = entreprise.maturity.percentage >= 70 ? totalValue * 0.10 : 0;
+                  const forfaitMensuel = entreprise.maturity.percentage >= 70 ? 390 : 0;
                   
                   return (
                     <tr 
@@ -357,9 +377,9 @@ export default function GestionPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {commission > 0 ? (
+                        {forfaitMensuel > 0 ? (
                           <span className="text-emerald-400 font-semibold">
-                            {formatCurrency(commission)}
+                            {formatCurrency(forfaitMensuel)}
                           </span>
                         ) : (
                           <span className="text-slate-600">—</span>
@@ -406,7 +426,7 @@ export default function GestionPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-emerald-400 font-bold text-lg">
-                      {formatCurrency(totalCommission)}
+                      {formatCurrency(mrrHT)}
                     </span>
                   </td>
                   <td className="px-6 py-4"></td>
@@ -439,7 +459,7 @@ export default function GestionPage() {
             
             <div className="p-4 space-y-3">
               {transmittedDossiers.map((dossier) => {
-                const commission = (dossier.economie + dossier.subventions) * 0.10;
+                const forfait = 390;
                 const transmittedDate = dossier.transmitted_at 
                   ? new Date(dossier.transmitted_at).toLocaleDateString('fr-FR', {
                       day: '2-digit',
@@ -471,9 +491,9 @@ export default function GestionPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-xs text-slate-500 mb-1">Commission (10%)</p>
+                        <p className="text-xs text-slate-500 mb-1">Forfait Mensuel</p>
                         <p className="text-xl font-bold text-amber-400">
-                          {formatCurrency(commission)}
+                          {formatCurrency(forfait)}
                         </p>
                         <div className="flex items-center gap-1 mt-1">
                           {dossier.cee_codes.map((code, i) => (
@@ -534,7 +554,7 @@ export default function GestionPage() {
             
             <div className="p-4 space-y-3">
               {paidDossiers.map((dossier) => {
-                const commission = (dossier.economie + dossier.subventions) * 0.10;
+                const forfait = 390;
                 const paidDate = dossier.paid_at 
                   ? new Date(dossier.paid_at).toLocaleDateString('fr-FR', {
                       day: '2-digit',
@@ -572,9 +592,9 @@ export default function GestionPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-xs text-slate-500 mb-1">Commission perçue</p>
+                        <p className="text-xs text-slate-500 mb-1">Forfait perçu</p>
                         <p className="text-xl font-bold text-emerald-400">
-                          {formatCurrency(commission)}
+                          {formatCurrency(forfait)}
                         </p>
                         <div className="flex items-center gap-1 mt-1">
                           {dossier.cee_codes.map((code, i) => (
@@ -610,7 +630,7 @@ export default function GestionPage() {
         <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
           <p className="text-slate-500 text-xs text-center">
             🔒 Ces données sont strictement confidentielles et réservées à l&apos;administrateur du cabinet.
-            Les commissions sont calculées sur la base de 10% du montant total (économies + subventions) des dossiers qualifiés.
+            Le MRR (Monthly Recurring Revenue) est calculé sur la base des forfaits actifs. Le salaire net estimé applique un coefficient de 0.78.
           </p>
         </div>
       </main>

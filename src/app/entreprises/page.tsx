@@ -7,6 +7,13 @@ import { ComplianceBadgeList } from '@/components/ui/ComplianceBadge';
 import { FolderOpen, Send, Hammer } from 'lucide-react';
 
 type EntrepriseStatut = 'client_actif' | 'prospect' | 'chantier_en_cours' | 'transmis';
+type ForfaitNiveau = 'essentiel' | 'serenite' | 'expert';
+
+const FORFAIT_BADGES: Record<ForfaitNiveau, { badge: string; label: string; bgColor: string; textColor: string }> = {
+  essentiel: { badge: '🔵', label: 'Essentiel', bgColor: 'bg-blue-500/20', textColor: 'text-blue-400' },
+  serenite: { badge: '⭐', label: 'Sérénité', bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400' },
+  expert: { badge: '👑', label: 'Expert', bgColor: 'bg-purple-500/20', textColor: 'text-purple-400' },
+};
 
 const initialEntreprises: Array<{
   id: string;
@@ -25,6 +32,7 @@ const initialEntreprises: Array<{
   signed_at: string | null;
   co2_reduction: number;
   transmitted: boolean;
+  forfait: ForfaitNiveau;
 }> = [
   {
     id: '1',
@@ -43,6 +51,7 @@ const initialEntreprises: Array<{
     signed_at: '2026-01-05T14:30:00Z',
     co2_reduction: 4.2,
     transmitted: false,
+    forfait: 'serenite',
   },
   {
     id: '2',
@@ -61,6 +70,7 @@ const initialEntreprises: Array<{
     signed_at: null,
     co2_reduction: 2.8,
     transmitted: false,
+    forfait: 'essentiel',
   },
   {
     id: '3',
@@ -79,6 +89,7 @@ const initialEntreprises: Array<{
     signed_at: null,
     co2_reduction: 6.5,
     transmitted: false,
+    forfait: 'expert',
   },
   {
     id: '4',
@@ -97,6 +108,7 @@ const initialEntreprises: Array<{
     signed_at: null,
     co2_reduction: 0,
     transmitted: false,
+    forfait: 'essentiel',
   },
   {
     id: '5',
@@ -115,6 +127,7 @@ const initialEntreprises: Array<{
     signed_at: null,
     co2_reduction: 5.1,
     transmitted: false,
+    forfait: 'serenite',
   },
 ];
 
@@ -232,15 +245,17 @@ export default function EntreprisesPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        entreprise.statut === 'client_actif'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-slate-600/50 text-slate-400'
-                      }`}
-                    >
-                      {entreprise.statut === 'client_actif' ? 'Client actif' : 'Prospect'}
-                    </span>
+                    {entreprise.statut === 'client_actif' && (
+                      <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${FORFAIT_BADGES[entreprise.forfait].bgColor} ${FORFAIT_BADGES[entreprise.forfait].textColor}`}>
+                        <span>{FORFAIT_BADGES[entreprise.forfait].badge}</span>
+                        {FORFAIT_BADGES[entreprise.forfait].label}
+                      </span>
+                    )}
+                    {entreprise.statut === 'prospect' && (
+                      <span className="px-2 py-1 rounded text-xs font-medium bg-slate-600/50 text-slate-400">
+                        Prospect
+                      </span>
+                    )}
                     <span className="px-2 py-1 bg-slate-700 rounded text-xs text-slate-300">
                       {entreprise.taille}
                     </span>

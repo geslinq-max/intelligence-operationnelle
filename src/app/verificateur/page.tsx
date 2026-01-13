@@ -69,7 +69,7 @@ export default function VerificateurPage() {
       await new Promise(resolve => setTimeout(resolve, 500));
       setAnalysisState('extracting');
 
-      // Lancement du pipeline Agent A + B
+      // Lancement du pipeline Validation + Certification
       const result = await processAndValidateQuote(file);
       
       setExtraction(result.extraction);
@@ -162,7 +162,7 @@ export default function VerificateurPage() {
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-white">Vérificateur de Dossiers</h1>
               <p className="text-slate-400 mt-1 text-sm lg:text-base">
-                Analyse IA des devis avec double validation Agent A + B
+                Analyse IA des devis avec Validation Algorithmique et Certification de Conformité
               </p>
             </div>
             {analysisState === 'complete' && (
@@ -230,12 +230,12 @@ export default function VerificateurPage() {
               <div className="flex items-center justify-center gap-4">
                 <div className="flex items-center gap-2 text-slate-400">
                   <Zap className="w-4 h-4" />
-                  <span className="text-sm">Agent A : Extraction</span>
+                  <span className="text-sm">Validation Algorithmique</span>
                 </div>
                 <span className="text-slate-600">→</span>
                 <div className="flex items-center gap-2 text-slate-400">
                   <Shield className="w-4 h-4" />
-                  <span className="text-sm">Agent B : Validation</span>
+                  <span className="text-sm">Certification de Conformité</span>
                 </div>
               </div>
             </div>
@@ -251,8 +251,8 @@ export default function VerificateurPage() {
             
             <h3 className="text-xl font-semibold text-white mb-2">
               {analysisState === 'uploading' && 'Chargement du document...'}
-              {analysisState === 'extracting' && 'Agent A : Extraction en cours...'}
-              {analysisState === 'validating' && 'Agent B : Validation en cours...'}
+              {analysisState === 'extracting' && 'Validation Algorithmique en cours...'}
+              {analysisState === 'validating' && 'Certification de Conformité en cours...'}
             </h3>
             
             {selectedFile && (
@@ -281,7 +281,7 @@ export default function VerificateurPage() {
                 ) : (
                   <Zap className="w-5 h-5" />
                 )}
-                <span className="text-sm">Agent A</span>
+                <span className="text-sm">Validation</span>
               </div>
               <div className={`w-8 h-0.5 ${analysisState === 'validating' ? 'bg-emerald-500' : 'bg-slate-600'}`} />
               <div className={`flex items-center gap-2 ${analysisState === 'validating' ? 'text-cyan-400' : 'text-slate-500'}`}>
@@ -290,7 +290,7 @@ export default function VerificateurPage() {
                 ) : (
                   <Shield className="w-5 h-5" />
                 )}
-                <span className="text-sm">Agent B</span>
+                <span className="text-sm">Certification</span>
               </div>
             </div>
           </div>
@@ -340,7 +340,7 @@ export default function VerificateurPage() {
               <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <Zap className="w-5 h-5 text-cyan-400" />
-                  <h3 className="text-lg font-semibold text-white">Données Techniques (Agent A)</h3>
+                  <h3 className="text-lg font-semibold text-white">Données Techniques (Validation Algorithmique)</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -399,7 +399,7 @@ export default function VerificateurPage() {
               <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <Shield className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-lg font-semibold text-white">Calcul CEE (Agent B)</h3>
+                  <h3 className="text-lg font-semibold text-white">Calcul CEE (Certification de Conformité)</h3>
                 </div>
 
                 {extraction.calcul_cee && (
@@ -434,7 +434,7 @@ export default function VerificateurPage() {
 
                 {/* Vérification calcul Agent B */}
                 <div className="mt-4 pt-4 border-t border-slate-700">
-                  <p className="text-slate-400 text-sm mb-2">Vérification croisée</p>
+                  <p className="text-slate-400 text-sm mb-2">Certification croisée</p>
                   <div className="flex items-center gap-2">
                     {validation.verification_calcul.concordance_prime ? (
                       <>
@@ -639,7 +639,7 @@ export default function VerificateurPage() {
         {/* Footer */}
         <footer className="mt-8 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between text-sm text-slate-500">
-            <span>Vérificateur IA - Double validation</span>
+            <span>Vérificateur IA - Validation & Certification</span>
             <span>v2.0.0 - CAPITAL ÉNERGIE</span>
           </div>
         </footer>
