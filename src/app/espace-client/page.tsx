@@ -188,20 +188,28 @@ function getBarreColor(pourcentage: number): { bg: string; glow: string } {
 
 function BarreSanteAdministrative({ documents }: { documents: Partial<Record<DocumentType, boolean>> }) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [animatedWidth, setAnimatedWidth] = useState(0);
   const sante = calculerSanteAdministrative(documents);
   const colors = getBarreColor(sante.pourcentage);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedWidth(sante.pourcentage);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [sante.pourcentage]);
+
   return (
     <div className="mt-3 relative">
-      {/* Barre de progression */}
+      {/* Barre de progression animée */}
       <div 
         className="relative h-2 bg-slate-700/50 rounded-full overflow-hidden cursor-help"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
         <div
-          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${colors.bg} ${colors.glow}`}
-          style={{ width: `${sante.pourcentage}%` }}
+          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out ${colors.bg} ${colors.glow}`}
+          style={{ width: `${animatedWidth}%` }}
         />
       </div>
 
