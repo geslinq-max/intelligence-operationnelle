@@ -436,8 +436,12 @@ function AttestationModal({ isOpen, onClose, dossier }: AttestationModalProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const formatCurrencyPDF = (amount: number) => {
-    return new Intl.NumberFormat('fr-FR').format(amount);
+  const formatMontantFR = (amount: number): string => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount).replace(/\s/g, ' ') + ' euros';
   };
 
   const generatePDF = async () => {
@@ -447,99 +451,141 @@ function AttestationModal({ isOpen, onClose, dossier }: AttestationModalProps) {
     
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 25;
     const dateValidite = new Date();
     dateValidite.setFullYear(dateValidite.getFullYear() + 1);
     
     doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, pageWidth, 50, 'F');
+    doc.rect(0, 0, pageWidth, 55, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(26);
     doc.setFont('helvetica', 'bold');
-    doc.text('CAPITAL ENERGIE', pageWidth / 2, 25, { align: 'center' });
+    doc.text('CAPITAL ENERGIE', pageWidth / 2, 28, { align: 'center' });
     
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text('Cellule d\'Expertise', pageWidth / 2, 35, { align: 'center' });
+    doc.setTextColor(148, 163, 184);
+    doc.text('Cellule d\'Expertise - Systeme d\'Audit de Conformite', pageWidth / 2, 42, { align: 'center' });
     
-    doc.setTextColor(52, 211, 153);
-    doc.setFontSize(20);
+    doc.setTextColor(16, 185, 129);
+    doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
     doc.text('ATTESTATION DE CONFORMITE', pageWidth / 2, 75, { align: 'center' });
     
-    doc.setDrawColor(52, 211, 153);
-    doc.setLineWidth(0.5);
-    doc.line(40, 80, pageWidth - 40, 80);
+    doc.setDrawColor(16, 185, 129);
+    doc.setLineWidth(0.8);
+    doc.line(margin, 82, pageWidth - margin, 82);
     
     doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     
     const today = new Date().toLocaleDateString('fr-FR', { 
       day: 'numeric', month: 'long', year: 'numeric' 
     });
-    doc.text(`Date d'emission : ${today}`, 20, 100);
-    doc.text(`Reference du dossier : ${dossier.id}`, 20, 110);
+    doc.text(`Date d'emission : ${today}`, margin, 100);
+    doc.text(`Reference : DOSSIER-${dossier.id}`, margin, 110);
     
     doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
     const bodyText = [
       'La Cellule d\'Expertise CAPITAL ENERGIE certifie que le dossier :',
-      '',
-      `     "${dossier.nom}"`,
-      '',
-      'a ete integralement audite et valide par notre Systeme d\'Audit.',
-      '',
-      'L\'ensemble des pieces justificatives requises ont ete verifiees :',
-      '  - Devis signe',
-      '  - Note technique',
-      '  - Attestation sur l\'honneur',
-      '  - Photos avant/apres travaux',
-      '',
-      'Ce dossier repond aux criteres d\'eligibilite aux aides a la',
-      'renovation energetique.'
     ];
     
     let yPos = 130;
     bodyText.forEach(line => {
-      doc.text(line, 20, yPos);
+      doc.text(line, margin, yPos);
+      yPos += 8;
+    });
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.text(`"${dossier.nom}"`, pageWidth / 2, yPos + 5, { align: 'center' });
+    yPos += 18;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(30, 41, 59);
+    const bodyText2 = [
+      'a ete integralement audite et valide par notre Systeme d\'Audit.',
+      '',
+      'L\'ensemble des pieces justificatives requises ont ete verifiees :',
+    ];
+    bodyText2.forEach(line => {
+      doc.text(line, margin, yPos);
+      yPos += 8;
+    });
+    
+    const checkItems = [
+      'Devis signe par les parties',
+      'Note technique detaillee',
+      'Attestation sur l\'honneur',
+      'Photos avant et apres travaux'
+    ];
+    checkItems.forEach(item => {
+      doc.setTextColor(16, 185, 129);
+      doc.text('>', margin + 5, yPos);
+      doc.setTextColor(30, 41, 59);
+      doc.text(item, margin + 12, yPos);
       yPos += 7;
     });
     
+    yPos += 5;
+    doc.text('Ce dossier repond aux criteres d\'eligibilite aux aides a la renovation energetique.', margin, yPos);
+    
     const capitalSecurise = dossier.montantEconomies + dossier.montantSubventions;
     
+    yPos += 15;
     doc.setFillColor(240, 253, 244);
-    doc.roundedRect(30, yPos + 5, pageWidth - 60, 35, 3, 3, 'F');
+    doc.setDrawColor(16, 185, 129);
+    doc.setLineWidth(1);
+    doc.roundedRect(margin, yPos, pageWidth - (margin * 2), 40, 4, 4, 'FD');
     
-    doc.setTextColor(30, 41, 59);
+    doc.setTextColor(71, 85, 105);
     doc.setFontSize(12);
-    doc.text('Capital Securise :', pageWidth / 2, yPos + 18, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text('Capital Securise :', pageWidth / 2, yPos + 15, { align: 'center' });
     
     doc.setTextColor(16, 185, 129);
-    doc.setFontSize(24);
+    doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
-    doc.text(`${formatCurrencyPDF(capitalSecurise)} EUR`, pageWidth / 2, yPos + 32, { align: 'center' });
+    doc.text(formatMontantFR(capitalSecurise), pageWidth / 2, yPos + 32, { align: 'center' });
     
     yPos += 55;
     
-    doc.setFillColor(52, 211, 153);
-    doc.roundedRect(pageWidth / 2 - 40, yPos, 80, 25, 3, 3, 'F');
+    doc.setFillColor(16, 185, 129);
+    doc.roundedRect(pageWidth / 2 - 50, yPos, 100, 28, 4, 4, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('CERTIFIE CONFORME', pageWidth / 2, yPos + 10, { align: 'center' });
+    doc.text('CERTIFIE PAR LA CELLULE', pageWidth / 2, yPos + 12, { align: 'center' });
     
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const validiteStr = dateValidite.toLocaleDateString('fr-FR');
-    doc.text(`Valide jusqu'au ${validiteStr}`, pageWidth / 2, yPos + 18, { align: 'center' });
+    doc.text(`Valide jusqu'au ${validiteStr}`, pageWidth / 2, yPos + 22, { align: 'center' });
     
-    doc.setTextColor(148, 163, 184);
-    doc.setFontSize(8);
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.3);
+    doc.line(margin, pageHeight - 35, pageWidth - margin, pageHeight - 35);
+    
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
     doc.text(
-      'Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise.',
+      'Certification issue du Systeme d\'Audit de Conformite Algorithmique',
       pageWidth / 2, 
-      280, 
+      pageHeight - 25, 
+      { align: 'center' }
+    );
+    doc.text(
+      'Cellule d\'Expertise CAPITAL ENERGIE - Validation technique par un professionnel RGE requise.',
+      pageWidth / 2, 
+      pageHeight - 18, 
       { align: 'center' }
     );
     
@@ -615,7 +661,7 @@ function AttestationModal({ isOpen, onClose, dossier }: AttestationModalProps) {
               <div className="pt-3 border-t border-slate-700">
                 <p className="text-slate-400 text-sm mb-1">Capital Securise</p>
                 <p className="text-2xl font-bold text-emerald-400">
-                  {formatCurrencyPDF(dossier.montantEconomies + dossier.montantSubventions)} EUR
+                  {formatCurrency(dossier.montantEconomies + dossier.montantSubventions)} €
                 </p>
               </div>
             </div>
