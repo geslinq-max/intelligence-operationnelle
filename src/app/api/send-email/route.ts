@@ -30,10 +30,6 @@ export async function POST(request: NextRequest) {
 
     // Mode SIMULATION si pas de clé API
     if (!RESEND_API_KEY) {
-      console.log('📧 [SIMULATION] Email envoyé à:', to);
-      console.log('   Sujet:', subject);
-      console.log('   Message:', message.substring(0, 100) + '...');
-      
       return NextResponse.json({
         success: true,
         mode: 'simulation',
@@ -91,7 +87,6 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (!response.ok) {
-      console.error('❌ Erreur Resend:', result);
       return NextResponse.json(
         { 
           success: false, 
@@ -102,8 +97,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ Email envoyé via Resend:', result.id);
-    
     return NextResponse.json({
       success: true,
       mode: 'real',
@@ -117,7 +110,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Erreur API send-email:', error);
     return NextResponse.json(
       { 
         success: false, 

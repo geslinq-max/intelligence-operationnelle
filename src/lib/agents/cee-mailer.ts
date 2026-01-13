@@ -288,15 +288,10 @@ interface ResendEmailPayload {
 async function sendViaResend(payload: ResendEmailPayload): Promise<{ id: string } | null> {
   // Basculement automatique Simulation/Réel
   if (RESEND_CONFIG.mode === 'SIMULATION') {
-    console.log('🛠️  [CEE-Mailer] Mode SIMULATION - Email non envoyé réellement');
-    console.log(`   → Destinataire: ${payload.to}`);
-    console.log(`   → Sujet: ${payload.subject}`);
-    // Simuler un délai pour réalisme
     await new Promise(resolve => setTimeout(resolve, 500));
     return { id: `sim_${Date.now()}` };
   }
   
-  console.log('🚀 [CEE-Mailer] Mode RÉEL - Envoi via Resend API');
   const apiKey = RESEND_CONFIG.apiKey;
   
   try {
@@ -310,14 +305,11 @@ async function sendViaResend(payload: ResendEmailPayload): Promise<{ id: string 
     });
     
     if (!response.ok) {
-      const error = await response.text();
-      console.error('[CEE-Mailer] Erreur Resend:', error);
       return null;
     }
     
     return await response.json();
-  } catch (error) {
-    console.error('[CEE-Mailer] Erreur envoi:', error);
+  } catch {
     return null;
   }
 }
@@ -470,7 +462,6 @@ export async function getProspectEmailLogs(prospectId: string): Promise<EmailLog
     .order('sent_at', { ascending: false });
   
   if (error) {
-    console.error('[CEE-Mailer] Erreur récupération logs:', error);
     return [];
   }
   
@@ -636,7 +627,6 @@ export async function getHotProspects(minOpens: number = 2): Promise<Prospect[]>
     .limit(20);
   
   if (error) {
-    console.error('[CEE-Mailer] Erreur récupération hot prospects:', error);
     return [];
   }
   

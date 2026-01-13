@@ -108,10 +108,8 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
       }));
 
       setSiretSuccess(true);
-      console.log('SIRET trouvé:', { nomEntreprise, adresse, ville, codeNAF });
 
-    } catch (error) {
-      console.error('Erreur recherche SIRET:', error);
+    } catch {
       setSiretError('SIRET non trouvé, saisie manuelle requise');
     } finally {
       setIsSearchingSiret(false);
@@ -167,7 +165,6 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
   // ═══════════════════════════════════════════════════════════════
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Formulaire soumis : Nouvelle entreprise', formData);
     
     setIsSubmitting(true);
     setSiretError(null);
@@ -186,8 +183,6 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
         status: 'prospect',
       };
 
-      console.log('Insertion Supabase:', companyData);
-
       // Insertion dans Supabase
       const { data, error } = await supabase
         .from('companies')
@@ -196,8 +191,6 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
         .single();
 
       if (error) {
-        // Log erreur dans DebugLogger via console.error
-        console.error('Erreur Supabase insertion company:', error);
         
         // Gestion erreur SIRET dupliqué
         if (error.code === '23505') {
@@ -207,8 +200,6 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
         
         throw error;
       }
-
-      console.log('Entreprise créée avec succès:', data);
 
       // Callback parent avec les données
       await onSubmit({ ...formData, id: data.id });
@@ -221,8 +212,7 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
       setSiretSuccess(false);
       onClose();
 
-    } catch (error) {
-      console.error('Erreur création entreprise:', error);
+    } catch {
       setSiretError('Erreur lors de l\'enregistrement. Vérifiez votre connexion.');
     } finally {
       setIsSubmitting(false);

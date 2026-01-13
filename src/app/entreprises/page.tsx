@@ -161,7 +161,7 @@ export default function EntreprisesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleAddCompany = async (data: CompanyFormData) => {
-    console.log('Nouvelle entreprise ajoutée:', data);
+    // Entreprise ajoutée via Supabase dans le modal
   };
 
   const handleTransmitPack = (entreprise: typeof initialEntreprises[0]) => {
@@ -204,7 +204,6 @@ export default function EntreprisesPage() {
             </div>
             <button 
               onClick={() => {
-                console.log('Bouton cliqué : Ajouter une entreprise');
                 setIsAddModalOpen(true);
               }}
               className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors pointer-events-auto relative z-50"

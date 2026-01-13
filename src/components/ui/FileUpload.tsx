@@ -251,7 +251,7 @@ export default function FileUpload({
           <div className="mt-3 pt-3 border-t border-slate-700/50">
             <p className="text-xs text-slate-500 flex items-center gap-2">
               <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
-              Ce document sera joint à l&apos;analyse et traité par l&apos;Agent Scout
+              Ce document sera joint à l&apos;analyse et traité par le Système d'Audit
             </p>
           </div>
         </div>

@@ -31,9 +31,9 @@ export default function LandingPage() {
     setIsLoading(false);
   };
 
-  const agents = [
+  const expertiseCells = [
     {
-      name: 'Agent Scout',
+      name: 'Cellule Scout',
       icon: Search,
       color: 'from-cyan-500 to-blue-600',
       bgColor: 'bg-cyan-500/10',
@@ -43,7 +43,7 @@ export default function LandingPage() {
       features: ['Détection d\'anomalies', 'Analyse de factures', 'Benchmarking sectoriel'],
     },
     {
-      name: 'Agent Architect',
+      name: 'Cellule Architect',
       icon: Building2,
       color: 'from-violet-500 to-purple-600',
       bgColor: 'bg-violet-500/10',
@@ -53,7 +53,7 @@ export default function LandingPage() {
       features: ['Plans d\'action', 'Calcul ROI', 'Priorisation projets'],
     },
     {
-      name: 'Agent Compliance',
+      name: 'Cellule Compliance',
       icon: FileCheck,
       color: 'from-emerald-500 to-green-600',
       bgColor: 'bg-emerald-500/10',
@@ -167,7 +167,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              3 Agents IA à votre service
+              3 Cellules d'Expertise IA à votre service
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
               Une équipe d&apos;intelligences artificielles spécialisées qui travaillent ensemble pour maximiser votre rentabilité.
@@ -175,27 +175,27 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {agents.map((agent, index) => (
+            {expertiseCells.map((cell, index) => (
               <div
                 key={index}
-                className={`${agent.bgColor} border ${agent.borderColor} rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl`}
+                className={`${cell.bgColor} border ${cell.borderColor} rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl`}
               >
-                <div className={`w-16 h-16 bg-gradient-to-br ${agent.color} rounded-2xl flex items-center justify-center mb-6`}>
-                  <agent.icon className="w-8 h-8 text-white" />
+                <div className={`w-16 h-16 bg-gradient-to-br ${cell.color} rounded-2xl flex items-center justify-center mb-6`}>
+                  <cell.icon className="w-8 h-8 text-white" />
                 </div>
                 
-                <h3 className={`text-2xl font-bold ${agent.textColor} mb-3`}>
-                  {agent.name}
+                <h3 className={`text-2xl font-bold ${cell.textColor} mb-3`}>
+                  {cell.name}
                 </h3>
                 
                 <p className="text-slate-400 mb-6 leading-relaxed">
-                  {agent.description}
+                  {cell.description}
                 </p>
                 
                 <ul className="space-y-2">
-                  {agent.features.map((feature, i) => (
+                  {cell.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-2 text-slate-300 text-sm">
-                      <CheckCircle className={`w-4 h-4 ${agent.textColor}`} />
+                      <CheckCircle className={`w-4 h-4 ${cell.textColor}`} />
                       {feature}
                     </li>
                   ))}

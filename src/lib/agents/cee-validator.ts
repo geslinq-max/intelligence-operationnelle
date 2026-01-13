@@ -182,7 +182,6 @@ async function relirePuissance(
   );
   
   if (!response.ok) {
-    console.error('Erreur relecture puissance:', await response.text());
     return { puissance: null, confidence: 0 };
   }
   

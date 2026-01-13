@@ -35,20 +35,16 @@ export const supabaseStatus = {
 // Test de connexion à la base de données
 export const testConnection = async (): Promise<boolean> => {
   if (!supabaseStatus.isConfigured) {
-    console.warn('⚠️ Supabase non configuré - Variables d\'environnement manquantes');
     return false;
   }
   
   try {
     const { error } = await supabase.from('companies').select('id').limit(1);
     if (error && error.code !== 'PGRST116') {
-      console.error('❌ Erreur connexion Supabase:', error.message);
       return false;
     }
-    console.log('✅ Base de données CAPITAL ÉNERGIE connectée');
     return true;
-  } catch (err) {
-    console.error('❌ Erreur connexion Supabase:', err);
+  } catch {
     return false;
   }
 };

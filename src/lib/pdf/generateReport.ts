@@ -181,7 +181,6 @@ function enrichirSubventionsAvecCEE(actions: PlanAction[], subventions: Subventi
 }
 
 export async function generatePlanReport(data: ReportData): Promise<void> {
-  console.log('generatePlanReport called with:', data);
   
   // Validation des données entrantes
   // Enrichir les subventions avec références CEE
@@ -224,7 +223,6 @@ export async function generatePlanReport(data: ReportData): Promise<void> {
   const planUrl = safeData.planId ? `${baseUrl}/plans/${safeData.planId}` : '';
   const qrCodeDataUrl = planUrl ? await generateQRCode(planUrl) : '';
   
-  console.log('Safe data:', safeData);
   
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -820,8 +818,7 @@ export async function generatePlanReport(data: ReportData): Promise<void> {
         doc.setTextColor(...COLORS.slate400);
         doc.text('✓ Consentement RGPD obtenu', pageWidth - 65, sigY + 30);
       }
-    } catch (e) {
-      console.error('Erreur ajout signature:', e);
+    } catch {
       // Fallback: ligne de signature vide
       doc.setDrawColor(...COLORS.slate200);
       doc.line(20, sigY + 15, 100, sigY + 15);

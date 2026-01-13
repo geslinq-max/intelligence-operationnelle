@@ -66,30 +66,7 @@ let hasLoggedStatus = false;
 export function logAgentStatus(): void {
   if (hasLoggedStatus) return;
   hasLoggedStatus = true;
-  
-  console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log('║              CAPITAL ÉNERGIE - STATUT DES AGENTS             ║');
-  console.log('╚══════════════════════════════════════════════════════════════╝\n');
-  
-  const configs = [GEMINI_CONFIG, RESEND_CONFIG, SUPABASE_CONFIG];
-  
-  configs.forEach(config => {
-    if (config.mode === 'REAL') {
-      console.log(`🚀 [${config.name}] configuré en mode RÉEL`);
-    } else {
-      console.log(`🛠️  [${config.name}] configuré en mode SIMULATION`);
-    }
-  });
-  
-  console.log('');
-  
-  // Avertissement si tout est en simulation
-  const allSimulation = configs.every(c => c.mode === 'SIMULATION');
-  if (allSimulation) {
-    console.log('⚠️  Tous les agents sont en mode SIMULATION.');
-    console.log('   Créez un fichier .env.local avec vos clés API pour activer le mode RÉEL.');
-    console.log('');
-  }
+  // Logging silencieux en production
 }
 
 // ============================================================================

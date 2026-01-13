@@ -76,7 +76,6 @@ export default function VerificateurPage() {
       setValidation(result.validation);
       setAnalysisState('complete');
     } catch (err) {
-      console.error('Erreur analyse:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors de l\'analyse');
       setAnalysisState('error');
     }
@@ -604,8 +603,8 @@ export default function VerificateurPage() {
                   setIsGenerating(true);
                   try {
                     await downloadConformityPack({ extraction, validation });
-                  } catch (err) {
-                    console.error('Erreur génération pack:', err);
+                  } catch {
+                    // Erreur silencieuse - le téléchargement a échoué
                   } finally {
                     setIsGenerating(false);
                   }

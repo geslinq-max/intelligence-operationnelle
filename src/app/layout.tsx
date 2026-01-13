@@ -4,7 +4,6 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { BrandingProvider } from "@/contexts/ThemeContext";
-import DebugLogger from "@/components/debug/DebugLogger";
 import SupabaseInit from "@/components/SupabaseInit";
 
 const geistSans = Geist({
@@ -54,7 +53,6 @@ export default function RootLayout({
         </BrandingProvider>
         <ServiceWorkerRegister />
         <SupabaseInit />
-        <DebugLogger />
       </body>
     </html>
   );

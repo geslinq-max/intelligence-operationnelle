@@ -285,7 +285,6 @@ function getMimeType(file: File): string {
 // ============================================================================
 
 function getSimulatedExtraction(): ExtractionResult {
-  console.log('🛠️  [CEE-Extractor] Mode SIMULATION - Données de test utilisées');
   
   const puissance = 25;
   const kwhCumac = calculerKWhCumac(puissance);
@@ -385,7 +384,6 @@ export async function processQuote(file: File): Promise<ExtractionResult> {
     return getSimulatedExtraction();
   }
   
-  console.log('🚀 [CEE-Extractor] Mode RÉEL - Appel API Gemini');
   const apiKey = GEMINI_CONFIG.apiKey;
   
   // Convertir le fichier en base64
