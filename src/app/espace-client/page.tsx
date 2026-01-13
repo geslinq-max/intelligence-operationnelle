@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -357,7 +357,7 @@ function ChronologieConfiance({ status }: { status: DossierStatus }) {
   );
 }
 
-export default function EspaceClientPage() {
+function EspaceClientContent() {
   const searchParams = useSearchParams();
   const clientId = searchParams.get('id');
   const isModeMiroir = !!clientId;
@@ -698,5 +698,20 @@ export default function EspaceClientPage() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function EspaceClientPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Chargement de l'espace client...</p>
+        </div>
+      </div>
+    }>
+      <EspaceClientContent />
+    </Suspense>
   );
 }
