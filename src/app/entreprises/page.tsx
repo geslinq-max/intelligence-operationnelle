@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Sidebar } from '@/components';
 import AddCompanyModal, { type CompanyFormData } from '@/components/modals/AddCompanyModal';
 import { ComplianceBadgeList } from '@/components/ui/ComplianceBadge';
-import { FolderOpen, Send, Hammer } from 'lucide-react';
+import { FolderOpen, Send, Hammer, Eye } from 'lucide-react';
+import Link from 'next/link';
 import BouclierTresorerie from '@/components/ui/BouclierTresorerie';
 
 type EntrepriseStatut = 'client_actif' | 'prospect' | 'chantier_en_cours' | 'transmis';
@@ -296,6 +297,18 @@ export default function EntreprisesPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-700">
+                {/* Bouton Aperçu - Mode Miroir */}
+                {entreprise.statut === 'client_actif' && (
+                  <Link
+                    href={`/espace-client?id=${entreprise.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 border border-violet-500/30 rounded-lg text-sm transition-all"
+                    title="Aperçu de l'espace client"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span className="hidden sm:inline">👁️</span>
+                  </Link>
+                )}
                 {entreprise.statut === 'chantier_en_cours' ? (
                   <div className="flex-1 flex items-center justify-center gap-2 py-2 bg-amber-500/10 text-amber-400 rounded-lg text-sm">
                     <Hammer className="w-4 h-4" />

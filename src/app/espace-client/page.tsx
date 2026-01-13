@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Upload, 
   FileText, 
@@ -11,7 +13,9 @@ import {
   X,
   FileCheck,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft,
+  Eye
 } from 'lucide-react';
 
 type DossierStatus = 'depot' | 'analyse' | 'certification' | 'valide';
@@ -23,32 +27,108 @@ interface Dossier {
   status: DossierStatus;
   montantEconomies: number;
   montantSubventions: number;
+  clientId: string;
 }
 
-const demoData: Dossier[] = [
+interface ClientData {
+  id: string;
+  nom: string;
+  secteur: string;
+  ville: string;
+}
+
+const CLIENTS_DATA: Record<string, ClientData> = {
+  '1': { id: '1', nom: 'Métallurgie Dupont SARL', secteur: 'Métallurgie', ville: 'Lyon' },
+  '2': { id: '2', nom: 'Plasturgie Ouest', secteur: 'Plasturgie', ville: 'Nantes' },
+  '3': { id: '3', nom: 'Fonderie Martin', secteur: 'Fonderie', ville: 'Marseille' },
+  '4': { id: '4', nom: 'Textiles Innovants SA', secteur: 'Textile', ville: 'Lille' },
+  '5': { id: '5', nom: "Verrerie d'Azur", secteur: 'Verrerie', ville: 'Nice' },
+};
+
+const ALL_DOSSIERS: Dossier[] = [
   {
-    id: '1',
-    nom: 'Pompe à chaleur - Dupont Industries',
+    id: 'd1',
+    nom: 'Pompe à chaleur - Bâtiment A',
     dateDepot: '2026-01-10',
     status: 'valide',
     montantEconomies: 12500,
     montantSubventions: 8500,
+    clientId: '1',
   },
   {
-    id: '2',
-    nom: 'Isolation thermique - Garage Martin',
+    id: 'd2',
+    nom: 'Variateur de vitesse VFD-200',
+    dateDepot: '2026-01-08',
+    status: 'certification',
+    montantEconomies: 4200,
+    montantSubventions: 3100,
+    clientId: '1',
+  },
+  {
+    id: 'd3',
+    nom: 'Isolation thermique - Atelier principal',
     dateDepot: '2026-01-12',
     status: 'certification',
     montantEconomies: 6200,
     montantSubventions: 4100,
+    clientId: '2',
   },
   {
-    id: '3',
-    nom: 'Variateur de vitesse - Atelier Legrand',
-    dateDepot: '2026-01-13',
+    id: 'd4',
+    nom: 'Récupérateur de chaleur RCH-500',
+    dateDepot: '2026-01-05',
+    status: 'valide',
+    montantEconomies: 18500,
+    montantSubventions: 15200,
+    clientId: '3',
+  },
+  {
+    id: 'd5',
+    nom: 'Compresseur haute efficacité',
+    dateDepot: '2026-01-11',
     status: 'analyse',
-    montantEconomies: 8900,
-    montantSubventions: 5600,
+    montantEconomies: 9800,
+    montantSubventions: 7400,
+    clientId: '3',
+  },
+  {
+    id: 'd6',
+    nom: 'Échangeur thermique ET-350',
+    dateDepot: '2026-01-09',
+    status: 'valide',
+    montantEconomies: 11200,
+    montantSubventions: 8900,
+    clientId: '5',
+  },
+  {
+    id: 'd7',
+    nom: 'Moteur IE4 - Ligne production',
+    dateDepot: '2026-01-13',
+    status: 'depot',
+    montantEconomies: 0,
+    montantSubventions: 0,
+    clientId: '5',
+  },
+];
+
+const DEFAULT_DOSSIERS: Dossier[] = [
+  {
+    id: 'default1',
+    nom: 'Pompe à chaleur - Démo',
+    dateDepot: '2026-01-10',
+    status: 'valide',
+    montantEconomies: 12500,
+    montantSubventions: 8500,
+    clientId: 'default',
+  },
+  {
+    id: 'default2',
+    nom: 'Isolation thermique - Démo',
+    dateDepot: '2026-01-12',
+    status: 'certification',
+    montantEconomies: 6200,
+    montantSubventions: 4100,
+    clientId: 'default',
   },
 ];
 
@@ -166,7 +246,24 @@ function ChronologieConfiance({ status }: { status: DossierStatus }) {
 }
 
 export default function EspaceClientPage() {
-  const [dossiers, setDossiers] = useState<Dossier[]>(demoData);
+  const searchParams = useSearchParams();
+  const clientId = searchParams.get('id');
+  const isModeMiroir = !!clientId;
+  
+  const clientInfo = clientId ? CLIENTS_DATA[clientId] : null;
+  
+  const initialDossiers = useMemo(() => {
+    if (clientId) {
+      return ALL_DOSSIERS.filter(d => d.clientId === clientId);
+    }
+    return DEFAULT_DOSSIERS;
+  }, [clientId]);
+  
+  const [dossiers, setDossiers] = useState<Dossier[]>(initialDossiers);
+  
+  useEffect(() => {
+    setDossiers(initialDossiers);
+  }, [initialDossiers]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -208,6 +305,7 @@ export default function EspaceClientPage() {
       status: 'depot',
       montantEconomies: 0,
       montantSubventions: 0,
+      clientId: clientId || 'default',
     };
 
     setDossiers(prev => [newDossier, ...prev]);
@@ -224,6 +322,27 @@ export default function EspaceClientPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Bannière Mode Consultation (patron uniquement) */}
+      {isModeMiroir && clientInfo && (
+        <div className="bg-gradient-to-r from-amber-600/90 to-orange-600/90 border-b border-amber-500">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">
+                ⚠️ Mode Consultation : Vous visualisez l'espace de <strong>{clientInfo.nom}</strong>
+              </span>
+            </div>
+            <Link
+              href="/entreprises"
+              className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Retour
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -233,7 +352,9 @@ export default function EspaceClientPage() {
             </div>
             <div>
               <h1 className="text-white font-bold text-lg">CAPITAL ÉNERGIE</h1>
-              <p className="text-slate-500 text-xs">Espace Partenaire</p>
+              <p className="text-slate-500 text-xs">
+                {isModeMiroir && clientInfo ? `Espace de ${clientInfo.nom}` : 'Espace Partenaire'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
