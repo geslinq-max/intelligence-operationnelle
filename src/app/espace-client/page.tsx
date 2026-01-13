@@ -20,6 +20,16 @@ import {
 
 type DossierStatus = 'depot' | 'analyse' | 'certification' | 'valide';
 
+type DocumentType = 'devis' | 'note_technique' | 'attestation_honneur' | 'photo_avant' | 'photo_apres';
+
+const DOCUMENTS_REQUIS: { key: DocumentType; label: string }[] = [
+  { key: 'devis', label: 'Devis signé' },
+  { key: 'note_technique', label: 'Note technique' },
+  { key: 'attestation_honneur', label: 'Attestation sur l\'honneur' },
+  { key: 'photo_avant', label: 'Photo avant travaux' },
+  { key: 'photo_apres', label: 'Photo après travaux' },
+];
+
 interface Dossier {
   id: string;
   nom: string;
@@ -28,6 +38,7 @@ interface Dossier {
   montantEconomies: number;
   montantSubventions: number;
   clientId: string;
+  documents: Partial<Record<DocumentType, boolean>>;
 }
 
 interface ClientData {
@@ -54,6 +65,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 12500,
     montantSubventions: 8500,
     clientId: '1',
+    documents: { devis: true, note_technique: true, attestation_honneur: true, photo_avant: true, photo_apres: true },
   },
   {
     id: 'd2',
@@ -63,6 +75,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 4200,
     montantSubventions: 3100,
     clientId: '1',
+    documents: { devis: true, note_technique: true, attestation_honneur: true, photo_avant: true, photo_apres: false },
   },
   {
     id: 'd3',
@@ -72,6 +85,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 6200,
     montantSubventions: 4100,
     clientId: '2',
+    documents: { devis: true, note_technique: true, attestation_honneur: false, photo_avant: true, photo_apres: false },
   },
   {
     id: 'd4',
@@ -81,6 +95,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 18500,
     montantSubventions: 15200,
     clientId: '3',
+    documents: { devis: true, note_technique: true, attestation_honneur: true, photo_avant: true, photo_apres: true },
   },
   {
     id: 'd5',
@@ -90,6 +105,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 9800,
     montantSubventions: 7400,
     clientId: '3',
+    documents: { devis: true, note_technique: false, attestation_honneur: false, photo_avant: false, photo_apres: false },
   },
   {
     id: 'd6',
@@ -99,6 +115,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 11200,
     montantSubventions: 8900,
     clientId: '5',
+    documents: { devis: true, note_technique: true, attestation_honneur: true, photo_avant: true, photo_apres: true },
   },
   {
     id: 'd7',
@@ -108,6 +125,7 @@ const ALL_DOSSIERS: Dossier[] = [
     montantEconomies: 0,
     montantSubventions: 0,
     clientId: '5',
+    documents: { devis: true, note_technique: false, attestation_honneur: false, photo_avant: false, photo_apres: false },
   },
 ];
 
@@ -120,6 +138,7 @@ const DEFAULT_DOSSIERS: Dossier[] = [
     montantEconomies: 12500,
     montantSubventions: 8500,
     clientId: 'default',
+    documents: { devis: true, note_technique: true, attestation_honneur: true, photo_avant: true, photo_apres: true },
   },
   {
     id: 'default2',
@@ -129,8 +148,101 @@ const DEFAULT_DOSSIERS: Dossier[] = [
     montantEconomies: 6200,
     montantSubventions: 4100,
     clientId: 'default',
+    documents: { devis: true, note_technique: true, attestation_honneur: false, photo_avant: true, photo_apres: false },
   },
 ];
+
+function calculerSanteAdministrative(documents: Partial<Record<DocumentType, boolean>>) {
+  const total = DOCUMENTS_REQUIS.length;
+  const presentsCount = DOCUMENTS_REQUIS.filter(d => documents[d.key]).length;
+  const pourcentage = Math.round((presentsCount / total) * 100);
+  const manquants = DOCUMENTS_REQUIS.filter(d => !documents[d.key]);
+  
+  return {
+    pourcentage,
+    presentsCount,
+    total,
+    manquants,
+    estComplet: manquants.length === 0,
+  };
+}
+
+function getBarreColor(pourcentage: number): { bg: string; glow: string } {
+  if (pourcentage >= 71) {
+    return { 
+      bg: 'bg-gradient-to-r from-emerald-500 to-emerald-400', 
+      glow: 'shadow-lg shadow-emerald-500/30' 
+    };
+  } else if (pourcentage >= 31) {
+    return { 
+      bg: 'bg-gradient-to-r from-orange-500 to-amber-400', 
+      glow: '' 
+    };
+  } else {
+    return { 
+      bg: 'bg-gradient-to-r from-red-600 to-red-400', 
+      glow: '' 
+    };
+  }
+}
+
+function BarreSanteAdministrative({ documents }: { documents: Partial<Record<DocumentType, boolean>> }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const sante = calculerSanteAdministrative(documents);
+  const colors = getBarreColor(sante.pourcentage);
+
+  return (
+    <div className="mt-3 relative">
+      {/* Barre de progression */}
+      <div 
+        className="relative h-2 bg-slate-700/50 rounded-full overflow-hidden cursor-help"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${colors.bg} ${colors.glow}`}
+          style={{ width: `${sante.pourcentage}%` }}
+        />
+      </div>
+
+      {/* Libellé dynamique */}
+      <div className="flex items-center justify-between mt-1.5">
+        <span className={`text-xs font-medium ${
+          sante.estComplet ? 'text-emerald-400' : 
+          sante.pourcentage >= 31 ? 'text-amber-400' : 'text-red-400'
+        }`}>
+          {sante.estComplet 
+            ? '✅ Dossier Complet' 
+            : `⚠️ Manque ${sante.manquants.length} document${sante.manquants.length > 1 ? 's' : ''}`
+          }
+        </span>
+        <span className="text-xs text-slate-500">
+          {sante.presentsCount}/{sante.total} pièces
+        </span>
+      </div>
+
+      {/* Tooltip avec pièces manquantes */}
+      {showTooltip && sante.manquants.length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-2 z-50">
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
+            <p className="text-xs text-slate-400 mb-2 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Pièces manquantes (Système d'Audit)
+            </p>
+            <ul className="space-y-1">
+              {sante.manquants.map((doc) => (
+                <li key={doc.key} className="text-xs text-red-400 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                  {doc.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function useCountAnimation(target: number, duration: number = 2500) {
   const [count, setCount] = useState<number>(0);
@@ -306,6 +418,7 @@ export default function EspaceClientPage() {
       montantEconomies: 0,
       montantSubventions: 0,
       clientId: clientId || 'default',
+      documents: { devis: true, note_technique: false, attestation_honneur: false, photo_avant: false, photo_apres: false },
     };
 
     setDossiers(prev => [newDossier, ...prev]);
@@ -549,6 +662,9 @@ export default function EspaceClientPage() {
                             </span>
                           </div>
                         )}
+                        
+                        {/* Barre de Santé Administrative */}
+                        <BarreSanteAdministrative documents={dossier.documents} />
                       </div>
                     </div>
                   </div>
