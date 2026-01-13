@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { 
   BarChart3, 
@@ -633,6 +634,14 @@ export default function GestionPage() {
             Le MRR (Monthly Recurring Revenue) est calculé sur la base des forfaits actifs. Le salaire net estimé applique un coefficient de 0.78.
           </p>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-8 pt-6 border-t border-slate-800">
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <span>Gestion des Dossiers CEE</span>
+            <span>{APP_VERSION_FULL}</span>
+          </div>
+        </footer>
       </main>
     </div>
   );

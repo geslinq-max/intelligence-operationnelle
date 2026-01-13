@@ -60,7 +60,7 @@ export default function MentionsLegales() {
             <h2 className="text-xl font-semibold text-white mb-4">3. Propriété intellectuelle</h2>
             <p>
               L&apos;ensemble des éléments constituant la plateforme CAPITAL ÉNERGIE 
-              (textes, graphiques, logiciels, images, algorithmes d&apos;analyse, agents IA) 
+              (textes, graphiques, logiciels, images, algorithmes d&apos;analyse, Cellules d'Expertise IA) 
               sont protégés par les lois relatives à la propriété intellectuelle.
             </p>
             <p className="mt-4">

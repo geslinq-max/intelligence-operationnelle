@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { 
   Search,
@@ -661,7 +662,7 @@ export default function ProspectionPage() {
         <footer className="mt-8 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>{filteredProspects.length} prospect(s) affiché(s)</span>
-            <span>v1.0.0 - CAPITAL ÉNERGIE</span>
+            <span>{APP_VERSION_FULL}</span>
           </div>
         </footer>
       </main>

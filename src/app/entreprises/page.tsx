@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import AddCompanyModal, { type CompanyFormData } from '@/components/modals/AddCompanyModal';
 import { ComplianceBadgeList } from '@/components/ui/ComplianceBadge';
@@ -347,6 +348,14 @@ export default function EntreprisesPage() {
             </div>
           ))}
         </div>
+
+        {/* Footer */}
+        <footer className="mt-8 pt-6 border-t border-slate-800">
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <span>Gestion des Artisans Partenaires</span>
+            <span>{APP_VERSION_FULL}</span>
+          </div>
+        </footer>
       </main>
 
       {/* Modal Ajouter Entreprise */}

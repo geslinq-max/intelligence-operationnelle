@@ -126,7 +126,7 @@ export default function LandingPage() {
           {/* Sous-titre */}
           <p className="text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
             Identifiez vos gisements d&apos;économies d&apos;énergie et activez vos aides d&apos;État en 5 minutes.
-            Nos agents IA analysent, optimisent et financent vos projets.
+            Nos Cellules d'Expertise IA analysent, optimisent et financent vos projets.
           </p>
 
           {/* CTA Buttons */}
@@ -162,7 +162,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Agents Section */}
+      {/* Cellules d'Expertise Section */}
       <section className="py-20 px-6 bg-slate-900/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">

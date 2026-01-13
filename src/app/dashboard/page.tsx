@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { APP_VERSION_FULL, FOOTER_LABELS } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { Zap, Loader2, FolderOpen, Euro } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
@@ -121,7 +122,7 @@ export default function Dashboard() {
         <footer className="mt-8 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>Système opérationnel</span>
-            <span>v1.0.0 - CAPITAL ÉNERGIE</span>
+            <span>{APP_VERSION_FULL}</span>
           </div>
         </footer>
       </main>

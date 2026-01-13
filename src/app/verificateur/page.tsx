@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { 
   Upload, 
@@ -639,7 +640,7 @@ export default function VerificateurPage() {
         <footer className="mt-8 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>Vérificateur IA - Validation & Certification</span>
-            <span>v2.0.0 - CAPITAL ÉNERGIE</span>
+            <span>{APP_VERSION_FULL}</span>
           </div>
         </footer>
       </main>
