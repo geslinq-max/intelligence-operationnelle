@@ -394,9 +394,15 @@ function BarreSanteAdministrative({ documents, dossierNom, onDocumentDepose }: B
         </span>
       </div>
 
-      {/* Tooltip avec pièces manquantes */}
+      {/* Tooltip avec pièces manquantes - pointer-events: none pour éviter scintillement */}
       {showTooltip && sante.manquants.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 z-50">
+        <div 
+          className="absolute left-0 right-0 z-50"
+          style={{ 
+            top: 'calc(100% + 10px)',
+            pointerEvents: 'none'
+          }}
+        >
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
             <p className="text-xs text-slate-400 mb-2 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
