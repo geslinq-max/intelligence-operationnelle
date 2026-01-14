@@ -27,22 +27,31 @@ import {
 
 type ForfaitNiveau = 'essentiel' | 'serenite' | 'expert';
 
+interface Comparaison {
+  label: string;
+  avant: string;
+  apres: string;
+}
+
 interface Forfait {
   id: ForfaitNiveau;
   nom: string;
   slogan: string;
   prix: number;
   periode: string;
-  description: string;
-  features: string[];
+  volume: string;
+  comparaisons: Comparaison[];
+  verdict: string;
+  gainNet: string;
   icon: React.ReactNode;
   popular?: boolean;
   buttonColor: string;
   badgeColor: string;
+  accentColor: string;
 }
 
 // ============================================================================
-// DONNÉES DES FORFAITS
+// DONNÉES DES FORFAITS - STRUCTURE AVANT/APRÈS
 // ============================================================================
 
 const forfaits: Forfait[] = [
@@ -52,18 +61,18 @@ const forfaits: Forfait[] = [
     slogan: 'Sécurisez vos premiers chantiers',
     prix: 149,
     periode: '/mois HT',
-    description: 'L\'accès fondamental au Système d\'Audit pour démarrer sereinement.',
-    features: [
-      '3 dossiers CEE/mois',
-      'Vitesse Flash ⚡',
-      '1 accès utilisateur',
-      'Rapports PDF personnalisés',
-      'Support par email',
-      'Tableau de bord complet',
+    volume: '3 dossiers/mois',
+    comparaisons: [
+      { label: 'Temps', avant: '4h30 de paperasse', apres: '30 secondes de Scan Flash' },
+      { label: 'Coût', avant: '450 € d\'audits externes', apres: '149 € d\'abonnement' },
+      { label: 'Sécurité', avant: 'Trésorerie à risque', apres: '100 000 € de primes protégés' },
     ],
+    verdict: 'Rentabilisé dès le 1er dossier',
+    gainNet: '+301 €/mois',
     icon: <Shield className="w-8 h-8" />,
-    buttonColor: 'bg-slate-600 hover:bg-slate-500',
-    badgeColor: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+    buttonColor: 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500',
+    badgeColor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    accentColor: 'text-blue-400',
   },
   {
     id: 'serenite',
@@ -71,20 +80,19 @@ const forfaits: Forfait[] = [
     slogan: 'L\'audit prioritaire pour votre croissance',
     prix: 349,
     periode: '/mois HT',
-    description: 'Validation accélérée par la Cellule d\'Expertise pour maximiser vos opportunités.',
-    features: [
-      '15 dossiers CEE/mois',
-      'Vitesse Flash ⚡',
-      '2 accès utilisateurs',
-      'Rapports PDF personnalisés',
-      'Support prioritaire',
-      'Tableau de bord avancé',
-      'Alertes subventions en temps réel',
+    volume: '15 dossiers/mois',
+    comparaisons: [
+      { label: 'Temps', avant: '22h30 de paperasse', apres: '3 minutes de Scan Flash total' },
+      { label: 'Coût', avant: '2 250 € de gestion classique', apres: '349 € d\'abonnement' },
+      { label: 'Sécurité', avant: 'Trésorerie bloquée', apres: '500 000 € de primes protégés' },
     ],
+    verdict: '3 jours de vie récupérés',
+    gainNet: '+1 901 €/mois',
     icon: <Zap className="w-8 h-8" />,
     popular: true,
     buttonColor: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500',
     badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    accentColor: 'text-emerald-400',
   },
   {
     id: 'expert',
@@ -92,20 +100,18 @@ const forfaits: Forfait[] = [
     slogan: 'Puissance maximale pour ETI/PME',
     prix: 860,
     periode: '/mois HT',
-    description: 'Solution complète avec accompagnement personnalisé par le Fondateur.',
-    features: [
-      'Dossiers CEE illimités',
-      'Vitesse Flash ⚡',
-      'Accès utilisateurs illimités',
-      'Rapports PDF personnalisés',
-      'Accompagnement personnalisé par le Fondateur',
-      'Formation équipe incluse',
-      'Audit trimestriel stratégique',
-      'Support stratégique dédié',
+    volume: 'Dossiers illimités',
+    comparaisons: [
+      { label: 'Service', avant: 'Gestion administrative interne', apres: 'Délégation totale au Fondateur' },
+      { label: 'Temps', avant: 'Charge mentale constante', apres: 'Zéro effort (Gestion totale)' },
+      { label: 'Coût', avant: 'Salaire dédié (2 500 €+)', apres: '860 € d\'abonnement' },
     ],
+    verdict: 'Croissance illimitée',
+    gainNet: '+1 640 €+/mois',
     icon: <Crown className="w-8 h-8" />,
     buttonColor: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500',
     badgeColor: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
+    accentColor: 'text-violet-400',
   },
 ];
 
@@ -296,16 +302,19 @@ function ConfirmationModal({
                 {forfait.slogan}
               </p>
               
-              <div className="bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
-                <p className="text-sm text-slate-300 mb-3">Ce forfait inclut :</p>
+              <div className="bg-slate-800/50 rounded-xl p-4 mb-4 text-left">
+                <p className="text-sm text-slate-300 mb-3">📁 {forfait.volume}</p>
                 <ul className="space-y-2">
-                  {forfait.features.slice(0, 4).map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
-                      <Check className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
+                  {forfait.comparaisons.map((comp, i) => (
+                    <li key={i} className="text-sm">
+                      <span className="text-slate-500 line-through text-xs">{comp.avant}</span>
+                      <span className={`block ${forfait.accentColor} font-semibold`}>→ {comp.apres}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 mb-4 text-center">
+                <p className="text-emerald-400 font-bold">{forfait.gainNet}</p>
               </div>
 
               <div className="flex gap-3">
@@ -331,7 +340,7 @@ function ConfirmationModal({
 }
 
 // ============================================================================
-// COMPOSANT CARTE FORFAIT
+// COMPOSANT CARTE FORFAIT - STRUCTURE AVANT/APRÈS
 // ============================================================================
 
 function ForfaitCard({ 
@@ -360,40 +369,51 @@ function ForfaitCard({
       )}
 
       {/* Header */}
-      <div className="text-center mb-6 pt-2">
-        <div className={`w-14 h-14 ${forfait.badgeColor} rounded-xl flex items-center justify-center mx-auto mb-4 border`}>
+      <div className="text-center mb-4 pt-2">
+        <div className={`w-14 h-14 ${forfait.badgeColor} rounded-xl flex items-center justify-center mx-auto mb-3 border`}>
           {forfait.icon}
         </div>
         <h3 className="text-xl font-bold text-white mb-1">{forfait.nom}</h3>
         <p className="text-slate-400 text-sm">{forfait.slogan}</p>
       </div>
 
-      {/* Prix */}
-      <div className="text-center mb-6">
+      {/* Prix & Volume */}
+      <div className="text-center mb-4">
         <p className="text-4xl font-bold text-white">
           {forfait.prix} €
           <span className="text-lg text-slate-400 font-normal">{forfait.periode}</span>
         </p>
-        <p className="text-emerald-400 text-sm font-medium mt-2">✓ Rentabilisé dès le 1er dossier certifié</p>
-        <p className="text-slate-500 text-xs mt-1">Sans engagement</p>
+        <p className={`${forfait.accentColor} text-sm font-semibold mt-2`}>
+          📁 {forfait.volume}
+        </p>
       </div>
 
-      {/* Description */}
-      <p className="text-slate-400 text-sm text-center mb-6">
-        {forfait.description}
-      </p>
-
-      {/* Features */}
-      <ul className="space-y-3 flex-1 mb-6">
-        {forfait.features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-3">
-            <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-              forfait.popular ? 'text-emerald-400' : 'text-slate-500'
-            }`} />
-            <span className="text-slate-300 text-sm">{feature}</span>
-          </li>
+      {/* Comparaisons AVANT/APRÈS */}
+      <div className="space-y-3 flex-1 mb-4">
+        {forfait.comparaisons.map((comp, index) => (
+          <div key={index} className="bg-slate-800/50 rounded-lg p-3">
+            <p className="text-slate-500 text-xs font-semibold uppercase mb-2">{comp.label}</p>
+            <div className="space-y-1">
+              <p className="text-slate-500 text-sm line-through">
+                ❌ {comp.avant}
+              </p>
+              <p className={`${forfait.accentColor} text-sm font-bold`}>
+                ✓ {comp.apres}
+              </p>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
+
+      {/* Verdict & Gain */}
+      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-4 text-center">
+        <p className="text-emerald-400 text-sm font-medium mb-1">
+          🎯 {forfait.verdict}
+        </p>
+        <p className="text-emerald-400 text-2xl font-bold">
+          {forfait.gainNet}
+        </p>
+      </div>
 
       {/* CTA Button */}
       <button
@@ -520,8 +540,16 @@ export default function TarifsPage() {
           </div>
         </div>
 
+        {/* Mention légale ROI */}
+        <div className="max-w-4xl mx-auto mt-8">
+          <p className="text-center text-xs text-slate-500 italic px-4">
+            * Estimations basées sur un coût horaire de 45 € et 150 € de frais d'audit externe par dossier. 
+            ROI dépendant de votre volume réel.
+          </p>
+        </div>
+
         {/* Footer */}
-        <footer className="mt-8 pt-6 border-t border-slate-800">
+        <footer className="mt-6 pt-6 border-t border-slate-800">
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>Forfaits & Abonnements</span>
             <span>{APP_VERSION_FULL}</span>
