@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { sendActivationEmail } from '@/lib/email/send-activation-email';
 
 function getStripeClient() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -84,19 +85,46 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const { forfaitId, forfaitName } = session.metadata || {};
   const customerEmail = session.customer_email;
+  const customerName = session.customer_details?.name || null;
+  const amountTotal = session.amount_total || 0;
+  const paymentStatus = session.payment_status;
 
   console.log('✅ Paiement réussi!');
   console.log(`   📧 Client: ${customerEmail}`);
+  console.log(`   👤 Nom: ${customerName}`);
   console.log(`   📦 Forfait: ${forfaitName} (${forfaitId})`);
-  console.log(`   💰 Montant: ${(session.amount_total || 0) / 100} €`);
+  console.log(`   💰 Montant: ${amountTotal / 100} €`);
+  console.log(`   📋 Statut: ${paymentStatus}`);
 
-  // TODO: Implémenter la logique d'activation
-  // 1. Mettre à jour le statut utilisateur à "Actif"
-  // 2. Débloquer l'accès au Scanner Flash correspondant
-  // 3. Envoyer notification interne de succès
+  // Vérifier que le paiement est validé (statut "paid")
+  if (paymentStatus !== 'paid') {
+    console.log('⏳ Paiement en attente de validation, email différé');
+    return;
+  }
 
-  // Notification interne (simulation)
+  // Vérifier les données requises
+  if (!customerEmail || !forfaitId) {
+    console.error('❌ Données manquantes pour l\'email d\'activation');
+    return;
+  }
+
+  // 1. Envoyer l'email d'activation (Scanner Flash prêt)
+  const emailResult = await sendActivationEmail(
+    customerEmail,
+    customerName,
+    forfaitId,
+    amountTotal
+  );
+
+  if (emailResult.success) {
+    console.log(`📧 Email d'activation envoyé (${emailResult.mode}): ${emailResult.emailId}`);
+  } else {
+    console.error('❌ Échec envoi email d\'activation:', emailResult.message);
+  }
+
+  // 2. Notification interne de succès
   console.log('🔔 Notification: Nouvel abonnement activé!');
+  console.log(`   → Scanner Flash débloqué pour ${customerEmail}`);
 }
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
