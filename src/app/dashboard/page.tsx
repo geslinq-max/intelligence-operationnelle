@@ -17,11 +17,14 @@ import {
   Activity,
   Shield,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSubscription, SUBSCRIPTION_TIERS, type SubscriptionTier } from '@/contexts/SubscriptionContext';
 
 // ============================================================================
 // DONNÉES RÉELLES - ESPACE ARTISAN (POST-SANITIZATION)
@@ -50,16 +53,76 @@ const STATUT_CONFIG = {
 // COMPOSANTS
 // ============================================================================
 
+// Quota de Liberté - Barre de progression des dossiers
+function QuotaLiberte({ used, total, isUnlimited }: { used: number; total: number; isUnlimited: boolean }) {
+  if (isUnlimited) {
+    return (
+      <div className="bg-slate-800/50 border border-violet-500/30 rounded-xl p-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Unlock className="w-4 h-4 text-violet-400" />
+            <span className="text-slate-300 text-sm">Dossiers analysés par le Scanner Flash</span>
+          </div>
+          <span className="text-violet-400 font-semibold text-sm">Usage Illimité</span>
+        </div>
+      </div>
+    );
+  }
+
+  const percentage = Math.min((used / total) * 100, 100);
+  const isAtLimit = used >= total;
+
+  return (
+    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          {isAtLimit ? (
+            <Lock className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+          )}
+          <span className="text-slate-300 text-sm">Dossiers analysés par le Scanner Flash</span>
+        </div>
+        <span className={`font-semibold text-sm ${isAtLimit ? 'text-amber-400' : 'text-emerald-400'}`}>
+          {used} / {total}
+        </span>
+      </div>
+      {/* Barre de progression fine - fond sombre, remplissage vert émeraude */}
+      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
+        <div 
+          className={`h-full rounded-full transition-all duration-500 ${
+            isAtLimit ? 'bg-amber-500' : 'bg-emerald-500'
+          }`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      {isAtLimit && (
+        <p className="text-amber-400 text-xs mt-2">
+          Votre quota actuel de Scanner Flash est atteint
+        </p>
+      )}
+    </div>
+  );
+}
+
 // Drop Zone - Zone de Dépôt Premier Scan (Style Soft Contrast)
-function DropZonePremierScan({ onFileSelect }: { onFileSelect: () => void }) {
+interface DropZoneProps {
+  onFileSelect: () => void;
+  isQuotaReached: boolean;
+  nextTier: SubscriptionTier | null;
+}
+
+function DropZonePremierScan({ onFileSelect, isQuotaReached, nextTier }: DropZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const router = useRouter();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(true);
-  }, []);
+    if (!isQuotaReached) {
+      setIsDragOver(true);
+    }
+  }, [isQuotaReached]);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -69,17 +132,52 @@ function DropZonePremierScan({ onFileSelect }: { onFileSelect: () => void }) {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    setIsAnalyzing(true);
     
-    // Simulation analyse puis redirection
+    if (isQuotaReached) return;
+    
+    setIsAnalyzing(true);
     setTimeout(() => {
       router.push('/verificateur');
     }, 1500);
-  }, [router]);
+  }, [router, isQuotaReached]);
 
   const handleClick = () => {
-    router.push('/verificateur');
+    if (isQuotaReached) {
+      // Rediriger vers tarifs avec upsell
+      router.push(`/tarifs?upgrade=${nextTier || 'serenite'}`);
+    } else {
+      router.push('/verificateur');
+    }
   };
+
+  // Zone grisée si quota atteint
+  if (isQuotaReached) {
+    return (
+      <div
+        onClick={handleClick}
+        className="relative cursor-pointer rounded-2xl p-8 lg:p-12 mb-8 border-2 border-dashed border-slate-700 bg-slate-900/50"
+      >
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-2xl flex items-center justify-center">
+            <Lock className="w-8 h-8 text-slate-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-slate-400 mb-2">
+            Quota Scanner Flash atteint
+          </h3>
+          <p className="text-slate-500 mb-6">
+            Votre quota actuel de Scanner Flash est atteint
+          </p>
+          <button
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium rounded-xl transition-all shadow-lg"
+          >
+            <Unlock className="w-5 h-5" />
+            Débloquer plus de dossiers
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -331,6 +429,26 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [dossiersEnCours, setDossiersEnCours] = useState(0);
   const [commissionsAPercevoir, setCommissionsAPercevoir] = useState(0);
+  const [dossiersUtilises, setDossiersUtilises] = useState(2); // Simulation: 2 dossiers utilisés ce mois
+  
+  // Récupération du forfait actuel
+  const { tier, config } = useSubscription();
+  
+  // Calcul des quotas selon le forfait
+  const maxDossiers = config.features.maxDossiers;
+  const isUnlimited = maxDossiers === 'illimite';
+  const quotaTotal = typeof maxDossiers === 'number' ? maxDossiers : 0;
+  const isQuotaReached = !isUnlimited && dossiersUtilises >= quotaTotal;
+  
+  // Déterminer le forfait supérieur pour l'upsell
+  const getNextTier = (): SubscriptionTier | null => {
+    const tierOrder: SubscriptionTier[] = ['prospect', 'essentiel', 'serenite', 'expert'];
+    const currentIndex = tierOrder.indexOf(tier);
+    if (currentIndex < tierOrder.length - 1) {
+      return tierOrder[currentIndex + 1];
+    }
+    return null;
+  };
 
   useEffect(() => {
     loadStats();
@@ -395,8 +513,19 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Quota de Liberté - Barre de progression */}
+        <QuotaLiberte 
+          used={dossiersUtilises} 
+          total={quotaTotal} 
+          isUnlimited={isUnlimited} 
+        />
+
         {/* Drop Zone Premier Scan */}
-        <DropZonePremierScan onFileSelect={() => {}} />
+        <DropZonePremierScan 
+          onFileSelect={() => {}} 
+          isQuotaReached={isQuotaReached}
+          nextTier={getNextTier()}
+        />
 
         {/* Stats rapides avec Impact Financier en premier */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
