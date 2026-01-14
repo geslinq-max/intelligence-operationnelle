@@ -388,55 +388,45 @@ function ForfaitCard({
         </p>
       </div>
 
-      {/* Comparaisons AVANT/APRÈS - Style ULTRA-GLOW & OBSCURE */}
+      {/* Comparaisons AVANT/APRÈS - Style Balanced Premium */}
       <div className="space-y-3 flex-1 mb-4">
         {forfait.comparaisons.map((comp, index) => (
           <div key={index} className="bg-slate-800/50 rounded-lg p-3">
             <p className="text-slate-500 text-xs font-semibold uppercase mb-2">{comp.label}</p>
             <div className="space-y-2">
-              {/* Style AVANT: Le Passé Obscur - gris foncé #4B5563, opacité 30%, barré rouge 2px */}
+              {/* Style AVANT: Gris froid, lisible mais secondaire */}
               <p 
-                className="text-sm"
+                className="text-sm line-through"
                 style={{ 
-                  color: '#4B5563',
-                  opacity: 0.3,
-                  textDecoration: 'line-through',
-                  textDecorationColor: '#EF4444',
-                  textDecorationThickness: '2px'
+                  color: '#9CA3AF',
+                  opacity: 0.6,
+                  textDecorationColor: '#9CA3AF'
                 }}
               >
-                <span style={{ filter: 'saturate(0.2) brightness(0.6)' }}>❌</span> {comp.avant}
+                ❌ {comp.avant}
               </p>
-              {/* Style APRÈS: Le Futur Radioactif - blanc pur, glow multicouche intense */}
+              {/* Style APRÈS: Blanc pur, propre, voile vert subtil */}
               <p 
-                className="text-sm font-bold"
+                className="text-sm rounded px-2 py-1 -mx-2"
                 style={{ 
                   color: '#FFFFFF',
-                  textShadow: '0 0 10px #22C55E, 0 0 20px #22C55E, 0 0 40px rgba(34, 197, 94, 0.5)'
+                  fontWeight: 600,
+                  background: 'rgba(34, 197, 94, 0.05)'
                 }}
               >
-                <span style={{ filter: 'drop-shadow(0 0 8px #22C55E) brightness(1.2)' }}>✅</span> {comp.apres}
+                ✅ {comp.apres}
               </p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Verdict & Gain - Style Lumineux */}
-      <div 
-        className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-4 text-center"
-        style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.15)' }}
-      >
+      {/* Verdict & Gain - Style Premium Clean */}
+      <div className="bg-transparent border border-emerald-500 rounded-xl p-4 mb-4 text-center">
         <p className="text-emerald-400 text-sm font-medium mb-1">
           🎯 {forfait.verdict}
         </p>
-        <p 
-          className="text-2xl font-bold"
-          style={{ 
-            color: '#22C55E',
-            textShadow: '0 0 10px #22C55E, 0 0 20px #22C55E'
-          }}
-        >
+        <p className="text-emerald-500 text-2xl font-bold">
           📈 {forfait.gainNet}
         </p>
       </div>
