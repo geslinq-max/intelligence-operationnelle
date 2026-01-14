@@ -388,30 +388,29 @@ function ForfaitCard({
         </p>
       </div>
 
-      {/* Comparaisons AVANT/APRÈS - Style Balanced Premium */}
+      {/* Comparaisons AVANT/APRÈS - Style Soft & Professional */}
       <div className="space-y-3 flex-1 mb-4">
         {forfait.comparaisons.map((comp, index) => (
           <div key={index} className="bg-slate-800/50 rounded-lg p-3">
             <p className="text-slate-500 text-xs font-semibold uppercase mb-2">{comp.label}</p>
             <div className="space-y-2">
-              {/* Style AVANT: Gris froid, lisible mais secondaire */}
+              {/* Style AVANT: Gris doux, haute visibilité, biffure discrète */}
               <p 
                 className="text-sm line-through"
                 style={{ 
                   color: '#9CA3AF',
-                  opacity: 0.6,
+                  opacity: 0.8,
                   textDecorationColor: '#9CA3AF'
                 }}
               >
                 ❌ {comp.avant}
               </p>
-              {/* Style APRÈS: Blanc pur, propre, voile vert subtil */}
+              {/* Style APRÈS: Blanc net, clarté professionnelle */}
               <p 
-                className="text-sm rounded px-2 py-1 -mx-2"
+                className="text-sm"
                 style={{ 
                   color: '#FFFFFF',
-                  fontWeight: 600,
-                  background: 'rgba(34, 197, 94, 0.05)'
+                  fontWeight: 500
                 }}
               >
                 ✅ {comp.apres}
@@ -421,9 +420,9 @@ function ForfaitCard({
         ))}
       </div>
 
-      {/* Verdict & Gain - Style Premium Clean */}
-      <div className="bg-transparent border border-emerald-500 rounded-xl p-4 mb-4 text-center">
-        <p className="text-emerald-400 text-sm font-medium mb-1">
+      {/* Verdict & Gain - Fond sombre, bordure verte fine */}
+      <div className="bg-slate-900 border border-emerald-500 rounded-xl p-4 mb-4 text-center">
+        <p className="text-slate-400 text-sm font-medium mb-1">
           🎯 {forfait.verdict}
         </p>
         <p className="text-emerald-500 text-2xl font-bold">
