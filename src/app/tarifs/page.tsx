@@ -474,12 +474,16 @@ function TarifsPageContent() {
   useEffect(() => {
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
+    const sessionId = searchParams.get('session_id');
     
     if (success === 'true') {
-      // Paiement réussi - activer le forfait
+      // Paiement réussi - activer le forfait et rediriger vers dashboard
       setShowSuccess(true);
-      // Nettoyer l'URL
-      router.replace('/tarifs');
+      
+      // Redirection automatique vers le dashboard après 2 secondes
+      setTimeout(() => {
+        router.push('/dashboard?activated=true');
+      }, 2000);
     }
     
     if (canceled === 'true') {
@@ -522,7 +526,20 @@ function TarifsPageContent() {
       }
     } catch (error) {
       console.error('Erreur paiement:', error);
-      setPaymentError('Paiement refusé, veuillez réessayer.');
+      // Traduction des erreurs Stripe en français
+      const errorMessage = error instanceof Error ? error.message : 'Erreur de paiement';
+      const frenchErrors: Record<string, string> = {
+        'card_declined': 'Carte refusée. Veuillez vérifier vos informations.',
+        'insufficient_funds': 'Fonds insuffisants sur votre carte.',
+        'expired_card': 'Carte expirée. Veuillez utiliser une carte valide.',
+        'Your card was declined': 'Votre carte a été refusée.',
+        'Payment failed': 'Le paiement a échoué. Veuillez réessayer.',
+      };
+      const translatedError = Object.entries(frenchErrors).find(([key]) => 
+        errorMessage.toLowerCase().includes(key.toLowerCase())
+      )?.[1] || 'Paiement refusé. Veuillez réessayer ou contacter notre support.';
+      
+      setPaymentError(translatedError);
       setIsProcessing(false);
     }
   };

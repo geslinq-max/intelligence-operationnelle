@@ -426,13 +426,15 @@ function ValidationsCellule() {
 // ============================================================================
 
 export default function Dashboard() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [dossiersEnCours, setDossiersEnCours] = useState(0);
   const [commissionsAPercevoir, setCommissionsAPercevoir] = useState(0);
-  const [dossiersUtilises, setDossiersUtilises] = useState(2); // Simulation: 2 dossiers utilisés ce mois
+  const [dossiersUtilises, setDossiersUtilises] = useState(0); // Quota remis à 0 après paiement
+  const [showActivationBanner, setShowActivationBanner] = useState(false);
   
   // Récupération du forfait actuel
-  const { tier, config } = useSubscription();
+  const { tier, config, setTier } = useSubscription();
   
   // Calcul des quotas selon le forfait
   const maxDossiers = config.features.maxDossiers;
@@ -451,8 +453,22 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    // Vérifier si l'utilisateur vient d'activer un forfait
+    const urlParams = new URLSearchParams(window.location.search);
+    const activated = urlParams.get('activated');
+    
+    if (activated === 'true') {
+      setShowActivationBanner(true);
+      setDossiersUtilises(0); // Reset quota à 0 après paiement
+      // Nettoyer l'URL
+      router.replace('/dashboard');
+      
+      // Masquer la bannière après 5 secondes
+      setTimeout(() => setShowActivationBanner(false), 5000);
+    }
+    
     loadStats();
-  }, []);
+  }, [router]);
 
   const loadStats = async () => {
     try {
@@ -481,8 +497,16 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
+        <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+        </div>
+        <div className="text-center">
+          <p className="text-white font-medium mb-2">Initialisation de votre Scanner Flash...</p>
+          <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden mx-auto">
+            <div className="h-full bg-emerald-500 rounded-full animate-pulse" style={{ width: '60%' }} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -492,6 +516,21 @@ export default function Dashboard() {
       <Sidebar />
       
       <main className="p-4 lg:p-8 pt-20 lg:pt-8 transition-all duration-300 lg:ml-64">
+        {/* Bannière d'activation réussie */}
+        {showActivationBanner && (
+          <div className="mb-6 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500/30 rounded-lg flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-white font-medium">🎉 Forfait activé avec succès !</p>
+                <p className="text-emerald-400 text-sm">Votre Scanner Flash est prêt. Quota : 0 / {quotaTotal} dossiers</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header className="mb-6 lg:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

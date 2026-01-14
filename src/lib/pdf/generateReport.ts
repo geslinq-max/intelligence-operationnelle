@@ -955,7 +955,7 @@ Ce document a une valeur informative et ne peut en aucun cas se substituer à un
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(...COLORS.slate500);
-    doc.text('Informations techniques collectées par l\'Agent Scout pour les professionnels RGE', 20, techY);
+    doc.text('Informations techniques collectées par le Scanner Flash pour les professionnels RGE', 20, techY);
     
     techY += 15;
     
