@@ -22,89 +22,45 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION - ESPACE MANAGER (BRAS DROIT)
+// DONNÉES RÉELLES - ESPACE MANAGER (POST-SANITIZATION)
 // Note: AUCUNE donnée de marge globale ne transite ici
 // ============================================================================
 
-// Volume de vente de l'équipe (sans marge fondateur)
+import { DIRECTION_DATA } from '@/lib/data/specimen-data';
+
+// Volume de vente de l'équipe (basé sur le Spécimen uniquement)
 const EQUIPE_STATS = {
-  volumeVenteTotal: 47850, // MRR total équipe
-  nombreVendeurs: 5,
-  clientsTotaux: 118,
-  nouveauxClientsMois: 12,
-  objectifMensuel: 55000,
-  commissionManager: 10, // 10% sur le volume équipe
+  volumeVenteTotal: DIRECTION_DATA.volumeVenteTotal,
+  nombreVendeurs: DIRECTION_DATA.nombreVendeurs,
+  clientsTotaux: DIRECTION_DATA.clientsTotaux,
+  nouveauxClientsMois: DIRECTION_DATA.nouveauxClientsMois,
+  objectifMensuel: DIRECTION_DATA.objectifMensuel,
+  commissionManager: DIRECTION_DATA.commissionManager,
 };
 
 // Commission du Manager (10% du volume)
 const COMMISSION_MANAGER = {
-  tauxCommission: 10,
-  commissionMensuelle: Math.round(EQUIPE_STATS.volumeVenteTotal * 0.10),
-  commissionAnnuelle: Math.round(EQUIPE_STATS.volumeVenteTotal * 0.10 * 12),
+  tauxCommission: DIRECTION_DATA.commissionManager,
+  commissionMensuelle: DIRECTION_DATA.commissionMensuelle,
+  commissionAnnuelle: DIRECTION_DATA.commissionMensuelle * 12,
 };
 
-// Performance de l'équipe commerciale
-const EQUIPE_VENDEURS = [
-  { 
-    id: '1', 
-    nom: 'Thomas Bernard', 
-    clients: 28, 
-    volumeVente: 11760, 
-    objectif: 12000,
-    nouveauxMois: 4,
-    status: 'actif',
-    trend: 'up'
-  },
-  { 
-    id: '2', 
-    nom: 'Sophie Durand', 
-    clients: 22, 
-    volumeVente: 9240, 
-    objectif: 10000,
-    nouveauxMois: 3,
-    status: 'actif',
-    trend: 'stable'
-  },
-  { 
-    id: '3', 
-    nom: 'Lucas Martin', 
-    clients: 19, 
-    volumeVente: 7980, 
-    objectif: 9000,
-    nouveauxMois: 2,
-    status: 'actif',
-    trend: 'up'
-  },
-  { 
-    id: '4', 
-    nom: 'Emma Petit', 
-    clients: 15, 
-    volumeVente: 6300, 
-    objectif: 8000,
-    nouveauxMois: 1,
-    status: 'warning',
-    trend: 'down'
-  },
-  { 
-    id: '5', 
-    nom: 'Hugo Lefebvre', 
-    clients: 12, 
-    volumeVente: 5040, 
-    objectif: 7000,
-    nouveauxMois: 2,
-    status: 'actif',
-    trend: 'up'
-  },
-];
+// Performance de l'équipe commerciale - Vide (aucun compte fictif)
+// Les vrais partenaires apparaîtront ici lors de leur création
+const EQUIPE_VENDEURS: { 
+  id: string; 
+  nom: string; 
+  clients: number; 
+  volumeVente: number; 
+  objectif: number;
+  nouveauxMois: number;
+  status: string;
+  trend: string;
+}[] = DIRECTION_DATA.equipe;
 
-// Historique des ventes (sans marge)
+// Historique des ventes - Réinitialisé (départ janvier 2025)
 const VENTES_HISTORY = [
-  { mois: 'Août', volume: 32000 },
-  { mois: 'Sept', volume: 36500 },
-  { mois: 'Oct', volume: 41200 },
-  { mois: 'Nov', volume: 44100 },
-  { mois: 'Déc', volume: 45800 },
-  { mois: 'Jan', volume: 47850 },
+  { mois: 'Jan 2025', volume: DIRECTION_DATA.volumeVenteTotal },
 ];
 
 // ============================================================================

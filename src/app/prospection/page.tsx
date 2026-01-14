@@ -66,24 +66,23 @@ const STATUS_CONFIG: Record<InvitationStatus, { label: string; color: string; bg
   },
 };
 
-// Données de démonstration pour la campagne des 50 artisans
-const DEMO_ARTISANS: ArtisanProspect[] = [
-  { id: '1', nom: 'Chauffage Pro Lyon', ville: 'Lyon', secteur: 'Chauffage', potentiel_estime: 45000, statut: 'converti', score_chaleur: 95 },
-  { id: '2', nom: 'Isolation Expert 69', ville: 'Villeurbanne', secteur: 'Isolation', potentiel_estime: 38000, statut: 'converti', score_chaleur: 92 },
-  { id: '3', nom: 'Énergie Verte Rhône', ville: 'Lyon', secteur: 'Pompes à chaleur', potentiel_estime: 52000, statut: 'converti', score_chaleur: 98 },
-  { id: '4', nom: 'Thermique Solutions', ville: 'Saint-Étienne', secteur: 'Chauffage', potentiel_estime: 29000, statut: 'en_attente', score_chaleur: 78 },
-  { id: '5', nom: 'Isol\'Plus SARL', ville: 'Grenoble', secteur: 'Isolation', potentiel_estime: 41000, statut: 'en_attente', score_chaleur: 85 },
-  { id: '6', nom: 'PAC Alpes Services', ville: 'Annecy', secteur: 'Pompes à chaleur', potentiel_estime: 67000, statut: 'invite', score_chaleur: 88 },
-  { id: '7', nom: 'Rénovation Confort', ville: 'Chambéry', secteur: 'Rénovation globale', potentiel_estime: 55000, statut: 'invite', score_chaleur: 82 },
-  { id: '8', nom: 'Artisan Climat 42', ville: 'Roanne', secteur: 'Climatisation', potentiel_estime: 33000, statut: 'invite', score_chaleur: 75 },
-  { id: '9', nom: 'EcoTherm Bâtiment', ville: 'Bourg-en-Bresse', secteur: 'Chauffage', potentiel_estime: 48000, statut: 'a_inviter', score_chaleur: 91 },
-  { id: '10', nom: 'Menuiseries RGE Pro', ville: 'Valence', secteur: 'Menuiseries', potentiel_estime: 36000, statut: 'a_inviter', score_chaleur: 79 },
-  { id: '11', nom: 'Ventilation Experts', ville: 'Lyon', secteur: 'VMC', potentiel_estime: 27000, statut: 'a_inviter', score_chaleur: 72 },
-  { id: '12', nom: 'Solaire Auvergne', ville: 'Clermont-Ferrand', secteur: 'Solaire', potentiel_estime: 62000, statut: 'a_inviter', score_chaleur: 94 },
-  { id: '13', nom: 'Chauffagiste Central', ville: 'Mâcon', secteur: 'Chauffage', potentiel_estime: 31000, statut: 'a_inviter', score_chaleur: 68 },
-  { id: '14', nom: 'ITE Solutions Rhône', ville: 'Vienne', secteur: 'Isolation', potentiel_estime: 44000, statut: 'a_inviter', score_chaleur: 86 },
-  { id: '15', nom: 'Plomberie Énergie', ville: 'Montélimar', secteur: 'Plomberie', potentiel_estime: 25000, statut: 'a_inviter', score_chaleur: 65 },
-];
+// ============================================================================
+// DONNÉES RÉELLES - PROSPECTION (POST-SANITIZATION)
+// ============================================================================
+
+import { PROSPECTION_DATA } from '@/lib/data/specimen-data';
+
+// L'Artisan Spécimen est le seul converti - objectif 50 à atteindre
+const DEMO_ARTISANS: ArtisanProspect[] = PROSPECTION_DATA.artisans.map(a => ({
+  id: a.id,
+  nom: a.nom,
+  ville: a.ville,
+  secteur: a.secteur,
+  potentiel_estime: a.potentiel_estime,
+  statut: a.statut,
+  date_invitation: a.date_invitation,
+  score_chaleur: a.score_chaleur,
+}));
 
 // ============================================================================
 // COMPOSANTS

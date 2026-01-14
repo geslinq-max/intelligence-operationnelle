@@ -21,48 +21,22 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION - CERVEAU FONDATEUR
+// DONNÉES RÉELLES - CERVEAU FONDATEUR (POST-SANITIZATION)
 // ============================================================================
 
-// Données financières globales (EXCLUSIF FONDATEUR)
-const FINANCE_DATA = {
-  mrr: 47850,
-  mrrGrowth: 12.5,
-  arr: 574200,
-  marge: 70, // 70% de marge - CONFIDENTIEL
-  margeAbsolue: 33495,
-  totalClients: 127,
-  clientsActifs: 118,
-  churnRate: 2.1,
-  ltv: 4520,
-  cac: 380,
-};
+import { 
+  COMPTEURS_GLOBAUX, 
+  MRR_HISTORY, 
+  FORFAITS_REPARTITION,
+  ARTISAN_SPECIMEN 
+} from '@/lib/data/specimen-data';
 
-// Historique MRR (6 derniers mois)
-const MRR_HISTORY = [
-  { mois: 'Août', mrr: 32000, marge: 22400 },
-  { mois: 'Sept', mrr: 36500, marge: 25550 },
-  { mois: 'Oct', mrr: 41200, marge: 28840 },
-  { mois: 'Nov', mrr: 44100, marge: 30870 },
-  { mois: 'Déc', mrr: 45800, marge: 32060 },
-  { mois: 'Jan', mrr: 47850, marge: 33495 },
-];
+// Données financières globales basées sur l'Artisan Spécimen uniquement
+const FINANCE_DATA = COMPTEURS_GLOBAUX;
 
-// Leaderboard vendeurs
-const VENDEURS_DATA = [
-  { id: '1', nom: 'Marie Laurent', role: 'Manager', clients: 34, mrr: 14280, commission: 1428, trend: 'up' },
-  { id: '2', nom: 'Thomas Bernard', role: 'Partenaire', clients: 28, mrr: 11760, commission: 2352, trend: 'up' },
-  { id: '3', nom: 'Sophie Durand', role: 'Partenaire', clients: 22, mrr: 9240, commission: 1848, trend: 'stable' },
-  { id: '4', nom: 'Lucas Martin', role: 'Partenaire', clients: 19, mrr: 7980, commission: 1596, trend: 'up' },
-  { id: '5', nom: 'Emma Petit', role: 'Partenaire', clients: 15, mrr: 6300, commission: 1260, trend: 'down' },
-];
-
-// Répartition des forfaits
-const FORFAITS_REPARTITION = [
-  { nom: 'Essentiel', clients: 42, mrr: 6258, pourcentage: 33 },
-  { nom: 'Sérénité', clients: 58, mrr: 20242, pourcentage: 46 },
-  { nom: 'Expert', clients: 27, mrr: 23220, pourcentage: 21 },
-];
+// Leaderboard vendeurs - Vide (aucun compte fictif)
+// Les vrais partenaires apparaîtront ici lors de leur création
+const VENDEURS_DATA: { id: string; nom: string; role: string; clients: number; mrr: number; commission: number; trend: string }[] = [];
 
 // ============================================================================
 // COMPOSANTS

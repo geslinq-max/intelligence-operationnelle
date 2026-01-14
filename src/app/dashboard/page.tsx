@@ -21,14 +21,20 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION - ESPACE ARTISAN
+// DONNÉES RÉELLES - ESPACE ARTISAN (POST-SANITIZATION)
 // ============================================================================
 
-const DOSSIERS_ARTISAN = [
-  { id: 'DOS-2025-001', client: 'Résidence Les Lilas', type: 'BAR-TH-164', statut: 'valide', montant: 2850, date: '2025-01-10' },
-  { id: 'DOS-2025-002', client: 'Copro Saint-Michel', type: 'BAR-TH-143', statut: 'en_analyse', montant: 4200, date: '2025-01-12' },
-  { id: 'DOS-2025-003', client: 'Maison Dupont', type: 'BAR-EN-101', statut: 'en_attente', montant: 1650, date: '2025-01-13' },
-];
+import { DOSSIERS_SPECIMEN, ARTISAN_SPECIMEN, SCANNER_RESULTS_SPECIMEN, CELLULE_INTERVENTIONS_SPECIMEN } from '@/lib/data/specimen-data';
+
+// Dossiers de l'Artisan Spécimen
+const DOSSIERS_ARTISAN = DOSSIERS_SPECIMEN.map(d => ({
+  id: d.id,
+  client: d.client,
+  type: d.type,
+  statut: d.statut,
+  montant: d.prime_cee,
+  date: d.date_soumission,
+}));
 
 const STATUT_CONFIG = {
   valide: { label: 'Validé', color: 'text-emerald-400', bg: 'bg-emerald-500/20', icon: CheckCircle2 },

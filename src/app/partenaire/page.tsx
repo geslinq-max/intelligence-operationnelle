@@ -26,103 +26,33 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// DONNÉES DE DÉMONSTRATION - COCKPIT PARTENAIRE (SOLDAT)
+// DONNÉES RÉELLES - COCKPIT PARTENAIRE (POST-SANITIZATION)
 // Note: Uniquement les clients propres du partenaire, AUCUNE donnée globale
 // ============================================================================
 
-// Stats du partenaire (ses propres clients uniquement)
+import { PARTENAIRE_DATA } from '@/lib/data/specimen-data';
+
+// Stats du partenaire (basées sur le Spécimen uniquement)
 const PARTENAIRE_STATS = {
-  clientsPropres: 28,
-  volumePersonnel: 11760, // MRR de SES clients uniquement
-  commissionTaux: 20, // 20% de commission
-  commissionMensuelle: 2352, // 20% de 11760
-  clientsRisque: 3,
-  clientsFideles: 22,
+  clientsPropres: PARTENAIRE_DATA.clientsPropres,
+  volumePersonnel: PARTENAIRE_DATA.volumePersonnel,
+  commissionTaux: PARTENAIRE_DATA.commissionTaux,
+  commissionMensuelle: PARTENAIRE_DATA.commissionMensuelle,
+  clientsRisque: PARTENAIRE_DATA.clientsRisque,
+  clientsFideles: PARTENAIRE_DATA.clientsFideles,
 };
 
-// Clients du partenaire (données propres uniquement)
-const MES_CLIENTS = [
-  { 
-    id: 'cli_001',
-    nom: 'Chauffage Pro Lyon',
-    forfait: 'serenite',
-    mrr: 349,
-    dateAdhesion: '2024-06-15',
-    dernierContact: '2025-01-10',
-    risqueDesabo: false,
-    sante: 95
-  },
-  { 
-    id: 'cli_002',
-    nom: 'Isolation Expert 69',
-    forfait: 'expert',
-    mrr: 860,
-    dateAdhesion: '2024-04-22',
-    dernierContact: '2025-01-08',
-    risqueDesabo: false,
-    sante: 98
-  },
-  { 
-    id: 'cli_003',
-    nom: 'Énergie Verte Rhône',
-    forfait: 'serenite',
-    mrr: 349,
-    dateAdhesion: '2024-08-03',
-    dernierContact: '2024-12-15',
-    risqueDesabo: true,
-    sante: 45
-  },
-  { 
-    id: 'cli_004',
-    nom: 'Thermique Solutions',
-    forfait: 'essentiel',
-    mrr: 149,
-    dateAdhesion: '2024-09-10',
-    dernierContact: '2025-01-12',
-    risqueDesabo: false,
-    sante: 82
-  },
-  { 
-    id: 'cli_005',
-    nom: 'PAC Alpes Services',
-    forfait: 'expert',
-    mrr: 860,
-    dateAdhesion: '2024-03-18',
-    dernierContact: '2024-11-28',
-    risqueDesabo: true,
-    sante: 38
-  },
-  { 
-    id: 'cli_006',
-    nom: 'Rénovation Confort',
-    forfait: 'serenite',
-    mrr: 349,
-    dateAdhesion: '2024-07-05',
-    dernierContact: '2025-01-05',
-    risqueDesabo: false,
-    sante: 88
-  },
-  { 
-    id: 'cli_007',
-    nom: 'Artisan Climat 42',
-    forfait: 'essentiel',
-    mrr: 149,
-    dateAdhesion: '2024-10-20',
-    dernierContact: '2024-12-01',
-    risqueDesabo: true,
-    sante: 52
-  },
-  { 
-    id: 'cli_008',
-    nom: 'EcoTherm Bâtiment',
-    forfait: 'serenite',
-    mrr: 349,
-    dateAdhesion: '2024-05-12',
-    dernierContact: '2025-01-11',
-    risqueDesabo: false,
-    sante: 91
-  },
-];
+// Clients du partenaire - L'Artisan Spécimen uniquement
+const MES_CLIENTS = PARTENAIRE_DATA.clients.map(client => ({
+  id: client.id,
+  nom: client.nom,
+  forfait: client.forfait,
+  mrr: client.mrr,
+  dateAdhesion: client.dateAdhesion,
+  dernierContact: client.dernierContact,
+  risqueDesabo: client.risqueDesabo,
+  sante: client.sante,
+}));
 
 // Forfaits config
 const FORFAIT_CONFIG = {
