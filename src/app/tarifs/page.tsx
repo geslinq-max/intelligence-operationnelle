@@ -388,33 +388,34 @@ function ForfaitCard({
         </p>
       </div>
 
-      {/* Comparaisons AVANT/APRÈS - Style Néon & Glow */}
+      {/* Comparaisons AVANT/APRÈS - Style ULTRA-GLOW & OBSCURE */}
       <div className="space-y-3 flex-1 mb-4">
         {forfait.comparaisons.map((comp, index) => (
           <div key={index} className="bg-slate-800/50 rounded-lg p-3">
             <p className="text-slate-500 text-xs font-semibold uppercase mb-2">{comp.label}</p>
             <div className="space-y-2">
-              {/* Style AVANT: gris #6B7280, 50% opacité, barré rouge */}
+              {/* Style AVANT: Le Passé Obscur - gris foncé #4B5563, opacité 30%, barré rouge 2px */}
               <p 
-                className="text-sm opacity-50"
+                className="text-sm"
                 style={{ 
-                  color: '#6B7280',
+                  color: '#4B5563',
+                  opacity: 0.3,
                   textDecoration: 'line-through',
                   textDecorationColor: '#EF4444',
-                  textDecorationThickness: '1px'
+                  textDecorationThickness: '2px'
                 }}
               >
-                <span className="opacity-70" style={{ filter: 'saturate(0.3)' }}>❌</span> {comp.avant}
+                <span style={{ filter: 'saturate(0.2) brightness(0.6)' }}>❌</span> {comp.avant}
               </p>
-              {/* Style APRÈS: blanc pur, glow vert néon */}
+              {/* Style APRÈS: Le Futur Radioactif - blanc pur, glow multicouche intense */}
               <p 
                 className="text-sm font-bold"
                 style={{ 
                   color: '#FFFFFF',
-                  textShadow: '0 0 8px #22C55E, 0 0 16px #22C55E'
+                  textShadow: '0 0 10px #22C55E, 0 0 20px #22C55E, 0 0 40px rgba(34, 197, 94, 0.5)'
                 }}
               >
-                <span style={{ filter: 'drop-shadow(0 0 4px #22C55E)' }}>✅</span> {comp.apres}
+                <span style={{ filter: 'drop-shadow(0 0 8px #22C55E) brightness(1.2)' }}>✅</span> {comp.apres}
               </p>
             </div>
           </div>
