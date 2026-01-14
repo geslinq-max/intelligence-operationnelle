@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { useSubscription, type SubscriptionTier } from '@/contexts/SubscriptionContext';
@@ -18,7 +18,9 @@ import {
   X,
   Sparkles,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  CreditCard,
+  AlertCircle
 } from 'lucide-react';
 
 // ============================================================================
@@ -441,6 +443,14 @@ function ForfaitCard({
       >
         Sélectionner ce Forfait
       </button>
+
+      {/* Icônes Moyens de Paiement */}
+      <div className="flex items-center justify-center gap-3 mt-3">
+        <span className="text-xs" style={{ color: '#9CA3AF' }}>CB</span>
+        <span className="text-xs" style={{ color: '#9CA3AF' }}>Visa</span>
+        <span className="text-xs" style={{ color: '#9CA3AF' }}>Mastercard</span>
+        <span className="text-xs" style={{ color: '#9CA3AF' }}>SEPA</span>
+      </div>
     </div>
   );
 }
@@ -449,36 +459,72 @@ function ForfaitCard({
 // PAGE PRINCIPALE
 // ============================================================================
 
-export default function TarifsPage() {
+function TarifsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTier, tier: currentTier } = useSubscription();
   const [selectedForfait, setSelectedForfait] = useState<Forfait | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activatedForfait, setActivatedForfait] = useState<Forfait | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  // Gestion du retour Stripe (success/cancel)
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    
+    if (success === 'true') {
+      // Paiement réussi - activer le forfait
+      setShowSuccess(true);
+      // Nettoyer l'URL
+      router.replace('/tarifs');
+    }
+    
+    if (canceled === 'true') {
+      setPaymentError('Paiement annulé. Vous pouvez réessayer à tout moment.');
+      router.replace('/tarifs');
+    }
+  }, [searchParams, router]);
 
   const handleSelectForfait = (forfait: Forfait) => {
     setSelectedForfait(forfait);
     setIsModalOpen(true);
+    setPaymentError(null);
   };
 
-  const handleConfirmSubscription = () => {
+  const handleConfirmSubscription = async () => {
     if (!selectedForfait) return;
     
-    // Fermer le modal
-    setIsModalOpen(false);
+    setIsProcessing(true);
+    setPaymentError(null);
     
-    // Mettre à jour le statut d'abonnement
-    const tierMap: Record<ForfaitNiveau, SubscriptionTier> = {
-      essentiel: 'essentiel',
-      serenite: 'serenite',
-      expert: 'expert',
-    };
-    setTier(tierMap[selectedForfait.id]);
-    
-    // Afficher l'animation de succès
-    setActivatedForfait(selectedForfait);
-    setShowSuccess(true);
+    try {
+      // Appel API Stripe Checkout
+      const response = await fetch('/api/stripe/checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          forfaitId: selectedForfait.id,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur de paiement');
+      }
+      
+      // Redirection vers Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Erreur paiement:', error);
+      setPaymentError('Paiement refusé, veuillez réessayer.');
+      setIsProcessing(false);
+    }
   };
 
   const handleSuccessComplete = () => {
@@ -491,6 +537,22 @@ export default function TarifsPage() {
       <Sidebar />
       
       <main className="p-4 lg:p-8 pt-20 lg:pt-8 transition-all duration-300 lg:ml-64">
+        {/* Bannière d'erreur paiement */}
+        {paymentError && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 text-sm">{paymentError}</p>
+              <button 
+                onClick={() => setPaymentError(null)}
+                className="ml-auto text-red-400 hover:text-red-300"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header className="mb-8 lg:mb-12 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full mb-6">
@@ -588,5 +650,18 @@ export default function TarifsPage() {
         />
       )}
     </div>
+  );
+}
+
+// Wrapper avec Suspense pour useSearchParams
+export default function TarifsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      </div>
+    }>
+      <TarifsPageContent />
+    </Suspense>
   );
 }
