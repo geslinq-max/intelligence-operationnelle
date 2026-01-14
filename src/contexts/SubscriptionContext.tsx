@@ -11,6 +11,7 @@ export type SubscriptionTier = 'prospect' | 'essentiel' | 'serenite' | 'expert';
 export interface SubscriptionConfig {
   id: SubscriptionTier;
   nom: string;
+  prix: number;
   color: string;
   bgColor: string;
   borderColor: string;
@@ -18,10 +19,10 @@ export interface SubscriptionConfig {
   icon: string;
   features: {
     maxDossiers: number | 'illimite';
-    delaiValidation: string;
-    supportTelephone: boolean;
+    maxAcces: number | 'illimite';
+    vitesse: 'standard' | 'flash';
+    accompagnementFondateur: boolean;
     rapportsPDF: boolean;
-    apiAccess: boolean;
   };
 }
 
@@ -29,6 +30,7 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, SubscriptionConfig> = 
   prospect: {
     id: 'prospect',
     nom: 'Prospect',
+    prix: 0,
     color: 'text-slate-400',
     bgColor: 'bg-slate-500/20',
     borderColor: 'border-slate-500/30',
@@ -36,47 +38,50 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, SubscriptionConfig> = 
     icon: '👤',
     features: {
       maxDossiers: 1,
-      delaiValidation: '7 jours',
-      supportTelephone: false,
+      maxAcces: 1,
+      vitesse: 'standard',
+      accompagnementFondateur: false,
       rapportsPDF: false,
-      apiAccess: false,
     },
   },
   essentiel: {
     id: 'essentiel',
     nom: 'Essentiel',
+    prix: 149,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
     borderColor: 'border-blue-500/30',
     gradient: 'from-blue-500 to-cyan-600',
     icon: '🛡️',
     features: {
-      maxDossiers: 5,
-      delaiValidation: '72h',
-      supportTelephone: false,
-      rapportsPDF: false,
-      apiAccess: false,
+      maxDossiers: 3,
+      maxAcces: 1,
+      vitesse: 'flash',
+      accompagnementFondateur: false,
+      rapportsPDF: true,
     },
   },
   serenite: {
     id: 'serenite',
     nom: 'Sérénité',
+    prix: 349,
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/20',
     borderColor: 'border-emerald-500/30',
     gradient: 'from-emerald-500 to-teal-600',
     icon: '⚡',
     features: {
-      maxDossiers: 'illimite',
-      delaiValidation: '24h',
-      supportTelephone: true,
+      maxDossiers: 15,
+      maxAcces: 2,
+      vitesse: 'flash',
+      accompagnementFondateur: false,
       rapportsPDF: true,
-      apiAccess: false,
     },
   },
   expert: {
     id: 'expert',
     nom: 'Expert',
+    prix: 860,
     color: 'text-violet-400',
     bgColor: 'bg-violet-500/20',
     borderColor: 'border-violet-500/30',
@@ -84,10 +89,10 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, SubscriptionConfig> = 
     icon: '👑',
     features: {
       maxDossiers: 'illimite',
-      delaiValidation: '12h',
-      supportTelephone: true,
+      maxAcces: 'illimite',
+      vitesse: 'flash',
+      accompagnementFondateur: true,
       rapportsPDF: true,
-      apiAccess: true,
     },
   },
 };
