@@ -14,7 +14,7 @@ const cookieOptions = {
 };
 
 // 🔒 EMAIL FONDATEUR UNIQUE - SEUL AUTORISÉ SUR /admin, /direction, /vendeur
-const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || 'fondateur@capital-energie.fr';
+const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 
 // Pages publiques (pas besoin d'authentification)
 const PUBLIC_PATHS = ['/', '/login', '/mentions-legales', '/confidentialite', '/landing', '/cgv', '/tarifs', '/403'];

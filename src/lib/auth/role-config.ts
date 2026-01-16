@@ -15,7 +15,7 @@
  * IMPORTANT: Remplacez cette valeur par votre email réel
  * Seul cet email aura les droits FOUNDER (fondateur)
  */
-export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || 'fondateur@capital-energie.fr';
+export const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 
 // ============================================================================
 // TYPES DE RÔLES
