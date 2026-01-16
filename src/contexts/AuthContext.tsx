@@ -2,6 +2,21 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
+
+// ============================================================================
+// 🔒 SÉCURITÉ HARD-CODED - AUCUN MOCK, AUCUN DEMO
+// ============================================================================
+
+// 🔒 EMAIL FONDATEUR - SI VIDE OU UNDEFINED, PERSONNE N'A ACCÈS FONDATEUR
+const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
+
+// 🔒 Vérification stricte : si FOUNDER_EMAIL est vide, PERSONNE n'est fondateur
+function isFounderEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  if (!FOUNDER_EMAIL || FOUNDER_EMAIL.trim() === '') return false; // SÉCURITÉ: Si pas de FOUNDER_EMAIL, personne n'est fondateur
+  return email.toLowerCase().trim() === FOUNDER_EMAIL.toLowerCase().trim();
+}
 
 // ============================================================================
 // TYPES - RBAC CAPITAL ÉNERGIE
@@ -22,15 +37,14 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (role: UserRole) => void;
   logout: () => void;
-  switchRole: (role: UserRole) => void;
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean;
   getHomeRoute: () => string;
+  isFounder: boolean;
 }
 
 // ============================================================================
-// CONFIGURATION DES RÔLES
+// CONFIGURATION DES RÔLES (lecture seule, pas de switchRole)
 // ============================================================================
 
 export const ROLE_CONFIG: Record<UserRole, {
@@ -47,7 +61,7 @@ export const ROLE_CONFIG: Record<UserRole, {
     cle: 'Clé Fondateur',
     description: 'Accès au Cerveau - Vision stratégique complète',
     homeRoute: '/admin',
-    allowedRoutes: ['/admin', '/direction', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion', '/prospection', '/verificateur'],
+    allowedRoutes: ['/admin', '/admin/pilotage', '/direction', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion', '/prospection', '/verificateur'],
     color: 'text-amber-400',
     icon: '👑',
   },
@@ -56,7 +70,7 @@ export const ROLE_CONFIG: Record<UserRole, {
     cle: 'Clé Manager',
     description: 'Bras Droit - Gestion équipe commerciale',
     homeRoute: '/direction',
-    allowedRoutes: ['/direction', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion'],
+    allowedRoutes: ['/direction', '/admin/pilotage', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion'],
     color: 'text-violet-400',
     icon: '🎯',
   },
@@ -80,40 +94,8 @@ export const ROLE_CONFIG: Record<UserRole, {
   },
 };
 
-// Données de démonstration pour chaque rôle
-const DEMO_USERS: Record<UserRole, User> = {
-  fondateur: {
-    id: 'usr_fondateur_001',
-    nom: 'Alexandre Dupont',
-    email: 'fondateur@capital-energie.fr',
-    role: 'fondateur',
-    dateCreation: '2024-01-01',
-  },
-  manager: {
-    id: 'usr_manager_001',
-    nom: 'Marie Laurent',
-    email: 'direction@capital-energie.fr',
-    role: 'manager',
-    dateCreation: '2024-03-15',
-  },
-  partenaire: {
-    id: 'usr_partenaire_001',
-    nom: 'Thomas Bernard',
-    email: 'partenaire@capital-energie.fr',
-    role: 'partenaire',
-    dateCreation: '2024-06-01',
-  },
-  artisan: {
-    id: 'usr_artisan_001',
-    nom: 'Pierre Martin',
-    email: 'artisan@capital-energie.fr',
-    role: 'artisan',
-    dateCreation: '2024-09-01',
-  },
-};
-
 // ============================================================================
-// CONTEXT
+// CONTEXT - BASÉ SUR SUPABASE UNIQUEMENT
 // ============================================================================
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -124,83 +106,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Charger l'utilisateur depuis localStorage au montage
+  // 🔒 Charger l'utilisateur UNIQUEMENT depuis Supabase Auth
   useEffect(() => {
-    const storedRole = localStorage.getItem('ce-user-role') as UserRole | null;
-    if (storedRole && DEMO_USERS[storedRole]) {
-      setUser(DEMO_USERS[storedRole]);
+    async function loadUser() {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        
+        if (authUser && authUser.email) {
+          // 🔒 Déterminer le rôle basé UNIQUEMENT sur l'email
+          const role: UserRole = isFounderEmail(authUser.email) ? 'fondateur' : 'artisan';
+          
+          setUser({
+            id: authUser.id,
+            nom: authUser.email.split('@')[0],
+            email: authUser.email,
+            role: role,
+            dateCreation: authUser.created_at || new Date().toISOString(),
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Erreur chargement utilisateur:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    setIsLoading(false);
+    
+    loadUser();
+    
+    // Écouter les changements d'auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        setUser(null);
+      } else if (session?.user?.email) {
+        const role: UserRole = isFounderEmail(session.user.email) ? 'fondateur' : 'artisan';
+        setUser({
+          id: session.user.id,
+          nom: session.user.email.split('@')[0],
+          email: session.user.email,
+          role: role,
+          dateCreation: session.user.created_at || new Date().toISOString(),
+        });
+      }
+    });
+    
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Protection des routes - redirection si accès non autorisé
+  // Protection des routes côté client (le middleware est la vraie protection)
   useEffect(() => {
     if (isLoading) return;
     
-    // Routes publiques qui ne nécessitent pas d'authentification
-    const publicRoutes = ['/', '/landing', '/login', '/mentions-legales', '/confidentialite', '/tarifs'];
+    const publicRoutes = ['/', '/landing', '/login', '/mentions-legales', '/confidentialite', '/tarifs', '/cgv', '/403'];
     if (publicRoutes.some(route => pathname === route || pathname.startsWith('/public/'))) {
       return;
     }
-
-    // Routes protégées par rôle
-    const protectedRoutes = ['/admin', '/direction', '/partenaire'];
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-
-    if (isProtectedRoute && user) {
-      const roleConfig = ROLE_CONFIG[user.role];
-      const hasAccess = roleConfig.allowedRoutes.some(route => pathname.startsWith(route));
-      
-      if (!hasAccess) {
-        // Redirection vers l'espace autorisé
-        router.replace(roleConfig.homeRoute);
-      }
-    }
   }, [pathname, user, isLoading, router]);
 
-  const login = useCallback((role: UserRole) => {
-    const demoUser = DEMO_USERS[role];
-    setUser(demoUser);
-    localStorage.setItem('ce-user-role', role);
-    router.push(ROLE_CONFIG[role].homeRoute);
-  }, [router]);
-
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('ce-user-role');
-    router.push('/');
+    router.push('/login');
   }, [router]);
 
-  const switchRole = useCallback((role: UserRole) => {
-    login(role);
-  }, [login]);
-
+  // 🔒 hasAccess basé sur l'email réel, pas sur un rôle client-side modifiable
   const hasAccess = useCallback((requiredRole: UserRole | UserRole[]): boolean => {
     if (!user) return false;
     
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
     
-    // Le fondateur a accès à tout
-    if (user.role === 'fondateur') return true;
+    // 🔒 Vérifier si c'est le fondateur via email HARD-CODED
+    if (isFounderEmail(user.email)) return true;
     
+    // Pour les autres, vérifier le rôle (toujours artisan pour les non-fondateurs)
     return roles.includes(user.role);
   }, [user]);
 
   const getHomeRoute = useCallback((): string => {
-    if (!user) return '/';
-    return ROLE_CONFIG[user.role].homeRoute;
+    if (!user) return '/login';
+    if (isFounderEmail(user.email)) return '/admin';
+    return '/dashboard';
   }, [user]);
+
+  // 🔒 isFounder basé sur email réel
+  const isFounder = user ? isFounderEmail(user.email) : false;
 
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated: !!user,
       isLoading,
-      login,
       logout,
-      switchRole,
       hasAccess,
       getHomeRoute,
+      isFounder,
     }}>
       {children}
     </AuthContext.Provider>
@@ -226,14 +227,26 @@ export function ProtectedRoute({
   children: React.ReactNode;
   allowedRoles: UserRole[];
 }) {
-  const { user, isLoading, hasAccess, getHomeRoute } = useAuth();
+  const { user, isLoading, hasAccess, getHomeRoute, isFounder } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user && !hasAccess(allowedRoles)) {
-      router.replace(getHomeRoute());
+    if (!isLoading) {
+      // 🔒 Si pas d'utilisateur, rediriger vers login
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+      
+      // 🔒 Fondateur a toujours accès
+      if (isFounder) return;
+      
+      // 🔒 Vérifier l'accès pour les non-fondateurs
+      if (!hasAccess(allowedRoles)) {
+        router.replace('/403');
+      }
     }
-  }, [user, isLoading, hasAccess, allowedRoles, router, getHomeRoute]);
+  }, [user, isLoading, hasAccess, allowedRoles, router, getHomeRoute, isFounder]);
 
   if (isLoading) {
     return (
@@ -246,7 +259,16 @@ export function ProtectedRoute({
     );
   }
 
-  if (!user || !hasAccess(allowedRoles)) {
+  if (!user) {
+    return null;
+  }
+
+  // 🔒 Fondateur a toujours accès
+  if (isFounder) {
+    return <>{children}</>;
+  }
+
+  if (!hasAccess(allowedRoles)) {
     return null;
   }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
 import { useSubscription, type SubscriptionTier } from '@/contexts/SubscriptionContext';
@@ -236,6 +237,7 @@ function ConfirmationModal({
   onConfirm: () => void;
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [cgvAccepted, setCgvAccepted] = useState(false);
 
   if (!isOpen || !forfait) return null;
 
@@ -319,6 +321,27 @@ function ConfirmationModal({
                 <p className="text-emerald-400 font-bold">{forfait.gainNet}</p>
               </div>
 
+              {/* Checkbox CGV obligatoire */}
+              <label className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg mb-4 cursor-pointer hover:bg-slate-800 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={cgvAccepted}
+                  onChange={(e) => setCgvAccepted(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-700 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-slate-900"
+                />
+                <span className="text-sm text-slate-300">
+                  J&apos;ai pris connaissance et j&apos;accepte les{' '}
+                  <Link 
+                    href="/cgv" 
+                    target="_blank"
+                    className="text-cyan-400 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    CGV de Capital Énergie
+                  </Link>.
+                </span>
+              </label>
+
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
@@ -328,7 +351,8 @@ function ConfirmationModal({
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className={`flex-1 px-4 py-3 ${forfait.buttonColor} text-white rounded-xl font-medium transition-all shadow-lg`}
+                  disabled={!cgvAccepted}
+                  className={`flex-1 px-4 py-3 ${forfait.buttonColor} text-white rounded-xl font-medium transition-all shadow-lg ${!cgvAccepted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Confirmer
                 </button>

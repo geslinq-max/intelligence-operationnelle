@@ -185,7 +185,7 @@ export default function VerificateurPage() {
             onDragLeave={handleDragLeave}
             onClick={() => fileInputRef.current?.click()}
             className={`
-              relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer
+              relative border-2 border-dashed rounded-2xl p-6 sm:p-8 lg:p-12 text-center cursor-pointer
               transition-all duration-300
               ${isDragOver 
                 ? 'border-cyan-400 bg-cyan-500/10 scale-[1.02]' 
@@ -244,7 +244,7 @@ export default function VerificateurPage() {
 
         {/* États de chargement */}
         {(analysisState === 'uploading' || analysisState === 'extracting' || analysisState === 'validating') && (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-12 text-center">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 sm:p-8 lg:p-12 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-cyan-500/20 flex items-center justify-center">
               <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
             </div>
@@ -260,7 +260,7 @@ export default function VerificateurPage() {
             )}
             
             {/* Progress steps */}
-            <div className="flex items-center justify-center gap-6 mt-8">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-6 sm:mt-8">
               <div className={`flex items-center gap-2 ${analysisState === 'uploading' ? 'text-cyan-400' : 'text-emerald-400'}`}>
                 {analysisState === 'uploading' ? (
                   <Clock className="w-5 h-5 animate-pulse" />
@@ -409,7 +409,7 @@ export default function VerificateurPage() {
                       <p className="text-xl font-bold text-white">{extraction.calcul_cee.fiche_reference}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="p-4 bg-slate-900/50 rounded-lg">
                         <p className="text-slate-400 text-sm">kWh cumac</p>
                         <p className="text-2xl font-bold text-cyan-400">
@@ -611,7 +611,7 @@ export default function VerificateurPage() {
                   }
                 }}
                 className={`
-                  flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg
+                  flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg
                   transition-all duration-300
                   ${validation.statut === 'VALIDE' && !isGenerating
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/20 cursor-pointer'

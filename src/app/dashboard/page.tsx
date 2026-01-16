@@ -155,7 +155,7 @@ function DropZonePremierScan({ onFileSelect, isQuotaReached, nextTier }: DropZon
     return (
       <div
         onClick={handleClick}
-        className="relative cursor-pointer rounded-2xl p-8 lg:p-12 mb-8 border-2 border-dashed border-slate-700 bg-slate-900/50"
+        className="relative cursor-pointer rounded-2xl p-6 sm:p-8 lg:p-12 mb-6 sm:mb-8 border-2 border-dashed border-slate-700 bg-slate-900/50"
       >
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-2xl flex items-center justify-center">
@@ -186,7 +186,7 @@ function DropZonePremierScan({ onFileSelect, isQuotaReached, nextTier }: DropZon
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`
-        relative cursor-pointer rounded-2xl p-8 lg:p-12 mb-8
+        relative cursor-pointer rounded-2xl p-6 sm:p-8 lg:p-12 mb-6 sm:mb-8
         border-2 border-dashed transition-all duration-300
         ${isDragOver 
           ? 'border-emerald-500 bg-emerald-500/10' 

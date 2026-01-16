@@ -97,6 +97,14 @@ export default function Confidentialite() {
               <li>• Améliorer la qualité de nos algorithmes d&apos;intelligence artificielle</li>
               <li>• Assurer la sécurité et la maintenance de la plateforme</li>
             </ul>
+            <div className="mt-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+              <p className="text-emerald-400 font-semibold mb-2">🔒 Engagement de non-revente</p>
+              <p className="text-slate-300">
+                <strong>Les données des chantiers sont traitées uniquement pour l&apos;audit et ne sont 
+                jamais revendues à des tiers.</strong> Aucune exploitation commerciale de vos données 
+                n&apos;est effectuée en dehors de la fourniture du service souscrit.
+              </p>
+            </div>
           </section>
 
           <section>

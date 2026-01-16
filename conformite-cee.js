@@ -382,12 +382,20 @@ function verifierDossier(donnees) {
   });
 
   // 4. Calculer l'indice de sécurité (0-100%)
-  const totalPoids = resultat.controles.reduce((sum, c) => sum + c.poids, 0);
+  const totalPoids = resultat.controles.reduce((sum, c) => sum + (c.poids || 0), 0);
   const poidsPerdu = resultat.controles.reduce((sum, c) => {
-    return sum + (c.statut.poids * c.poids / 30);
+    const statutPoids = c.statut?.poids || 0;
+    const controlePoids = c.poids || 0;
+    return sum + (statutPoids * controlePoids / 30);
   }, 0);
   
-  resultat.indiceSécurite = Math.max(0, Math.round(100 - (poidsPerdu / totalPoids) * 100));
+  // Protection contre division par zéro et NaN
+  if (totalPoids === 0 || isNaN(totalPoids)) {
+    resultat.indiceSécurite = 0;
+  } else {
+    const indice = 100 - (poidsPerdu / totalPoids) * 100;
+    resultat.indiceSécurite = Math.max(0, Math.min(100, Math.round(isNaN(indice) ? 0 : indice)));
+  }
 
   // 5. Décision automatique
   if (resultat.resume.bloquants > 0) {

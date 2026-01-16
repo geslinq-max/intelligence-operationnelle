@@ -1,13 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard, Crown, Target, Briefcase, Zap, ChevronDown, Shield } from 'lucide-react';
+import { LogOut, HelpCircle, Menu, X, BarChart3, CreditCard, Crown, Target, Briefcase, Zap, Shield, AlertTriangle } from 'lucide-react';
 import { useBranding, THEMES } from '@/contexts/ThemeContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useAuth, ROLE_CONFIG, type UserRole } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
+
+// ============================================================================
+// 🔒 SÉCURITÉ HARD-CODED - EMAIL FONDATEUR UNIQUE
+// ============================================================================
+const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
+
+/**
+ * 🔒 Vérifie si l'email est celui du fondateur
+ * SÉCURITÉ: Si FOUNDER_EMAIL est vide/undefined, PERSONNE n'est fondateur
+ */
+function isFounderEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  if (!FOUNDER_EMAIL || FOUNDER_EMAIL.trim() === '') return false; // 🔒 SÉCURITÉ CRITIQUE
+  return email.toLowerCase().trim() === FOUNDER_EMAIL.toLowerCase().trim();
+}
 
 // Navigation de base (accessible à tous)
 const baseNavigation = [
@@ -71,6 +86,14 @@ const rbacNavigation = [
     bgActive: 'bg-amber-500/20 border-amber-500/30',
   },
   {
+    name: 'Command Center',
+    href: '/admin/pilotage',
+    icon: <BarChart3 className="w-5 h-5" />,
+    roles: ['manager', 'fondateur'] as UserRole[],
+    color: 'text-emerald-400',
+    bgActive: 'bg-emerald-500/20 border-emerald-500/30',
+  },
+  {
     name: 'Espace Direction',
     href: '/direction',
     icon: <Target className="w-5 h-5" />,
@@ -97,18 +120,55 @@ const ROLE_ICONS = {
 };
 
 export default function Sidebar() {
+  // 🔒 DÉSACTIVATION TOTALE TEMPORAIRE - TEST VERCEL
+  // Si ce return null; n'a pas d'effet sur le site en ligne,
+  // c'est que nous ne modifions pas le bon projet ou que Vercel ne se met pas à jour.
+  return null;
+  
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const { theme, logoUrl, cabinetNom } = useBranding();
   const { config: subscriptionConfig } = useSubscription();
-  const { user, switchRole, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isFounder: authIsFounder, logout } = useAuth();
   const themeConfig = THEMES[theme];
 
-  // Filtrer la navigation selon le rôle de l'utilisateur
+  // 🔒 Récupérer l'email réel de l'utilisateur Supabase
+  useEffect(() => {
+    async function fetchUserEmail() {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        setUserEmail(authUser?.email || null);
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    }
+    fetchUserEmail();
+  }, []);
+
+  // 🔒 SÉCURITÉ HARD-CODED : Double vérification
+  const isFounder = isFounderEmail(userEmail) && authIsFounder;
+  
+  // 🔒 MENU VIDE PAR DÉFAUT - Ajout conditionnel uniquement si authentifié
   const userRole = user?.role || 'artisan';
-  const filteredBaseNav = baseNavigation.filter(item => item.roles.includes(userRole));
-  const filteredRbacNav = rbacNavigation.filter(item => item.roles.includes(userRole));
+  
+  // 🔒 Navigation de base : UNIQUEMENT si authentifié avec email validé
+  const filteredBaseNav = (isAuthenticated && userEmail && !isLoadingAuth) ? baseNavigation.filter(item => {
+    // Routes admin/manager = UNIQUEMENT fondateur
+    if (item.roles.includes('fondateur') && !item.roles.includes('artisan')) {
+      return isFounder;
+    }
+    // Artisan voit ses routes
+    return item.roles.includes('artisan');
+  }) : []; // 🔒 VIDE si pas authentifié
+  
+  // 🔒 Navigation RBAC : HARD-CODED sur l'email - UNIQUEMENT fondateur
+  const filteredRbacNav = (isAuthenticated && userEmail && isFounder) ? rbacNavigation.filter(item => {
+    // Toutes les routes RBAC = UNIQUEMENT FOUNDER_EMAIL vérifié
+    return isFounder;
+  }) : []; // 🔒 VIDE si pas fondateur
+  
   const RoleIcon = ROLE_ICONS[userRole];
 
   return (
@@ -168,54 +228,38 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Sélecteur de rôle (Démo) */}
+      {/* 🔒 Indicateur de rôle (LECTURE SEULE - Pas de switchRole) */}
       <div className="p-4 border-b border-slate-700">
         <div className="relative">
-          <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-              ROLE_CONFIG[userRole].color
-            } bg-slate-800 hover:bg-slate-700`}
-          >
-            <RoleIcon className="w-5 h-5" />
-            <div className="flex-1 text-left">
-              <p className="text-white text-sm font-medium">{ROLE_CONFIG[userRole].label}</p>
-              <p className="text-slate-500 text-xs">{ROLE_CONFIG[userRole].cle}</p>
+          {/* 🔒 Affichage selon authentification et rôle */}
+          {!isAuthenticated || !userEmail ? (
+            /* 🔒 Non authentifié : message d'avertissement */
+            <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-red-900/20 border border-red-500/30">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <div className="flex-1 text-left">
+                <p className="text-red-400 text-sm font-medium">Non connecté</p>
+                <p className="text-slate-500 text-xs">Authentification requise</p>
+              </div>
             </div>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showRoleMenu ? 'rotate-180' : ''}`} />
-          </button>
-
-          {/* Menu déroulant des rôles */}
-          {showRoleMenu && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-50 overflow-hidden">
-              <p className="px-3 py-2 text-xs text-slate-500 border-b border-slate-700">Changer de rôle (Démo)</p>
-              {(['fondateur', 'manager', 'partenaire', 'artisan'] as UserRole[]).map((role) => {
-                const config = ROLE_CONFIG[role];
-                const Icon = ROLE_ICONS[role];
-                const isCurrentRole = role === userRole;
-                
-                return (
-                  <button
-                    key={role}
-                    onClick={() => {
-                      switchRole(role);
-                      setShowRoleMenu(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-colors ${
-                      isCurrentRole ? 'bg-slate-700' : 'hover:bg-slate-700'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${config.color}`} />
-                    <div className="flex-1 text-left">
-                      <p className="text-white text-sm">{config.label}</p>
-                      <p className="text-slate-500 text-xs">{config.cle}</p>
-                    </div>
-                    {isCurrentRole && (
-                      <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                    )}
-                  </button>
-                );
-              })}
+          ) : isFounder ? (
+            /* 🔒 Fondateur : affichage spécial (LECTURE SEULE) */
+            <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-amber-900/20 border border-amber-500/30">
+              <Crown className="w-5 h-5 text-amber-400" />
+              <div className="flex-1 text-left">
+                <p className="text-amber-400 text-sm font-medium">Fondateur</p>
+                <p className="text-slate-500 text-xs truncate">{userEmail}</p>
+              </div>
+              <Shield className="w-4 h-4 text-amber-500" />
+            </div>
+          ) : (
+            /* 🔒 Utilisateur standard : affichage statique */
+            <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800">
+              <Zap className="w-5 h-5 text-emerald-400" />
+              <div className="flex-1 text-left">
+                <p className="text-white text-sm font-medium">Espace Client</p>
+                <p className="text-slate-500 text-xs truncate">{userEmail}</p>
+              </div>
+              <Shield className="w-4 h-4 text-slate-600" />
             </div>
           )}
         </div>
@@ -324,10 +368,7 @@ export default function Sidebar() {
         </a>
         
         <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            window.location.href = '/login';
-          }}
+          onClick={() => logout()}
           className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />
@@ -336,6 +377,10 @@ export default function Sidebar() {
         
         {/* Liens légaux */}
         <div className="pt-2 border-t border-slate-800 flex justify-center gap-3 text-xs text-slate-500">
+          <Link href="/cgv" className="hover:text-slate-400 transition-colors">
+            CGV
+          </Link>
+          <span>•</span>
           <Link href="/mentions-legales" className="hover:text-slate-400 transition-colors">
             Mentions légales
           </Link>

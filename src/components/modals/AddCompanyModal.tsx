@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, Building2, FileText, Factory, MapPin, Users, Search, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { sanitizeText, sanitizeEmail, sanitizeSiret, detectSqlInjection } from '@/lib/security/sanitize';
 
 interface AddCompanyModalProps {
   isOpen: boolean;
@@ -169,17 +170,25 @@ export default function AddCompanyModal({ isOpen, onClose, onSubmit }: AddCompan
     setIsSubmitting(true);
     setSiretError(null);
 
+    // SÉCURITÉ: Détection tentatives d'injection
+    const allFields = [formData.nom, formData.adresse, formData.ville, formData.secteur];
+    if (allFields.some(field => field && detectSqlInjection(field))) {
+      setSiretError('Caractères non autorisés détectés');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Préparer les données pour Supabase
+      // SÉCURITÉ: Sanitization des données avant insertion
       const companyData = {
-        name: formData.nom,
-        siret: formData.siret.replace(/\s/g, ''),
-        address: formData.adresse || null,
-        city: formData.ville || null,
-        sector: formData.secteur || null,
+        name: sanitizeText(formData.nom, 200),
+        siret: sanitizeSiret(formData.siret) || formData.siret.replace(/\s/g, ''),
+        address: formData.adresse ? sanitizeText(formData.adresse, 500) : null,
+        city: formData.ville ? sanitizeText(formData.ville, 100) : null,
+        sector: formData.secteur ? sanitizeText(formData.secteur, 100) : null,
         naf_code: formData.codeNAF || null,
         employee_count: formData.effectif || null,
-        email: formData.email || null,
+        email: formData.email ? sanitizeEmail(formData.email) : null,
         status: 'prospect',
       };
 

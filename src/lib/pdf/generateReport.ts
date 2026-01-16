@@ -83,13 +83,22 @@ const formatCurrency = (value: number): string => {
 const LEGAL_FOOTER = "Ce rapport est une estimation par IA. Validation technique par un professionnel RGE requise.";
 
 /**
- * DEEP FIX - Fonction de correction orthographique automatique
- * Corrige les fautes de frappe courantes dans les données importées
+ * DEEP FIX - Fonction de sanitization et correction orthographique
+ * Protège contre XSS et corrige les fautes de frappe courantes
  */
 function sanitizeText(text: string): string {
-  if (!text) return text;
-  return text
-    // Corrections orthographiques forcées
+  if (!text) return '';
+  
+  // SÉCURITÉ: Suppression des balises HTML et scripts potentiels
+  let safe = String(text)
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '') // Supprime toutes les balises HTML
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '') // Supprime les event handlers
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ''); // Caractères de contrôle
+  
+  // Corrections orthographiques forcées
+  return safe
     .replace(/satination/gi, 'estimation')
     .replace(/Cer rapport/g, 'Ce rapport')
     .replace(/techniqur/gi, 'technique')
@@ -102,7 +111,9 @@ function sanitizeText(text: string): string {
     // Normalisation codes CEE
     .replace(/IND-UT102-/g, 'IND-UT-102')
     .replace(/IND_UT_102/g, 'IND-UT-102')
-    .replace(/IND-UT-102-/g, 'IND-UT-102');
+    .replace(/IND-UT-102-/g, 'IND-UT-102')
+    // Limite longueur pour éviter les attaques par déni de service
+    .slice(0, 10000);
 }
 
 // Formatage date et heure pour signature

@@ -1,0 +1,124 @@
+{
+  "dateAudit": "2026-01-15T19:28:07.794Z",
+  "version": "v3.1.0",
+  "phases": [
+    {
+      "phase": "Phase 1",
+      "test": "Division par zéro protégée",
+      "resultat": "OK",
+      "correction": "Ajout de gardes isNaN() et isFinite() dans les calculs",
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 1",
+      "test": "Pas de NaN dans les calculs",
+      "resultat": "ÉCHEC",
+      "correction": "Ajout de gardes isNaN() et isFinite() dans les calculs",
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 1",
+      "test": "Pas de Infinity dans les calculs",
+      "resultat": "OK",
+      "correction": "Ajout de gardes isNaN() et isFinite() dans les calculs",
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 1",
+      "test": "Gestion valeurs null/undefined",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 1",
+      "test": "Caractères spéciaux dans noms",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 1",
+      "test": "Noms très longs (500 chars)",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 2",
+      "test": "Anti-doublon email actif",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.798Z"
+    },
+    {
+      "phase": "Phase 2",
+      "test": "Capture caractères spéciaux sans perte",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.799Z"
+    },
+    {
+      "phase": "Phase 2",
+      "test": "Encodage UTF-8 préservé",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.799Z"
+    },
+    {
+      "phase": "Phase 3",
+      "test": "PDF: Noms longs tronqués correctement",
+      "resultat": "OK",
+      "correction": "Troncature automatique avec ellipse \"...\" pour noms > 80 caractères",
+      "timestamp": "2026-01-15T19:28:07.799Z"
+    },
+    {
+      "phase": "Phase 3",
+      "test": "Notification email déclenchée",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.800Z"
+    },
+    {
+      "phase": "Phase 3",
+      "test": "Format email validé",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.800Z"
+    },
+    {
+      "phase": "Phase 4",
+      "test": "Interruption connexion: données sauvegardées",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.800Z"
+    },
+    {
+      "phase": "Phase 4",
+      "test": "Reprise scan après interruption",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.800Z"
+    },
+    {
+      "phase": "Phase 4",
+      "test": "Race condition: verrou exclusif actif",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.801Z"
+    },
+    {
+      "phase": "Phase 4",
+      "test": "Charge élevée: 100 dossiers sans erreur",
+      "resultat": "OK",
+      "correction": null,
+      "timestamp": "2026-01-15T19:28:07.801Z"
+    }
+  ],
+  "resume": {
+    "total": 16,
+    "ok": 15,
+    "echec": 1,
+    "corrige": 1
+  }
+}

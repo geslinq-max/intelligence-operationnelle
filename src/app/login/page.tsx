@@ -41,12 +41,31 @@ export default function LoginPage() {
           return;
         }
       } else {
+        // ================================================================
+        // INSCRIPTION - Rôle USER (artisan) par défaut pour tout le monde
+        // Seul FOUNDER_EMAIL obtient le rôle fondateur (via middleware)
+        // ================================================================
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              role: 'artisan', // Rôle par défaut = USER limité à l'espace client
+            },
+          },
         });
         
         if (error) throw error;
+        
+        // Créer le profil utilisateur avec rôle artisan
+        if (data?.user) {
+          await supabase.from('user_profiles').upsert({
+            user_id: data.user.id,
+            email: email.toLowerCase().trim(),
+            role: 'artisan', // Toujours artisan à l'inscription
+            created_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+        }
         
         setError('✅ Compte créé ! Vérifie ton email pour confirmer.');
         setIsLoading(false);
