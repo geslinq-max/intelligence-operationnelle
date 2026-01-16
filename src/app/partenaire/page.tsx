@@ -379,7 +379,7 @@ function PartenairePageContent() {
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-white">Cockpit de Rente</h1>
               <p className="text-cyan-400 text-sm font-medium">
-                {ROLE_CONFIG.partenaire.cle} • Gestion de votre portefeuille
+                Administration • Gestion Portefeuille
               </p>
             </div>
           </div>
@@ -446,7 +446,7 @@ function PartenairePageContent() {
 
 export default function PartenairePage() {
   return (
-    <ProtectedRoute allowedRoles={['fondateur', 'manager', 'partenaire']}>
+    <ProtectedRoute allowedRoles={['admin']}>
       <PartenairePageContent />
     </ProtectedRoute>
   );

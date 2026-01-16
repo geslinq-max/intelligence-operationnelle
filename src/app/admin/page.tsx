@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { APP_VERSION_FULL } from '@/lib/config/constants';
 import { Sidebar } from '@/components';
-import { useAuth, ProtectedRoute, ROLE_CONFIG } from '@/contexts/AuthContext';
+import { useAuth, ProtectedRoute } from '@/contexts/AuthContext';
 import {
   Crown,
   TrendingUp,
@@ -266,9 +266,9 @@ function AdminPageContent() {
               <Crown className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white">Le Cerveau</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-white">Tableau de Bord</h1>
               <p className="text-amber-400 text-sm font-medium">
-                {ROLE_CONFIG.fondateur.cle} • Vision Stratégique Complète
+                Administration • Vision Complete
               </p>
             </div>
           </div>
@@ -367,7 +367,7 @@ function AdminPageContent() {
 
 export default function AdminPage() {
   return (
-    <ProtectedRoute allowedRoles={['fondateur']}>
+    <ProtectedRoute allowedRoles={['admin']}>
       <AdminPageContent />
     </ProtectedRoute>
   );

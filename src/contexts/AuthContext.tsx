@@ -3,26 +3,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import { isAdminEmail, type UserRole, ADMIN_ROUTES, USER_ROUTES } from '@/lib/auth/role-config';
 
 // ============================================================================
-// 🔒 SÉCURITÉ HARD-CODED - AUCUN MOCK, AUCUN DEMO
+// TYPES - MODÈLE SOLO-FONDATEUR
 // ============================================================================
 
-// 🔒 EMAIL FONDATEUR - SI VIDE OU UNDEFINED, PERSONNE N'A ACCÈS FONDATEUR
-const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
-
-// 🔒 Vérification stricte : si FOUNDER_EMAIL est vide, PERSONNE n'est fondateur
-function isFounderEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  if (!FOUNDER_EMAIL || FOUNDER_EMAIL.trim() === '') return false; // SÉCURITÉ: Si pas de FOUNDER_EMAIL, personne n'est fondateur
-  return email.toLowerCase().trim() === FOUNDER_EMAIL.toLowerCase().trim();
-}
-
-// ============================================================================
-// TYPES - RBAC CAPITAL ÉNERGIE
-// ============================================================================
-
-export type UserRole = 'fondateur' | 'manager' | 'partenaire' | 'artisan';
+export type { UserRole } from '@/lib/auth/role-config';
 
 export interface User {
   id: string;
@@ -40,55 +27,31 @@ interface AuthContextType {
   logout: () => void;
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean;
   getHomeRoute: () => string;
-  isFounder: boolean;
+  isAdmin: boolean;
 }
 
 // ============================================================================
-// CONFIGURATION DES RÔLES (lecture seule, pas de switchRole)
+// CONFIGURATION DES RÔLES (SIMPLIFIÉ)
 // ============================================================================
 
 export const ROLE_CONFIG: Record<UserRole, {
   label: string;
-  cle: string;
   description: string;
   homeRoute: string;
-  allowedRoutes: string[];
   color: string;
   icon: string;
 }> = {
-  fondateur: {
-    label: 'Fondateur',
-    cle: 'Clé Fondateur',
-    description: 'Accès au Cerveau - Vision stratégique complète',
+  admin: {
+    label: 'Administrateur',
+    description: 'Tableau de bord complet - Gestion clients et statistiques',
     homeRoute: '/admin',
-    allowedRoutes: ['/admin', '/admin/pilotage', '/direction', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion', '/prospection', '/verificateur'],
     color: 'text-amber-400',
     icon: '👑',
   },
-  manager: {
-    label: 'Manager',
-    cle: 'Clé Manager',
-    description: 'Bras Droit - Gestion équipe commerciale',
-    homeRoute: '/direction',
-    allowedRoutes: ['/direction', '/admin/pilotage', '/partenaire', '/dashboard', '/tarifs', '/entreprises', '/gestion'],
-    color: 'text-violet-400',
-    icon: '🎯',
-  },
-  partenaire: {
-    label: 'Partenaire',
-    cle: 'Clé Soldat',
-    description: 'Cockpit de Rente - Gestion clients',
-    homeRoute: '/partenaire',
-    allowedRoutes: ['/partenaire', '/dashboard', '/tarifs'],
-    color: 'text-cyan-400',
-    icon: '💼',
-  },
   artisan: {
     label: 'Artisan',
-    cle: 'Clé Artisan',
-    description: 'Espace Opérationnel - Dépôt et suivi dossiers',
+    description: 'Espace client - Dépôt et suivi de dossiers',
     homeRoute: '/dashboard',
-    allowedRoutes: ['/dashboard', '/verificateur', '/tarifs', '/gestion'],
     color: 'text-emerald-400',
     icon: '🔧',
   },
@@ -106,15 +69,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // 🔒 Charger l'utilisateur UNIQUEMENT depuis Supabase Auth
   useEffect(() => {
     async function loadUser() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         
         if (authUser && authUser.email) {
-          // 🔒 Déterminer le rôle basé UNIQUEMENT sur l'email
-          const role: UserRole = isFounderEmail(authUser.email) ? 'fondateur' : 'artisan';
+          const role: UserRole = isAdminEmail(authUser.email) ? 'admin' : 'artisan';
           
           setUser({
             id: authUser.id,
@@ -136,12 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     loadUser();
     
-    // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session?.user) {
         setUser(null);
       } else if (session?.user?.email) {
-        const role: UserRole = isFounderEmail(session.user.email) ? 'fondateur' : 'artisan';
+        const role: UserRole = isAdminEmail(session.user.email) ? 'admin' : 'artisan';
         setUser({
           id: session.user.id,
           nom: session.user.email.split('@')[0],
@@ -155,7 +115,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Protection des routes côté client (le middleware est la vraie protection)
   useEffect(() => {
     if (isLoading) return;
     
@@ -171,27 +130,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   }, [router]);
 
-  // 🔒 hasAccess basé sur l'email réel, pas sur un rôle client-side modifiable
   const hasAccess = useCallback((requiredRole: UserRole | UserRole[]): boolean => {
     if (!user) return false;
     
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
     
-    // 🔒 Vérifier si c'est le fondateur via email HARD-CODED
-    if (isFounderEmail(user.email)) return true;
+    if (isAdminEmail(user.email)) return true;
     
-    // Pour les autres, vérifier le rôle (toujours artisan pour les non-fondateurs)
     return roles.includes(user.role);
   }, [user]);
 
   const getHomeRoute = useCallback((): string => {
     if (!user) return '/login';
-    if (isFounderEmail(user.email)) return '/admin';
+    if (isAdminEmail(user.email)) return '/admin';
     return '/dashboard';
   }, [user]);
 
-  // 🔒 isFounder basé sur email réel
-  const isFounder = user ? isFounderEmail(user.email) : false;
+  const isAdmin = user ? isAdminEmail(user.email) : false;
 
   return (
     <AuthContext.Provider value={{
@@ -201,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       hasAccess,
       getHomeRoute,
-      isFounder,
+      isAdmin,
     }}>
       {children}
     </AuthContext.Provider>
@@ -227,26 +182,23 @@ export function ProtectedRoute({
   children: React.ReactNode;
   allowedRoles: UserRole[];
 }) {
-  const { user, isLoading, hasAccess, getHomeRoute, isFounder } = useAuth();
+  const { user, isLoading, hasAccess, isAdmin } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
-      // 🔒 Si pas d'utilisateur, rediriger vers login
       if (!user) {
         router.replace('/login');
         return;
       }
       
-      // 🔒 Fondateur a toujours accès
-      if (isFounder) return;
+      if (isAdmin) return;
       
-      // 🔒 Vérifier l'accès pour les non-fondateurs
       if (!hasAccess(allowedRoles)) {
         router.replace('/403');
       }
     }
-  }, [user, isLoading, hasAccess, allowedRoles, router, getHomeRoute, isFounder]);
+  }, [user, isLoading, hasAccess, allowedRoles, router, isAdmin]);
 
   if (isLoading) {
     return (
@@ -263,8 +215,7 @@ export function ProtectedRoute({
     return null;
   }
 
-  // 🔒 Fondateur a toujours accès
-  if (isFounder) {
+  if (isAdmin) {
     return <>{children}</>;
   }
 

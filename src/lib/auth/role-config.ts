@@ -1,29 +1,25 @@
 /**
- * Configuration des Rôles - Sécurité CAPITAL ÉNERGIE
+ * Configuration des Rôles - CAPITAL ÉNERGIE
  * 
- * RÈGLES DE SÉCURITÉ :
- * - Tout nouveau compte = rôle 'artisan' (USER limité à l'espace client)
- * - Seul FOUNDER_EMAIL a les droits 'fondateur'
- * - Les routes /admin et /vendeur sont protégées par middleware
+ * MODÈLE SOLO-FONDATEUR SIMPLIFIÉ :
+ * - ADMIN : Accès total (FOUNDER_EMAIL uniquement)
+ * - ARTISAN : Espace client standard
+ * 
+ * Architecture modulaire pour extensions futures (ex: segment Viticulture)
  */
 
 // ============================================================================
-// EMAIL FONDATEUR UNIQUE
+// EMAIL ADMIN UNIQUE
 // ============================================================================
 
-/**
- * IMPORTANT: Remplacez cette valeur par votre email réel
- * Seul cet email aura les droits FOUNDER (fondateur)
- */
-export const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
+export const ADMIN_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 
 // ============================================================================
-// TYPES DE RÔLES
+// TYPES DE RÔLES (SIMPLIFIÉ)
 // ============================================================================
 
-export type UserRole = 'fondateur' | 'manager' | 'partenaire' | 'artisan';
+export type UserRole = 'admin' | 'artisan';
 
-// Rôle par défaut pour tout nouveau compte
 export const DEFAULT_ROLE: UserRole = 'artisan';
 
 // ============================================================================
@@ -31,37 +27,55 @@ export const DEFAULT_ROLE: UserRole = 'artisan';
 // ============================================================================
 
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
-  fondateur: 100,  // Accès total
-  manager: 75,     // Accès direction + partenaires
-  partenaire: 50,  // Accès espace partenaire
-  artisan: 25,     // Accès espace client uniquement
+  admin: 100,    // Accès total
+  artisan: 25,   // Espace client uniquement
 };
 
 // ============================================================================
-// ROUTES PROTÉGÉES PAR RÔLE
+// CONFIGURATION DES SEGMENTS (MODULAIRE)
 // ============================================================================
 
-export const PROTECTED_ROUTES: Record<string, UserRole[]> = {
-  '/admin': ['fondateur'],
-  '/admin/pilotage': ['fondateur', 'manager'],
-  '/direction': ['fondateur', 'manager'],
-  '/vendeur': ['fondateur', 'manager', 'partenaire'],
-  '/partenaire': ['fondateur', 'manager', 'partenaire'],
-  '/prospection': ['fondateur', 'manager'],
-  '/entreprises': ['fondateur', 'manager'],
-  '/gestion': ['fondateur', 'manager', 'partenaire', 'artisan'],
+export type BusinessSegment = 'energie' | 'viticulture';
+
+export const SEGMENTS: Record<BusinessSegment, {
+  label: string;
+  icon: string;
+  color: string;
+}> = {
+  energie: {
+    label: 'Énergie & CEE',
+    icon: '⚡',
+    color: 'emerald',
+  },
+  viticulture: {
+    label: 'Viticulture',
+    icon: '🍇',
+    color: 'purple',
+  },
 };
 
-// Routes accessibles à tous les utilisateurs authentifiés
+// Segment actif (pour extension future)
+export const ACTIVE_SEGMENT: BusinessSegment = 'energie';
+
+// ============================================================================
+// ROUTES
+// ============================================================================
+
+export const ADMIN_ROUTES = [
+  '/admin',
+  '/admin/clients',
+  '/admin/statistiques',
+  '/admin/parametres',
+];
+
 export const USER_ROUTES = [
   '/dashboard',
   '/verificateur',
   '/tarifs',
   '/profile',
-  '/espace-client',
+  '/gestion',
 ];
 
-// Routes publiques (pas d'authentification requise)
 export const PUBLIC_ROUTES = [
   '/',
   '/login',
@@ -70,74 +84,39 @@ export const PUBLIC_ROUTES = [
   '/confidentialite',
   '/cgv',
   '/tarifs',
+  '/403',
 ];
 
 // ============================================================================
 // FONCTIONS UTILITAIRES
 // ============================================================================
 
-/**
- * Détermine le rôle à assigner lors de la création d'un compte
- */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  if (!ADMIN_EMAIL || ADMIN_EMAIL.trim() === '') return false;
+  return email.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim();
+}
+
 export function getRoleForEmail(email: string): UserRole {
-  // Normalisation de l'email
-  const normalizedEmail = email.toLowerCase().trim();
-  const normalizedFounder = FOUNDER_EMAIL.toLowerCase().trim();
-  
-  // Seul l'email fondateur obtient le rôle fondateur
-  if (normalizedEmail === normalizedFounder) {
-    return 'fondateur';
-  }
-  
-  // Tous les autres obtiennent le rôle par défaut (artisan)
-  return DEFAULT_ROLE;
+  return isAdminEmail(email) ? 'admin' : 'artisan';
 }
 
-/**
- * Vérifie si un rôle a accès à une route
- */
-export function hasRouteAccess(role: UserRole, pathname: string): boolean {
-  // Vérifier les routes publiques
-  if (PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`))) {
-    return true;
-  }
-  
-  // Vérifier les routes utilisateur (tous les authentifiés)
-  if (USER_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`))) {
-    return true;
-  }
-  
-  // Vérifier les routes protégées
-  for (const [route, allowedRoles] of Object.entries(PROTECTED_ROUTES)) {
-    if (pathname === route || pathname.startsWith(`${route}/`)) {
-      return allowedRoles.includes(role);
-    }
-  }
-  
-  // Par défaut, autoriser (routes non listées)
-  return true;
-}
-
-/**
- * Obtient la route de redirection pour un rôle donné
- */
 export function getHomeRouteForRole(role: UserRole): string {
-  switch (role) {
-    case 'fondateur':
-      return '/admin';
-    case 'manager':
-      return '/direction';
-    case 'partenaire':
-      return '/partenaire';
-    case 'artisan':
-    default:
-      return '/dashboard';
-  }
+  return role === 'admin' ? '/admin' : '/dashboard';
 }
 
-/**
- * Vérifie si un rôle a un niveau d'accès supérieur ou égal à un autre
- */
-export function hasMinimumRole(userRole: UserRole, requiredRole: UserRole): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
+export function hasRouteAccess(role: UserRole, pathname: string): boolean {
+  if (PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(`${r}/`))) {
+    return true;
+  }
+  
+  if (USER_ROUTES.some(r => pathname === r || pathname.startsWith(`${r}/`))) {
+    return true;
+  }
+  
+  if (ADMIN_ROUTES.some(r => pathname === r || pathname.startsWith(`${r}/`))) {
+    return role === 'admin';
+  }
+  
+  return true;
 }

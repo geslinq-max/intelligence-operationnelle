@@ -347,7 +347,7 @@ function DirectionPageContent() {
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-white">Espace Direction</h1>
               <p className="text-violet-400 text-sm font-medium">
-                {ROLE_CONFIG.manager.cle} • Bras Droit
+                Administration • Gestion Equipe
               </p>
             </div>
           </div>
@@ -420,7 +420,7 @@ function DirectionPageContent() {
 
 export default function DirectionPage() {
   return (
-    <ProtectedRoute allowedRoles={['fondateur', 'manager']}>
+    <ProtectedRoute allowedRoles={['admin']}>
       <DirectionPageContent />
     </ProtectedRoute>
   );

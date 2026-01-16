@@ -481,7 +481,7 @@ function PilotagePageContent() {
 
 export default function PilotagePage() {
   return (
-    <ProtectedRoute allowedRoles={['fondateur', 'manager']}>
+    <ProtectedRoute allowedRoles={['admin']}>
       <PilotagePageContent />
     </ProtectedRoute>
   );
