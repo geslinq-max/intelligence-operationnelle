@@ -57,6 +57,13 @@ export const SUPABASE_CONFIG: AgentConfig = {
                 isKeyPresent(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
 };
 
+export const GOOGLE_PLACES_CONFIG: AgentConfig = {
+  name: 'Radar-Prospection',
+  mode: isKeyPresent(process.env.GOOGLE_PLACES_API_KEY) ? 'REAL' : 'SIMULATION',
+  apiKey: process.env.GOOGLE_PLACES_API_KEY,
+  isConfigured: isKeyPresent(process.env.GOOGLE_PLACES_API_KEY),
+};
+
 // ============================================================================
 // LOGGING DU STATUT
 // ============================================================================
@@ -73,7 +80,7 @@ export function logAgentStatus(): void {
 // HELPER POUR LES AGENTS
 // ============================================================================
 
-export function getAgentMode(agentName: 'extractor' | 'mailer' | 'database'): AgentMode {
+export function getAgentMode(agentName: 'extractor' | 'mailer' | 'database' | 'radar'): AgentMode {
   switch (agentName) {
     case 'extractor':
       return GEMINI_CONFIG.mode;
@@ -81,10 +88,12 @@ export function getAgentMode(agentName: 'extractor' | 'mailer' | 'database'): Ag
       return RESEND_CONFIG.mode;
     case 'database':
       return SUPABASE_CONFIG.mode;
+    case 'radar':
+      return GOOGLE_PLACES_CONFIG.mode;
   }
 }
 
-export function isRealMode(agentName: 'extractor' | 'mailer' | 'database'): boolean {
+export function isRealMode(agentName: 'extractor' | 'mailer' | 'database' | 'radar'): boolean {
   return getAgentMode(agentName) === 'REAL';
 }
 
@@ -110,4 +119,9 @@ RESEND_API_KEY=
 # Obtenez vos clés sur : https://supabase.com/dashboard/project/_/settings/api
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+# Google Places API (Radar de prospection)
+# Obtenez votre clé sur : https://console.cloud.google.com/apis/credentials
+# Activez les APIs : Places API, Geocoding API
+GOOGLE_PLACES_API_KEY=
 `;

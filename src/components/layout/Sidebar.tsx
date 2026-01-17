@@ -10,6 +10,7 @@ import {
 import { useBranding, THEMES } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminEmail } from '@/lib/auth/role-config';
+import { IndustrySwitcher } from '@/contexts/IndustryContext';
 import { supabase } from '@/lib/supabase/client';
 
 // ============================================================================
@@ -168,6 +169,12 @@ export default function Sidebar() {
             </div>
             <Shield className={`w-4 h-4 ${isAdmin ? 'text-amber-500' : 'text-slate-600'}`} />
           </div>
+        </div>
+
+        {/* Sélecteur de Contexte Métier - DEBUG: bordure rouge + condition retirée */}
+        <div className="px-4 py-3 border-b border-slate-700 border-2 border-red-500 relative z-50">
+          <p className="text-slate-500 text-xs uppercase tracking-wider mb-2 px-1">Contexte Métier</p>
+          <IndustrySwitcher variant="compact" />
         </div>
 
         {/* Navigation principale - Espacement aere */}

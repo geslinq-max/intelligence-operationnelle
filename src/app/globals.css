@@ -55,3 +55,86 @@ body {
   animation: fade-in 0.15s ease-out;
 }
 
+/* ============================================================================
+   MOBILE OPTIMIZATIONS - Anti-zoom iOS & Touch Ergonomics
+   ============================================================================ */
+
+/* Prevent iOS zoom on input focus (requires font-size >= 16px) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"],
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+@media (min-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="month"],
+  input[type="week"],
+  textarea,
+  select {
+    font-size: inherit !important;
+  }
+}
+
+/* Minimum touch target size (44x44px recommended by Apple/Google) */
+button,
+[role="button"],
+a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Ensure buttons have proper touch feedback */
+button:active,
+[role="button"]:active {
+  transform: scale(0.98);
+}
+
+/* Smooth scrolling for iOS */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area insets for notched devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Prevent text selection on interactive elements */
+button,
+[role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Remove tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+

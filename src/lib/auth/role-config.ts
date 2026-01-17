@@ -18,7 +18,10 @@ export const ADMIN_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 // TYPES DE RÔLES (SIMPLIFIÉ)
 // ============================================================================
 
-export type UserRole = 'admin' | 'artisan';
+export type UserRole = 'admin' | 'artisan' | 'client';
+
+// Type d'industrie pour les clients
+export type ClientIndustry = 'CEE' | 'PAYSAGISTE' | 'VITICULTEUR';
 
 export const DEFAULT_ROLE: UserRole = 'artisan';
 
@@ -28,7 +31,8 @@ export const DEFAULT_ROLE: UserRole = 'artisan';
 
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   admin: 100,    // Accès total
-  artisan: 25,   // Espace client uniquement
+  artisan: 50,   // Espace artisan (accès interne)
+  client: 25,    // Espace client (accès restreint)
 };
 
 // ============================================================================
@@ -76,9 +80,17 @@ export const USER_ROUTES = [
   '/gestion',
 ];
 
+export const CLIENT_ROUTES = [
+  '/client',
+  '/client/dashboard',
+  '/client/dossiers',
+  '/client/documents',
+];
+
 export const PUBLIC_ROUTES = [
   '/',
   '/login',
+  '/inscription',
   '/landing',
   '/mentions-legales',
   '/confidentialite',
@@ -102,7 +114,11 @@ export function getRoleForEmail(email: string): UserRole {
 }
 
 export function getHomeRouteForRole(role: UserRole): string {
-  return role === 'admin' ? '/admin' : '/dashboard';
+  switch (role) {
+    case 'admin': return '/admin';
+    case 'client': return '/client/dashboard';
+    default: return '/dashboard';
+  }
 }
 
 export function hasRouteAccess(role: UserRole, pathname: string): boolean {

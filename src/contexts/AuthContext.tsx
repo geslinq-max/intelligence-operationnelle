@@ -50,10 +50,17 @@ export const ROLE_CONFIG: Record<UserRole, {
   },
   artisan: {
     label: 'Artisan',
-    description: 'Espace client - Dépôt et suivi de dossiers',
+    description: 'Espace artisan - Accès interne',
     homeRoute: '/dashboard',
     color: 'text-emerald-400',
     icon: '🔧',
+  },
+  client: {
+    label: 'Client',
+    description: 'Espace Ma Solution - Suivi simplifié',
+    homeRoute: '/client/dashboard',
+    color: 'text-cyan-400',
+    icon: '💼',
   },
 };
 
@@ -143,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getHomeRoute = useCallback((): string => {
     if (!user) return '/login';
     if (isAdminEmail(user.email)) return '/admin';
+    if (user.role === 'client') return '/client/dashboard';
     return '/dashboard';
   }, [user]);
 

@@ -14,10 +14,12 @@ export type UrgencyLevel = 'URGENCE_HAUTE' | 'URGENCE_MOYENNE' | 'NORMAL' | 'UNK
 
 export interface PainSignal {
   keyword: string;
-  category: 'reactivite' | 'delais' | 'qualite' | 'prix';
+  category: 'reactivite' | 'delais' | 'qualite' | 'prix' | 'conformite';
   weight: number;
   matchedText: string;
   reviewDate?: Date;
+  reviewRating?: number;
+  authorName?: string;
 }
 
 export interface ProspectInsight {
@@ -29,6 +31,24 @@ export interface ProspectInsight {
   lastAnalyzedAt: Date;
   reviewCount: number;
   topIssues: string[];
+  // Nouveaux champs pour les scripts de vente
+  realQuotes: RealQuote[];
+  scriptHooks: ScriptHook[];
+}
+
+export interface RealQuote {
+  text: string;
+  category: string;
+  authorName?: string;
+  rating: number;
+  date: Date;
+}
+
+export interface ScriptHook {
+  category: string;
+  hook: string;
+  frequency: number;
+  suggestedOpener: string;
 }
 
 export interface ReviewData {
@@ -45,51 +65,83 @@ export interface ReviewData {
 const PAIN_KEYWORDS = {
   reactivite: {
     patterns: [
+      // Communication de base
       { regex: /ne?\s*(répond|répondent)\s*(pas|jamais|plus)/gi, weight: 15 },
       { regex: /sans\s*réponse/gi, weight: 12 },
-      { regex: /pas\s*de\s*(rappel|réponse|nouvelles)/gi, weight: 14 },
-      { regex: /impossible\s*(de\s*)?(joindre|contacter)/gi, weight: 16 },
-      { regex: /aucun\s*retour/gi, weight: 13 },
-      { regex: /relance[rs]?\s*(plusieurs|multiple)/gi, weight: 11 },
+      { regex: /pas\s*de\s*(rappel|réponse|nouvelles|retour)/gi, weight: 14 },
+      { regex: /impossible\s*(de\s*)?(joindre|contacter|avoir)/gi, weight: 16 },
+      { regex: /aucun\s*(retour|rappel|signe)/gi, weight: 13 },
+      { regex: /relance[rs]?\s*(plusieurs|multiple|[0-9]+\s*fois)/gi, weight: 14 },
       { regex: /appel[és]?\s*(sans\s*)?suite/gi, weight: 10 },
-      { regex: /injoignable/gi, weight: 15 },
-      { regex: /ghost[ée]?/gi, weight: 14 },
-      { regex: /laissé\s*(en\s*)?plan/gi, weight: 12 },
+      { regex: /injoignable[s]?/gi, weight: 15 },
+      { regex: /ghost[ée]?[s]?/gi, weight: 14 },
+      { regex: /laissé[es]?\s*(en\s*)?plan/gi, weight: 12 },
+      // Messages et emails
+      { regex: /message[s]?\s*(rest[ée]s?\s*)?(sans\s*réponse|ignor[ée]s?)/gi, weight: 13 },
+      { regex: /mail[s]?\s*(rest[ée]s?\s*)?(sans\s*réponse|ignor[ée]s?)/gi, weight: 13 },
+      { regex: /ne\s*(décroche|rappelle)\s*(jamais|pas)/gi, weight: 14 },
     ],
     label: 'Problème de réactivité',
+    scriptHook: 'la gestion de vos communications clients',
   },
   delais: {
     patterns: [
+      // Devis spécifiquement
       { regex: /attente?\s*(du\s*)?(devis|chiffrage)/gi, weight: 14 },
-      { regex: /(plusieurs|des)\s*semaines/gi, weight: 12 },
-      { regex: /délai[s]?\s*(trop\s*)?(long|interminable)/gi, weight: 15 },
-      { regex: /mois\s*(d['']attente|sans)/gi, weight: 16 },
-      { regex: /toujours\s*(pas\s*de\s*)?devis/gi, weight: 13 },
+      { regex: /toujours\s*(pas\s*de\s*)?(devis|chiffrage)/gi, weight: 15 },
+      { regex: /devis\s*(jamais\s*)?(reçu|arrivé|envoyé)/gi, weight: 16 },
+      { regex: /devis\s*apr[eè]s\s*([0-9]+|plusieurs)\s*(jours?|semaines?|mois)/gi, weight: 17 },
+      { regex: /attendu\s*([0-9]+|plusieurs)\s*(jours?|semaines?|mois)/gi, weight: 18 },
+      { regex: /dû\s*relancer\s*(pour|le)\s*(un\s*)?devis/gi, weight: 15 },
+      // Délais généraux
+      { regex: /(plusieurs|des|[0-9]+)\s*semaines\s*(d['']attente)?/gi, weight: 12 },
+      { regex: /(plusieurs|des|[0-9]+)\s*mois\s*(d['']attente)?/gi, weight: 16 },
+      { regex: /délai[s]?\s*(trop\s*)?(long[s]?|interminable[s]?)/gi, weight: 15 },
       { regex: /retard\s*(important|énorme|conséquent)/gi, weight: 14 },
-      { regex: /repouss[ée]\s*(plusieurs|sans\s*cesse)/gi, weight: 11 },
-      { regex: /chantier\s*(jamais\s*)?(commencé|démarré)/gi, weight: 15 },
-      { regex: /travaux\s*(en\s*)?suspens/gi, weight: 12 },
+      { regex: /repouss[ée][s]?\s*(plusieurs|sans\s*cesse)/gi, weight: 13 },
+      // Chantiers
+      { regex: /chantier\s*(jamais\s*)?(commencé|démarré|terminé)/gi, weight: 15 },
+      { regex: /travaux\s*(en\s*)?(suspens|attente|retard)/gi, weight: 12 },
       { regex: /planning\s*(non\s*)?respect[ée]/gi, weight: 10 },
     ],
     label: 'Problème de délais',
+    scriptHook: 'la rapidité de vos réponses aux demandes',
   },
   qualite: {
     patterns: [
-      { regex: /travail\s*(bâclé|mal\s*fait)/gi, weight: 10 },
+      { regex: /travail\s*(bâclé|mal\s*fait|approximatif)/gi, weight: 10 },
       { regex: /malfaçon[s]?/gi, weight: 12 },
       { regex: /doit\s*repasser/gi, weight: 8 },
       { regex: /pas\s*(du\s*)?professionnel/gi, weight: 9 },
-      { regex: /déçu[e]?\s*(du\s*)?résultat/gi, weight: 7 },
+      { regex: /déçu[e]?[s]?\s*(du\s*)?résultat/gi, weight: 7 },
+      { regex: /finition[s]?\s*(bâcl[ée]e?s?|mauvaise[s]?)/gi, weight: 9 },
     ],
     label: 'Problème de qualité',
+    scriptHook: 'la qualité et le suivi de vos prestations',
   },
   prix: {
     patterns: [
       { regex: /devis\s*(très\s*)?(cher|élevé|excessif)/gi, weight: 6 },
       { regex: /surfactur[ée]/gi, weight: 8 },
-      { regex: /prix\s*(abusif|exorbitant)/gi, weight: 7 },
+      { regex: /prix\s*(abusif|exorbitant|gonfl[ée])/gi, weight: 7 },
+      { regex: /facture\s*(surprise|élev[ée]e?|gonfl[ée]e?)/gi, weight: 8 },
     ],
     label: 'Problème de prix',
+    scriptHook: 'la transparence de vos devis',
+  },
+  conformite: {
+    patterns: [
+      { regex: /non\s*conforme/gi, weight: 14 },
+      { regex: /attestation\s*(manquante|jamais\s*reçue)/gi, weight: 15 },
+      { regex: /document[s]?\s*(manquant[s]?|incomplet[s]?)/gi, weight: 12 },
+      { regex: /dossier\s*(incomplet|rejet[ée]|refus[ée])/gi, weight: 16 },
+      { regex: /prime[s]?\s*(perdue[s]?|refus[ée]e?s?)/gi, weight: 17 },
+      { regex: /CEE\s*(refus[ée]|rejet[ée]|perdu)/gi, weight: 18 },
+      { regex: /paperasse/gi, weight: 8 },
+      { regex: /administratif\s*(lourd|complexe|galère)/gi, weight: 10 },
+    ],
+    label: 'Problème de conformité',
+    scriptHook: 'la gestion de vos dossiers administratifs',
   },
 };
 
@@ -200,6 +252,12 @@ export function calculatePainScore(reviews: ReviewData[]): ProspectInsight {
   // Top issues
   const topIssues = getTopIssues(allSignals);
   
+  // Extraire les citations réelles pour les scripts de vente
+  const realQuotes = extractRealQuotes(reviews, allSignals);
+  
+  // Générer les hooks pour les scripts de vente
+  const scriptHooks = generateScriptHooks(allSignals);
+  
   return {
     prospectId: '',
     painScore: normalizedScore,
@@ -209,6 +267,8 @@ export function calculatePainScore(reviews: ReviewData[]): ProspectInsight {
     lastAnalyzedAt: new Date(),
     reviewCount: reviews.length,
     topIssues,
+    realQuotes,
+    scriptHooks,
   };
 }
 
@@ -237,8 +297,108 @@ function generateSummary(signals: PainSignal[]): string {
   if (categoryCounts.prix) {
     parts.push(`Prix critiqué ${categoryCounts.prix} fois`);
   }
+  if (categoryCounts.conformite) {
+    parts.push(`Conformité mentionnée ${categoryCounts.conformite} fois`);
+  }
   
   return parts.join(' • ') || 'Analyse en cours';
+}
+
+/**
+ * Extrait les citations réelles des avis pour personnaliser les scripts
+ */
+function extractRealQuotes(reviews: ReviewData[], signals: PainSignal[]): RealQuote[] {
+  const quotes: RealQuote[] = [];
+  
+  for (const review of reviews) {
+    // Ne garder que les avis négatifs (< 3 étoiles) avec des signaux détectés
+    if (review.rating >= 3) continue;
+    
+    const reviewSignals = signals.filter(s => 
+      s.reviewDate?.getTime() === review.date.getTime()
+    );
+    
+    if (reviewSignals.length === 0) continue;
+    
+    // Extraire la phrase la plus pertinente (contenant le mot-clé)
+    const sentences = review.text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    
+    for (const signal of reviewSignals) {
+      const relevantSentence = sentences.find(s => 
+        s.toLowerCase().includes(signal.keyword.toLowerCase())
+      );
+      
+      if (relevantSentence && quotes.length < 5) {
+        quotes.push({
+          text: relevantSentence.trim(),
+          category: signal.category,
+          authorName: review.authorName,
+          rating: review.rating,
+          date: review.date,
+        });
+      }
+    }
+  }
+  
+  // Trier par récence et limiter à 3
+  return quotes
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 3);
+}
+
+/**
+ * Génère des accroches de script basées sur les problèmes détectés
+ */
+function generateScriptHooks(signals: PainSignal[]): ScriptHook[] {
+  const categoryCounts: Record<string, number> = {};
+  
+  for (const signal of signals) {
+    categoryCounts[signal.category] = (categoryCounts[signal.category] || 0) + 1;
+  }
+  
+  const hooks: ScriptHook[] = [];
+  
+  // Générer un hook pour chaque catégorie détectée
+  for (const [category, count] of Object.entries(categoryCounts)) {
+    const config = PAIN_KEYWORDS[category as keyof typeof PAIN_KEYWORDS];
+    if (!config) continue;
+    
+    let suggestedOpener = '';
+    
+    switch (category) {
+      case 'reactivite':
+        suggestedOpener = count > 2 
+          ? `J'ai remarqué que plusieurs clients mentionnent des difficultés à vous joindre. Ma solution automatise les réponses et relances pour vous.`
+          : `J'ai vu qu'un client a eu du mal à avoir un retour. Notre système de notifications automatiques règle ce problème.`;
+        break;
+      case 'delais':
+        suggestedOpener = count > 2
+          ? `J'ai noté que ${count} avis évoquent des délais de devis. Avec notre outil, vos devis partent en 2 clics depuis le terrain.`
+          : `J'ai remarqué qu'un client a attendu son devis. Notre générateur de devis automatique vous fait gagner des heures.`;
+        break;
+      case 'qualite':
+        suggestedOpener = `J'ai vu des retours sur la qualité de finition. Notre checklist digitale garantit que rien n'est oublié avant de quitter le chantier.`;
+        break;
+      case 'prix':
+        suggestedOpener = `J'ai remarqué des commentaires sur vos tarifs. Notre système de devis détaillé justifie chaque ligne et rassure vos clients.`;
+        break;
+      case 'conformite':
+        suggestedOpener = count > 1
+          ? `J'ai vu que ${count} avis mentionnent des problèmes de conformité ou de dossiers. Notre plateforme vérifie automatiquement chaque dossier avant envoi.`
+          : `J'ai remarqué un souci de conformité mentionné. Notre système détecte les erreurs avant qu'elles ne coûtent une prime.`;
+        break;
+    }
+    
+    hooks.push({
+      category,
+      hook: config.scriptHook,
+      frequency: count,
+      suggestedOpener,
+    });
+  }
+  
+  // Trier par fréquence décroissante
+  return hooks.sort((a, b) => b.frequency - a.frequency);
 }
 
 /**

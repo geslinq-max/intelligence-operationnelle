@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components';
-import { useAuth, ProtectedRoute } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/contexts/AuthContext';
 import {
   Users,
   Search,
@@ -15,50 +15,28 @@ import {
   AlertTriangle,
   ChevronRight,
   Filter,
-  Activity
+  Radar,
+  Eye,
+  Zap,
+  Leaf,
+  Grape,
+  RefreshCw,
+  Timer
 } from 'lucide-react';
-import { ProspectInsight, UrgencyLevel } from '@/lib/ai/pain-signals';
-import { ProspectInsightsService } from '@/lib/services/prospect-insights-cache';
+import RadarModal from '@/components/modals/RadarModal';
+import { useToast } from '@/components/ui/Toast';
+import { useAdminClients, type ClientProfile } from '@/hooks/useAdminClients';
+import type { ClientIndustry } from '@/lib/auth/role-config';
 
-// Données specimen pour les artisans
-const ARTISANS_DATA = [
-  {
-    id: '1',
-    nom: 'Martin Dupont',
-    entreprise: 'Dupont Plomberie',
-    email: 'martin@dupont-plomberie.fr',
-    telephone: '06 12 34 56 78',
-    ville: 'Lyon',
-    statut: 'actif',
-    dossiersEnCours: 3,
-    dossiersValides: 12,
-    derniereDossier: '2026-01-15',
-  },
-  {
-    id: '2',
-    nom: 'Sophie Bernard',
-    entreprise: 'Bernard Chauffage',
-    email: 'sophie@bernard-chauffage.fr',
-    telephone: '06 98 76 54 32',
-    ville: 'Paris',
-    statut: 'actif',
-    dossiersEnCours: 1,
-    dossiersValides: 8,
-    derniereDossier: '2026-01-14',
-  },
-  {
-    id: '3',
-    nom: 'Pierre Moreau',
-    entreprise: 'Moreau Isolation',
-    email: 'pierre@moreau-isolation.fr',
-    telephone: '06 11 22 33 44',
-    ville: 'Marseille',
-    statut: 'en_attente',
-    dossiersEnCours: 0,
-    dossiersValides: 0,
-    derniereDossier: null,
-  },
-];
+// Configuration des industries
+const INDUSTRY_CONFIG: Record<ClientIndustry, { label: string; icon: React.ReactNode; color: string }> = {
+  CEE: { label: 'Artisan CEE', icon: <Zap className="w-4 h-4" />, color: 'text-emerald-400' },
+  PAYSAGISTE: { label: 'Paysagiste', icon: <Leaf className="w-4 h-4" />, color: 'text-amber-400' },
+  VITICULTEUR: { label: 'Viticulteur', icon: <Grape className="w-4 h-4" />, color: 'text-purple-400' },
+};
+
+// Type pour les filtres industrie
+type IndustryFilter = 'tous' | ClientIndustry;
 
 function StatutBadge({ statut }: { statut: string }) {
   const config = {
@@ -74,135 +52,143 @@ function StatutBadge({ statut }: { statut: string }) {
   );
 }
 
-/**
- * Composant Diagnostic Pain Signals
- * Affiche une icône d'alerte avec tooltip au survol
- */
-function DiagnosticBadge({ insight }: { insight: ProspectInsight | null }) {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  if (!insight || insight.urgencyLevel === 'NORMAL' || insight.urgencyLevel === 'UNKNOWN') {
-    return null; // Fallback silencieux
-  }
-  
-  const config = {
-    URGENCE_HAUTE: {
-      icon: 'bg-red-500/20 text-red-400 border-red-500/40',
-      label: 'Urgence haute',
-      bgTooltip: 'bg-red-950 border-red-500/50',
-    },
-    URGENCE_MOYENNE: {
-      icon: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
-      label: 'Urgence moyenne',
-      bgTooltip: 'bg-amber-950 border-amber-500/50',
-    },
-  }[insight.urgencyLevel] || null;
-  
+function IndustryBadge({ industry }: { industry: ClientIndustry | null }) {
+  if (!industry) return null;
+  const config = INDUSTRY_CONFIG[industry];
   if (!config) return null;
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-700/50 ${config.color}`}>
+      {config.icon}
+      {config.label}
+    </span>
+  );
+}
+
+function HeuresGagneesBadge({ heures }: { heures: number }) {
+  if (heures === 0) return <span className="text-slate-500 text-sm">-</span>;
   
   return (
-    <div className="relative" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
-      <div className={`w-7 h-7 rounded-lg flex items-center justify-center border cursor-help ${config.icon}`}>
-        <Activity className="w-4 h-4" />
-      </div>
-      
-      {/* Tooltip au survol */}
-      {showTooltip && (
-        <div className={`absolute z-50 right-0 top-full mt-2 w-64 p-3 rounded-xl border shadow-xl ${config.bgTooltip}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4" />
-            <span className="font-semibold text-sm">{config.label}</span>
-            <span className="ml-auto text-xs opacity-70">Score: {insight.painScore}/100</span>
-          </div>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            {insight.summary}
-          </p>
-          {insight.topIssues.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-white/10">
-              <p className="text-xs text-slate-400">
-                {insight.topIssues.join(' • ')}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+    <div className="flex items-center gap-1 text-emerald-400">
+      <Timer className="w-4 h-4" />
+      <span className="font-medium">{heures}h</span>
     </div>
   );
 }
 
 function ClientsPageContent() {
-  const { user } = useAuth();
+  const { clients, stats, isLoading, error, refetch } = useAdminClients();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatut, setFilterStatut] = useState<string>('tous');
-  const [insights, setInsights] = useState<Map<string, ProspectInsight>>(new Map());
+  const [filterIndustry, setFilterIndustry] = useState<IndustryFilter>('tous');
+  const [isRadarOpen, setIsRadarOpen] = useState(false);
+  const { showToast } = useToast();
 
-  // Charger les Pain Signals en arrière-plan
-  useEffect(() => {
-    const loadInsights = async () => {
-      try {
-        const prospectIds = ARTISANS_DATA.map(a => a.id);
-        const results = await ProspectInsightsService.getProspectsInsights(prospectIds);
-        setInsights(results);
-      } catch (error) {
-        // Fallback silencieux - pas d'erreur affichée
-        console.error('[PainSignals] Erreur chargement:', error);
-      }
-    };
-    loadInsights();
-  }, []);
-
-  const filteredArtisans = ARTISANS_DATA.filter(artisan => {
-    const matchSearch = artisan.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      artisan.entreprise.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      artisan.ville.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStatut = filterStatut === 'tous' || artisan.statut === filterStatut;
-    return matchSearch && matchStatut;
+  // Filtrer les clients
+  const filteredClients = clients.filter(client => {
+    const matchSearch = 
+      client.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (client.entreprise?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (client.ville?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+    const matchStatut = filterStatut === 'tous' || client.statut === filterStatut;
+    const matchIndustry = filterIndustry === 'tous' || client.industry === filterIndustry;
+    return matchSearch && matchStatut && matchIndustry;
   });
 
   return (
     <div className="min-h-screen bg-slate-950">
       <Sidebar />
       
-      <main className="p-4 lg:p-8 pt-20 lg:pt-8 transition-all duration-300 lg:ml-64">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+      <main className="p-3 sm:p-4 lg:p-8 pt-20 lg:pt-8 transition-all duration-300 lg:ml-64">
+        {/* Header - Mobile First */}
+        <header className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-white">Clients / Artisans</h1>
-                <p className="text-emerald-400 text-sm font-medium">
-                  {ARTISANS_DATA.length} artisans enregistres
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">Tour de Contrôle</h1>
+                <p className="text-emerald-400 text-xs sm:text-sm font-medium">
+                  {stats.total} clients inscrits • {stats.totalHeuresGagnees.toFixed(1)}h économisées
                 </p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors">
-              <Plus className="w-5 h-5" />
-              <span>Nouvel Artisan</span>
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={refetch}
+                disabled={isLoading}
+                className="p-2.5 border border-slate-600 hover:bg-slate-700 active:bg-slate-600 text-slate-400 rounded-xl transition-colors disabled:opacity-50"
+                title="Actualiser"
+              >
+                <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+              </button>
+              <button
+                onClick={() => setIsRadarOpen(true)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 border border-emerald-500/50 hover:bg-emerald-500/10 active:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm sm:text-base font-medium transition-colors"
+              >
+                <Radar className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Radar</span>
+              </button>
+              <Link
+                href="/inscription"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-sm sm:text-base font-medium transition-colors"
+              >
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Inviter</span>
+              </Link>
+            </div>
           </div>
         </header>
 
+        {/* Onglets Industrie */}
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+          {(['tous', 'CEE', 'PAYSAGISTE', 'VITICULTEUR'] as const).map((industry) => {
+            const isActive = filterIndustry === industry;
+            const count = industry === 'tous' ? stats.total : stats.parIndustrie[industry];
+            const config = industry === 'tous' 
+              ? { label: 'Tous', icon: <Users className="w-4 h-4" />, color: 'text-white' }
+              : INDUSTRY_CONFIG[industry];
+            
+            return (
+              <button
+                key={industry}
+                onClick={() => setFilterIndustry(industry)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                  isActive 
+                    ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400' 
+                    : 'bg-slate-800/50 border border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {config.icon}
+                <span>{config.label}</span>
+                <span className={`px-1.5 py-0.5 rounded text-xs ${isActive ? 'bg-emerald-500/30' : 'bg-slate-700'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Barre de recherche et filtres */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Rechercher un artisan..."
+              placeholder="Rechercher par nom, email, entreprise..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-10 sm:pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-base text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors"
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-slate-400" />
+            <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 flex-shrink-0" />
             <select
               value={filterStatut}
               onChange={(e) => setFilterStatut(e.target.value)}
-              className="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-base text-white focus:outline-none focus:border-emerald-500"
             >
               <option value="tous">Tous les statuts</option>
               <option value="actif">Actifs</option>
@@ -212,98 +198,229 @@ function ClientsPageContent() {
           </div>
         </div>
 
-        {/* Stats rapides */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+        {/* Stats rapides - Responsive */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-2.5 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400 mb-1 sm:mb-0" />
               <div>
-                <p className="text-2xl font-bold text-white">{ARTISANS_DATA.filter(a => a.statut === 'actif').length}</p>
-                <p className="text-slate-400 text-sm">Actifs</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats.actifs}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Actifs</p>
               </div>
             </div>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <Clock className="w-8 h-8 text-amber-400" />
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-2.5 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-amber-400 mb-1 sm:mb-0" />
               <div>
-                <p className="text-2xl font-bold text-white">{ARTISANS_DATA.filter(a => a.statut === 'en_attente').length}</p>
-                <p className="text-slate-400 text-sm">En attente</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats.enAttente}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">En attente</p>
               </div>
             </div>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-8 h-8 text-slate-400" />
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-2.5 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+              <Timer className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-400 mb-1 sm:mb-0" />
               <div>
-                <p className="text-2xl font-bold text-white">{ARTISANS_DATA.reduce((acc, a) => acc + a.dossiersEnCours, 0)}</p>
-                <p className="text-slate-400 text-sm">Dossiers en cours</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalHeuresGagnees.toFixed(0)}h</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Économisées</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-2.5 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 mb-1 sm:mb-0" />
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats.total}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Total</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Liste des artisans - Acces rapide (1 clic) */}
-        <div className="bg-slate-800/30 border border-slate-700 rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-slate-700">
-            <h2 className="text-lg font-semibold text-white">Liste des Artisans</h2>
+        {/* Erreur */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
+            {error}
           </div>
-          
-          <div className="divide-y divide-slate-700/50">
-            {filteredArtisans.length === 0 ? (
-              <div className="p-8 text-center">
-                <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400">Aucun artisan trouve</p>
-              </div>
-            ) : (
-              filteredArtisans.map((artisan) => (
-                <Link
-                  key={artisan.id}
-                  href={`/admin/clients/${artisan.id}`}
-                  className="flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center">
-                      <span className="text-emerald-400 font-bold text-lg">
-                        {artisan.nom.charAt(0)}
-                      </span>
+        )}
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
+          </div>
+        )}
+
+        {/* Liste des clients */}
+        {!isLoading && (
+          <div className="bg-slate-800/30 border border-slate-700 rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Clients Inscrits</h2>
+              <span className="text-sm text-slate-400">{filteredClients.length} résultats</span>
+            </div>
+            
+            {/* Vue Desktop (md+) */}
+            <div className="hidden md:block divide-y divide-slate-700/50">
+              {filteredClients.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400">Aucun client trouvé</p>
+                  <p className="text-slate-500 text-sm mt-1">Les nouveaux inscrits apparaîtront ici automatiquement</p>
+                </div>
+              ) : (
+                filteredClients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-emerald-400 font-bold text-lg">
+                          {client.nom.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-white font-medium truncate max-w-[200px] break-words">{client.nom}</h3>
+                          <StatutBadge statut={client.statut} />
+                          <IndustryBadge industry={client.industry} />
+                        </div>
+                        <p className="text-slate-400 text-sm truncate break-words">{client.email}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+                          {client.ville && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {client.ville}
+                            </span>
+                          )}
+                          {client.telephone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-3 h-3" />
+                              {client.telephone}
+                            </span>
+                          )}
+                          <span className="text-slate-600">
+                            Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-white font-medium group-hover:text-emerald-400 transition-colors">
-                          {artisan.nom}
-                        </h3>
-                        <StatutBadge statut={artisan.statut} />
+                    <div className="flex items-center gap-4 flex-shrink-0">
+                      {/* KPI Heures Gagnées */}
+                      <div className="text-right min-w-[80px]">
+                        <HeuresGagneesBadge heures={client.heuresGagnees} />
+                        <p className="text-slate-500 text-xs">gagnées</p>
                       </div>
-                      <p className="text-slate-400 text-sm">{artisan.entreprise}</p>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {artisan.ville}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          {artisan.telephone}
-                        </span>
+                      
+                      {/* Activité */}
+                      <div className="text-right min-w-[60px]">
+                        <p className="text-white font-medium">
+                          {client.dossiersCount + client.bsdCount + client.traitementsCount}
+                        </p>
+                        <p className="text-slate-400 text-xs">actions</p>
                       </div>
+
+                      {/* Bouton Aperçu Client */}
+                      <Link
+                        href={`/client/dashboard?preview=${client.id}&industry=${client.industry || 'CEE'}`}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-400 rounded-xl text-sm font-medium transition-colors"
+                        title="Voir le dashboard client"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Aperçu</span>
+                      </Link>
+
+                      <Link
+                        href={`/admin/clients/${client.id}`}
+                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5 text-slate-400 hover:text-emerald-400" />
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    {/* Colonne Diagnostic Pain Signals */}
-                    <DiagnosticBadge insight={insights.get(artisan.id) || null} />
-                    
-                    <div className="text-right hidden sm:block">
-                      <p className="text-white font-medium">{artisan.dossiersValides} dossiers</p>
-                      <p className="text-slate-400 text-xs">{artisan.dossiersEnCours} en cours</p>
+                ))
+              )}
+            </div>
+
+            {/* Vue Mobile (< md) */}
+            <div className="md:hidden p-3 space-y-3">
+              {filteredClients.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400">Aucun client trouvé</p>
+                </div>
+              ) : (
+                filteredClients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="bg-slate-800/60 border border-slate-700 rounded-2xl p-4"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-emerald-400 font-bold text-lg">
+                          {client.nom.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-white font-semibold truncate">{client.nom}</h3>
+                          <StatutBadge statut={client.statut} />
+                        </div>
+                        <p className="text-slate-400 text-sm truncate break-all">{client.email}</p>
+                        <IndustryBadge industry={client.industry} />
+                      </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+
+                    {/* Stats */}
+                    <div className="flex items-center justify-between py-3 border-t border-b border-slate-700/50 mb-3">
+                      <div className="flex items-center gap-4">
+                        <div className="text-center">
+                          <HeuresGagneesBadge heures={client.heuresGagnees} />
+                          <p className="text-slate-500 text-xs">gagnées</p>
+                        </div>
+                        <div className="w-px h-8 bg-slate-700"></div>
+                        <div className="text-center">
+                          <p className="text-white font-bold">
+                            {client.dossiersCount + client.bsdCount + client.traitementsCount}
+                          </p>
+                          <p className="text-slate-500 text-xs">actions</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <Link
+                      href={`/client/dashboard?preview=${client.id}&industry=${client.industry || 'CEE'}`}
+                      className="flex items-center justify-center gap-2 py-3 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-xl font-medium"
+                    >
+                      <Eye className="w-5 h-5" />
+                      <span>Voir le Dashboard Client</span>
+                    </Link>
                   </div>
-                </Link>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </main>
+
+      {/* Radar Modal */}
+      <RadarModal
+        isOpen={isRadarOpen}
+        onClose={() => setIsRadarOpen(false)}
+        onComplete={(newCount) => {
+          setIsRadarOpen(false);
+          showToast({
+            type: 'success',
+            title: 'Radar terminé',
+            message: `${newCount} nouveaux prospects identifiés.`,
+            duration: 6000,
+          });
+          refetch();
+        }}
+      />
     </div>
   );
 }
