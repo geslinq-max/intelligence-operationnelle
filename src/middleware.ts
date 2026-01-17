@@ -19,6 +19,9 @@ const PUBLIC_PATHS = ['/', '/login', '/mentions-legales', '/confidentialite', '/
 
 const ADMIN_ROUTES = ['/admin'];
 
+// Routes orphelines à rediriger vers /admin (sécurité stricte)
+const ORPHAN_ROUTES = ['/direction', '/partenaire', '/prospection', '/entreprises'];
+
 // ============================================================================
 // MIDDLEWARE PRINCIPAL
 // ============================================================================
@@ -86,6 +89,19 @@ export async function middleware(request: NextRequest) {
     
     if (isAdminRoute && !isAdmin) {
       return NextResponse.redirect(new URL('/403', request.url));
+    }
+    
+    // Redirection des routes orphelines vers /admin (admin only)
+    const isOrphanRoute = ORPHAN_ROUTES.some(
+      route => pathname === route || pathname.startsWith(`${route}/`)
+    );
+    
+    if (isOrphanRoute) {
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL('/403', request.url));
+      }
+      // Admin accédant à une route orpheline → rediriger vers /admin
+      return NextResponse.redirect(new URL('/admin', request.url));
     }
   }
 
