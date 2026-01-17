@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components';
 import { useAuth, ProtectedRoute } from '@/contexts/AuthContext';
@@ -8,16 +8,17 @@ import {
   Users,
   Search,
   Plus,
-  Eye,
   Phone,
-  Mail,
   MapPin,
   CheckCircle,
   Clock,
   AlertTriangle,
   ChevronRight,
-  Filter
+  Filter,
+  Activity
 } from 'lucide-react';
+import { ProspectInsight, UrgencyLevel } from '@/lib/ai/pain-signals';
+import { ProspectInsightsService } from '@/lib/services/prospect-insights-cache';
 
 // Données specimen pour les artisans
 const ARTISANS_DATA = [
@@ -73,10 +74,82 @@ function StatutBadge({ statut }: { statut: string }) {
   );
 }
 
+/**
+ * Composant Diagnostic Pain Signals
+ * Affiche une icône d'alerte avec tooltip au survol
+ */
+function DiagnosticBadge({ insight }: { insight: ProspectInsight | null }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  if (!insight || insight.urgencyLevel === 'NORMAL' || insight.urgencyLevel === 'UNKNOWN') {
+    return null; // Fallback silencieux
+  }
+  
+  const config = {
+    URGENCE_HAUTE: {
+      icon: 'bg-red-500/20 text-red-400 border-red-500/40',
+      label: 'Urgence haute',
+      bgTooltip: 'bg-red-950 border-red-500/50',
+    },
+    URGENCE_MOYENNE: {
+      icon: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+      label: 'Urgence moyenne',
+      bgTooltip: 'bg-amber-950 border-amber-500/50',
+    },
+  }[insight.urgencyLevel] || null;
+  
+  if (!config) return null;
+  
+  return (
+    <div className="relative" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center border cursor-help ${config.icon}`}>
+        <Activity className="w-4 h-4" />
+      </div>
+      
+      {/* Tooltip au survol */}
+      {showTooltip && (
+        <div className={`absolute z-50 right-0 top-full mt-2 w-64 p-3 rounded-xl border shadow-xl ${config.bgTooltip}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4" />
+            <span className="font-semibold text-sm">{config.label}</span>
+            <span className="ml-auto text-xs opacity-70">Score: {insight.painScore}/100</span>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {insight.summary}
+          </p>
+          {insight.topIssues.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-white/10">
+              <p className="text-xs text-slate-400">
+                {insight.topIssues.join(' • ')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ClientsPageContent() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatut, setFilterStatut] = useState<string>('tous');
+  const [insights, setInsights] = useState<Map<string, ProspectInsight>>(new Map());
+
+  // Charger les Pain Signals en arrière-plan
+  useEffect(() => {
+    const loadInsights = async () => {
+      try {
+        const prospectIds = ARTISANS_DATA.map(a => a.id);
+        const results = await ProspectInsightsService.getProspectsInsights(prospectIds);
+        setInsights(results);
+      } catch (error) {
+        // Fallback silencieux - pas d'erreur affichée
+        console.error('[PainSignals] Erreur chargement:', error);
+      }
+    };
+    loadInsights();
+  }, []);
 
   const filteredArtisans = ARTISANS_DATA.filter(artisan => {
     const matchSearch = artisan.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -215,7 +288,10 @@ function ClientsPageContent() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    {/* Colonne Diagnostic Pain Signals */}
+                    <DiagnosticBadge insight={insights.get(artisan.id) || null} />
+                    
                     <div className="text-right hidden sm:block">
                       <p className="text-white font-medium">{artisan.dossiersValides} dossiers</p>
                       <p className="text-slate-400 text-xs">{artisan.dossiersEnCours} en cours</p>
