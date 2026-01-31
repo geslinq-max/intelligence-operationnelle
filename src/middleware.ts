@@ -15,7 +15,7 @@ const cookieOptions = {
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 
-const PUBLIC_PATHS = ['/', '/login', '/mentions-legales', '/confidentialite', '/landing', '/cgv', '/tarifs', '/403'];
+const PUBLIC_PATHS = ['/', '/login', '/mentions-legales', '/confidentialite', '/landing', '/cgv', '/tarifs', '/403', '/api'];
 
 const ADMIN_ROUTES = ['/admin'];
 

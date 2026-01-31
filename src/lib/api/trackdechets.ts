@@ -105,18 +105,27 @@ export type TrackdechetsBSDAStatus =
 // CONFIGURATION
 // ============================================================================
 
+// URLs des environnements Trackdéchets
+const TRACKDECHETS_PRODUCTION_URL = 'https://api.trackdechets.beta.gouv.fr';
+const TRACKDECHETS_SANDBOX_URL = 'https://api.sandbox.trackdechets.beta.gouv.fr';
+
+// Clés API depuis les variables d'environnement
+const PRODUCTION_API_KEY = process.env.TRACKDECHETS_API_KEY || '';
+const SANDBOX_API_KEY = process.env.TRACKDECHETS_SANDBOX_API_KEY || '';
+
+// Forcer le mode production si la clé de production est présente et valide
+const USE_PRODUCTION = PRODUCTION_API_KEY.length > 0 && !PRODUCTION_API_KEY.startsWith('your_');
+
 const TRACKDECHETS_CONFIG: TrackdechetsConfig = {
-  apiUrl: process.env.TRACKDECHETS_API_URL || 'https://api.trackdechets.beta.gouv.fr',
-  apiKey: process.env.TRACKDECHETS_API_KEY || '',
-  isProduction: process.env.NODE_ENV === 'production',
+  apiUrl: USE_PRODUCTION ? TRACKDECHETS_PRODUCTION_URL : TRACKDECHETS_SANDBOX_URL,
+  apiKey: USE_PRODUCTION ? PRODUCTION_API_KEY : SANDBOX_API_KEY,
+  isProduction: USE_PRODUCTION,
 };
 
-// Sandbox pour les tests
-const SANDBOX_CONFIG: TrackdechetsConfig = {
-  apiUrl: 'https://api.sandbox.trackdechets.beta.gouv.fr',
-  apiKey: process.env.TRACKDECHETS_SANDBOX_API_KEY || '',
-  isProduction: false,
-};
+// Log de configuration au démarrage (sans exposer la clé)
+console.log(`[Trackdéchets] Mode: ${USE_PRODUCTION ? 'PRODUCTION' : 'SANDBOX'}`);
+console.log(`[Trackdéchets] URL: ${TRACKDECHETS_CONFIG.apiUrl}`);
+console.log(`[Trackdéchets] API Key configurée: ${TRACKDECHETS_CONFIG.apiKey ? 'OUI' : 'NON'}`);
 
 // ============================================================================
 // HELPERS
@@ -126,10 +135,7 @@ const SANDBOX_CONFIG: TrackdechetsConfig = {
  * Obtient la configuration active (production ou sandbox)
  */
 export function getTrackdechetsConfig(): TrackdechetsConfig {
-  if (TRACKDECHETS_CONFIG.apiKey && TRACKDECHETS_CONFIG.isProduction) {
-    return TRACKDECHETS_CONFIG;
-  }
-  return SANDBOX_CONFIG;
+  return TRACKDECHETS_CONFIG;
 }
 
 /**
@@ -328,6 +334,199 @@ export async function signBSDAAsProducer(bsdaId: string, signatureData: string):
   }
 }
 
+/**
+ * Signe un BSDA côté transporteur
+ */
+export async function signBSDAAsTransporter(bsdaId: string, signatureData: string): Promise<boolean> {
+  const config = getTrackdechetsConfig();
+  
+  if (!config.apiKey) {
+    console.warn('[Trackdéchets] API Key non configurée');
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${config.apiUrl}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation SignBsda($id: ID!, $input: BsdaSignatureInput!) {
+            signBsda(id: $id, input: $input) {
+              id
+              status
+            }
+          }
+        `,
+        variables: {
+          id: bsdaId,
+          input: {
+            type: 'TRANSPORT',
+            author: 'Transporteur',
+          },
+        },
+      }),
+    });
+
+    const data = await response.json();
+    
+    // LOG DIAGNOSTIC
+    console.log('[Trackdéchets] Signature transporteur:', JSON.stringify(data, null, 2));
+    
+    return !data.errors;
+  } catch (error) {
+    console.error('[Trackdéchets] Erreur signature transporteur:', error);
+    return false;
+  }
+}
+
+/**
+ * Récupère les détails d'un BSDA incluant le numéro officiel
+ */
+export async function getBSDADetails(bsdaId: string): Promise<{
+  id: string;
+  readableId: string; // Numéro officiel attribué par l'État
+  status: TrackdechetsBSDAStatus;
+  emitter?: { company?: { name?: string } };
+  destination?: { company?: { name?: string } };
+} | null> {
+  const config = getTrackdechetsConfig();
+  
+  if (!config.apiKey) {
+    console.warn('[Trackdéchets] API Key non configurée');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${config.apiUrl}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        query: `
+          query GetBsda($id: ID!) {
+            bsda(id: $id) {
+              id
+              readableId
+              status
+              emitter {
+                company {
+                  name
+                }
+              }
+              destination {
+                company {
+                  name
+                }
+                reception {
+                  date
+                  weight
+                }
+                operation {
+                  code
+                  date
+                }
+              }
+            }
+          }
+        `,
+        variables: { id: bsdaId },
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (data.errors) {
+      console.error('[Trackdéchets] Erreur récupération BSDA:', data.errors);
+      return null;
+    }
+
+    return data.data.bsda;
+  } catch (error) {
+    console.error('[Trackdéchets] Erreur getBSDADetails:', error);
+    return null;
+  }
+}
+
+/**
+ * Vérifie le statut d'un BSDA pour les notifications
+ * Retourne true si le bordereau a été traité par le centre de destination
+ */
+export async function checkBSDAProcessed(bsdaId: string): Promise<{
+  isProcessed: boolean;
+  status: TrackdechetsBSDAStatus | null;
+  readableId: string | null;
+  processingDate?: string;
+}> {
+  const details = await getBSDADetails(bsdaId);
+  
+  if (!details) {
+    return { isProcessed: false, status: null, readableId: null };
+  }
+
+  return {
+    isProcessed: details.status === 'PROCESSED',
+    status: details.status,
+    readableId: details.readableId,
+    processingDate: (details as any).destination?.operation?.date,
+  };
+}
+
+/**
+ * Publie un BSDA (passage de brouillon à officiel)
+ * Retourne le numéro de bordereau officiel
+ */
+export async function publishBSDA(bsdaId: string): Promise<{ readableId: string } | null> {
+  const config = getTrackdechetsConfig();
+  
+  if (!config.apiKey) {
+    console.warn('[Trackdéchets] API Key non configurée');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${config.apiUrl}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        query: `
+          mutation PublishBsda($id: ID!) {
+            publishBsda(id: $id) {
+              id
+              readableId
+              status
+            }
+          }
+        `,
+        variables: { id: bsdaId },
+      }),
+    });
+
+    const data = await response.json();
+    
+    // LOG DIAGNOSTIC
+    console.log('[Trackdéchets] Publication BSDA:', JSON.stringify(data, null, 2));
+    
+    if (data.errors) {
+      console.error('[Trackdéchets] Erreur publication:', data.errors);
+      return null;
+    }
+
+    return { readableId: data.data.publishBsda.readableId };
+  } catch (error) {
+    console.error('[Trackdéchets] Erreur publishBSDA:', error);
+    return null;
+  }
+}
+
 // ============================================================================
 // EXPORT STATUS
 // ============================================================================
@@ -335,6 +534,7 @@ export async function signBSDAAsProducer(bsdaId: string, signatureData: string):
 export const TRACKDECHETS_STATUS = {
   isReady: isTrackdechetsAvailable(),
   mode: isTrackdechetsAvailable() ? 'production' : 'preparation',
+  isProduction: USE_PRODUCTION,
   complianceDate: '2026-01-01',
   message: isTrackdechetsAvailable() 
     ? 'Intégration Trackdéchets active' 

@@ -20,6 +20,10 @@ interface BSDData {
   immatriculationVehicule: string;
   signatureProducteur: string | null;
   signatureTransporteur: string | null;
+  // Numéro officiel Trackdéchets (si disponible)
+  readableId?: string;
+  trackdechetsId?: string;
+  isOfficial?: boolean;
 }
 
 const TYPES_LABELS: Record<string, string> = {
@@ -64,11 +68,21 @@ export function generateBSDPdf(data: BSDData): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.text('Bordereau de Suivi des Déchets', margin, 33);
 
-  // Numéro BSD
-  const bsdNumber = `BSD-${Date.now().toString(36).toUpperCase()}`;
+  // Numéro BSD - Utiliser le numéro officiel Trackdéchets si disponible
+  const bsdNumber = data.readableId || `BSD-${Date.now().toString(36).toUpperCase()}`;
+  const isOfficial = !!data.readableId && data.isOfficial !== false;
+  
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text(bsdNumber, pageWidth - margin, 25, { align: 'right' });
+  
+  // Badge officiel si numéro Trackdéchets
+  if (isOfficial) {
+    doc.setFontSize(8);
+    doc.setTextColor(34, 197, 94); // green-500
+    doc.text('✓ OFFICIEL', pageWidth - margin, 38, { align: 'right' });
+    doc.setTextColor(255, 255, 255);
+  }
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');

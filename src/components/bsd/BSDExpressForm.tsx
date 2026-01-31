@@ -192,21 +192,23 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
 
             <div className="grid gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  <FileText className="w-4 h-4 inline mr-1" />
                   Nom du chantier <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
+                  autoFocus
                   value={formData.chantierNom}
                   onChange={(e) => updateField('chantierNom', e.target.value)}
                   placeholder="Ex: Démolition Villa Dupont"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full px-4 py-3.5 bg-slate-800 border border-slate-600 rounded-xl text-white text-lg placeholder:text-slate-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
                   <MapPin className="w-4 h-4 inline mr-1" />
                   Adresse du chantier <span className="text-red-400">*</span>
                 </label>
@@ -215,7 +217,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                   value={formData.chantierAdresse}
                   onChange={(e) => updateField('chantierAdresse', e.target.value)}
                   placeholder="12 rue des Lilas, 10100 Romilly-sur-Seine"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full px-4 py-3.5 bg-slate-800 border border-slate-600 rounded-xl text-white text-lg placeholder:text-slate-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors"
                   required
                 />
               </div>
@@ -326,39 +328,41 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
 
             <div className="grid gap-4 sm:grid-cols-2 pt-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
                   <Scale className="w-4 h-4 inline mr-1" />
                   Tonnage estimé (T) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.1"
                   min="0"
                   value={formData.tonnageEstime || ''}
                   onChange={(e) => updateField('tonnageEstime', parseFloat(e.target.value) || 0)}
                   placeholder="Ex: 15.5"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full px-4 py-3.5 bg-slate-800 border border-slate-600 rounded-xl text-white text-lg placeholder:text-slate-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
                   Volume estimé (m³)
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.1"
                   min="0"
                   value={formData.volumeEstime || ''}
                   onChange={(e) => updateField('volumeEstime', parseFloat(e.target.value) || 0)}
                   placeholder="Ex: 10"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                  className="w-full px-4 py-3.5 bg-slate-800 border border-slate-600 rounded-xl text-white text-lg placeholder:text-slate-500 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 transition-colors"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">
                   Conditionnement
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -367,10 +371,10 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                       key={c.value}
                       type="button"
                       onClick={() => updateField('conditionnement', c.value as BSDFormData['conditionnement'])}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      className={`px-4 py-3 min-h-[44px] rounded-xl font-medium transition-colors touch-manipulation ${
                         formData.conditionnement === c.value
                           ? 'bg-amber-500 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
                       }`}
                     >
                       {c.label}
@@ -542,7 +546,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                 <button
                   type="button"
                   onClick={() => setStep((step - 1) as 1 | 2 | 3)}
-                  className="order-2 sm:order-1 px-6 py-3.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-xl font-medium transition-colors text-base"
+                  className="order-2 sm:order-1 px-6 py-3.5 min-h-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-xl font-medium transition-colors text-base touch-manipulation"
                 >
                   Précédent
                 </button>
@@ -552,7 +556,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                 type="button"
                 onClick={() => setStep((step + 1) as 2 | 3 | 4)}
                 disabled={!canProceed(step)}
-                className="order-1 sm:order-2 w-full sm:w-auto px-6 py-3.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors text-base"
+                className="order-1 sm:order-2 w-full sm:w-auto px-6 py-3.5 min-h-[48px] bg-amber-500 hover:bg-amber-600 active:bg-amber-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-colors text-base touch-manipulation"
               >
                 Suivant
               </button>
@@ -563,7 +567,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                 <button
                   type="button"
                   onClick={() => setStep((step - 1) as 1 | 2 | 3)}
-                  className="order-3 px-6 py-3.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-xl font-medium transition-colors text-base"
+                  className="order-3 px-6 py-3.5 min-h-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-xl font-medium transition-colors text-base touch-manipulation"
                 >
                   Précédent
                 </button>
@@ -574,7 +578,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                   type="button"
                   onClick={() => onGeneratePDF(formData)}
                   disabled={!canProceed(4)}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors text-base"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 min-h-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors text-base touch-manipulation"
                 >
                   <FileText className="w-5 h-5" />
                   Aperçu PDF
@@ -583,7 +587,7 @@ export default function BSDExpressForm({ onSubmit, onGeneratePDF, isLoading, ini
                 <button
                   type="submit"
                   disabled={!canProceed(4) || isLoading}
-                  className="flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors text-base"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-colors text-base touch-manipulation"
                 >
                   <Send className="w-5 h-5" />
                   {isLoading ? 'Envoi...' : 'Valider BSD'}

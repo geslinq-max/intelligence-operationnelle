@@ -280,13 +280,13 @@ function ClientsPageContent() {
                           {client.nom.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-white font-medium truncate max-w-[200px] break-words">{client.nom}</h3>
+                          <h3 className="text-white font-medium truncate max-w-[180px] lg:max-w-[250px]">{client.nom}</h3>
                           <StatutBadge statut={client.statut} />
                           <IndustryBadge industry={client.industry} />
                         </div>
-                        <p className="text-slate-400 text-sm truncate break-words">{client.email}</p>
+                        <p className="text-slate-400 text-sm truncate">{client.email}</p>
                         <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
                           {client.ville && (
                             <span className="flex items-center gap-1">
@@ -324,7 +324,7 @@ function ClientsPageContent() {
                       {/* Bouton Aperçu Client */}
                       <Link
                         href={`/client/dashboard?preview=${client.id}&industry=${client.industry || 'CEE'}`}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-400 rounded-xl text-sm font-medium transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-cyan-500/20 hover:bg-cyan-500/30 active:bg-cyan-500/40 border border-cyan-500/40 text-cyan-400 rounded-xl text-sm font-medium transition-colors touch-manipulation"
                         title="Voir le dashboard client"
                       >
                         <Eye className="w-4 h-4" />
@@ -333,7 +333,7 @@ function ClientsPageContent() {
 
                       <Link
                         href={`/admin/clients/${client.id}`}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                        className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors touch-manipulation"
                       >
                         <ChevronRight className="w-5 h-5 text-slate-400 hover:text-emerald-400" />
                       </Link>
@@ -365,10 +365,10 @@ function ClientsPageContent() {
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-white font-semibold truncate">{client.nom}</h3>
+                          <h3 className="text-white font-semibold truncate max-w-[150px]">{client.nom}</h3>
                           <StatutBadge statut={client.statut} />
                         </div>
-                        <p className="text-slate-400 text-sm truncate break-all">{client.email}</p>
+                        <p className="text-slate-400 text-sm truncate">{client.email}</p>
                         <IndustryBadge industry={client.industry} />
                       </div>
                     </div>
@@ -393,7 +393,7 @@ function ClientsPageContent() {
                     {/* Actions */}
                     <Link
                       href={`/client/dashboard?preview=${client.id}&industry=${client.industry || 'CEE'}`}
-                      className="flex items-center justify-center gap-2 py-3 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-xl font-medium"
+                      className="flex items-center justify-center gap-2 py-3.5 min-h-[48px] bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-xl font-semibold touch-manipulation active:bg-cyan-500/30"
                     >
                       <Eye className="w-5 h-5" />
                       <span>Voir le Dashboard Client</span>

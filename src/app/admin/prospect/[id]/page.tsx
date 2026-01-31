@@ -590,14 +590,14 @@ export default function ProspectDetailPage() {
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/admin/clients"
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors active:bg-slate-600"
+              className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-slate-700 rounded-xl transition-colors active:bg-slate-600 touch-manipulation"
             >
               <ArrowLeft className="w-5 h-5 text-slate-400" />
             </Link>
 
-            <div className="flex-1 min-w-0">
-              <h1 className="text-base sm:text-xl font-bold text-white truncate">{prospect.raison_sociale}</h1>
-              <p className="text-xs sm:text-sm text-slate-400 truncate">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1 className="text-base sm:text-xl font-bold text-white truncate max-w-[200px] sm:max-w-none">{prospect.raison_sociale}</h1>
+              <p className="text-xs sm:text-sm text-slate-300 truncate">
                 {prospect.activite_principale || 'Activité non renseignée'} • {prospect.ville || 'Localisation inconnue'}
               </p>
             </div>
@@ -707,7 +707,7 @@ export default function ProspectDetailPage() {
               {prospect.telephone && (
                 <a
                   href={`tel:${prospect.telephone}`}
-                  className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors overflow-hidden"
+                  className="flex items-center gap-3 p-4 min-h-[64px] bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors overflow-hidden touch-manipulation"
                 >
                   <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Phone className="w-5 h-5 text-emerald-400" />
@@ -722,7 +722,7 @@ export default function ProspectDetailPage() {
               {prospect.email && (
                 <a
                   href={`mailto:${prospect.email}`}
-                  className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors"
+                  className="flex items-center gap-3 p-4 min-h-[64px] bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors overflow-hidden touch-manipulation"
                 >
                   <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-cyan-400" />
@@ -751,7 +751,7 @@ export default function ProspectDetailPage() {
                   href={prospect.site_web}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors"
+                  className="flex items-center gap-3 p-4 min-h-[64px] bg-slate-700/50 hover:bg-slate-700 active:bg-slate-600 rounded-xl transition-colors overflow-hidden touch-manipulation"
                 >
                   <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Globe className="w-5 h-5 text-purple-400" />

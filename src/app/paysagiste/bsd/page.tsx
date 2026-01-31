@@ -48,26 +48,46 @@ export default function BSDExpressPage() {
   const handleSubmit = async (data: BSDFormData) => {
     setIsLoading(true);
     try {
-      // Simuler l'envoi vers Trackdéchets (à implémenter avec l'API réelle)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Appel API Trackdéchets (production ou local)
+      const response = await fetch('/api/bsd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-      // Générer et télécharger le PDF
-      downloadBSDPdf(data);
+      const result = await response.json();
 
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Erreur lors de la création du BSD');
+      }
+
+      // Générer et télécharger le PDF avec le numéro officiel
+      downloadBSDPdf({
+        ...data,
+        readableId: result.readableId,
+        trackdechetsId: result.bsdId,
+        isOfficial: result.mode === 'PRODUCTION',
+      });
+
+      // Message adapté selon le mode
+      const isProduction = result.mode === 'PRODUCTION';
       showToast({
         type: 'success',
-        title: 'BSD validé',
-        message: 'Le bordereau a été enregistré et le PDF téléchargé.',
+        title: isProduction ? 'BSD Officiel créé' : 'BSD validé',
+        message: isProduction 
+          ? `Bordereau ${result.readableId} transmis à Trackdéchets`
+          : `Bordereau ${result.readableId} enregistré localement`,
         duration: 5000,
       });
 
       // Rediriger vers le dashboard
       router.push('/admin');
     } catch (error) {
+      console.error('[BSD] Erreur:', error);
       showToast({
         type: 'error',
         title: 'Erreur',
-        message: 'Une erreur est survenue lors de la validation.',
+        message: error instanceof Error ? error.message : 'Une erreur est survenue lors de la validation.',
         duration: 5000,
       });
     } finally {

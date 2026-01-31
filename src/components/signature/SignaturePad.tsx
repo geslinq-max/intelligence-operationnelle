@@ -118,7 +118,7 @@ export default function SignaturePad({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-slate-300">
+      <label className="block text-sm font-semibold text-slate-200">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
 
@@ -147,7 +147,7 @@ export default function SignaturePad({
         {/* Placeholder */}
         {!hasSignature && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-slate-400 text-sm">Signez ici avec votre doigt ou souris</p>
+            <p className="text-slate-500 text-base font-medium">Signez ici avec votre doigt</p>
           </div>
         )}
       </div>
@@ -156,15 +156,15 @@ export default function SignaturePad({
         <button
           type="button"
           onClick={clearSignature}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] min-w-[44px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-slate-200 rounded-xl text-sm font-medium transition-colors touch-manipulation"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-5 h-5" />
           Effacer
         </button>
 
         {hasSignature && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm">
-            <Check className="w-4 h-4" />
+          <div className="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 rounded-xl text-sm font-medium">
+            <Check className="w-5 h-5" />
             Signature enregistrée
           </div>
         )}

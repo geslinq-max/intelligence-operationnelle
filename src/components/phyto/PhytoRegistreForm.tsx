@@ -183,7 +183,7 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
               type="button"
               onClick={() => setStep(2)}
               disabled={!selectedParcelle || !date}
-              className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
+              className="w-full py-4 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors touch-manipulation"
             >
               Continuer
             </button>
@@ -205,10 +205,10 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
                   key={type}
                   type="button"
                   onClick={() => setProductFilter(type)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold transition-colors touch-manipulation ${
                     productFilter === type
                       ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      : 'bg-slate-700 text-slate-200 hover:bg-slate-600 active:bg-slate-500'
                   }`}
                 >
                   {type === 'all' ? 'Tous' : getTypeLabel(type)}
@@ -279,18 +279,19 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
 
             {/* Dose appliquée */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Dose appliquée * {selectedProduct && `(max: ${selectedProduct.doseMax} ${selectedProduct.unite})`}
               </label>
               <div className="relative">
                 <Droplets className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.1"
                   value={dose}
                   onChange={(e) => setDose(e.target.value)}
                   placeholder="Ex: 2.5"
-                  className="w-full pl-12 pr-20 py-4 bg-slate-700/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-12 pr-20 py-4 bg-slate-700/50 border border-slate-600 rounded-xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                   {selectedProduct?.unite || 'L/ha'}
@@ -338,7 +339,7 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-colors"
+                className="flex-1 py-4 min-h-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 Retour
               </button>
@@ -346,7 +347,7 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={!selectedProduct || !dose}
-                className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
+                className="flex-1 py-4 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors touch-manipulation"
               >
                 Continuer
               </button>
@@ -392,13 +393,14 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
 
             {/* Opérateur */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Nom de l'opérateur *</label>
+              <label className="block text-sm font-semibold text-slate-200 mb-2">Nom de l'opérateur *</label>
               <input
                 type="text"
+                autoFocus
                 value={operateur}
                 onChange={(e) => setOperateur(e.target.value)}
                 placeholder="Ex: Jean Dupont"
-                className="w-full px-4 py-4 bg-slate-700/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-4 py-4 bg-slate-700/50 border border-slate-600 rounded-xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
@@ -435,7 +437,7 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-colors"
+                className="flex-1 py-4 min-h-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 Retour
               </button>
@@ -443,7 +445,7 @@ export default function PhytoRegistreForm({ onSubmit, onCancel }: PhytoRegistreF
                 type="button"
                 onClick={handleSubmit}
                 disabled={!operateur}
-                className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-4 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors touch-manipulation flex items-center justify-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 Enregistrer

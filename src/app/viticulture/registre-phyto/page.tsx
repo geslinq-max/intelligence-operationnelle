@@ -133,7 +133,7 @@ export default function RegistrePhytoPage() {
                 <Grape className="w-5 h-5 text-purple-400" />
                 Registre Phyto Express
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
+              <p className="text-xs sm:text-sm text-slate-300 font-medium">
                 Saisie rapide • Alertes DAR • Export réglementaire
               </p>
             </div>
@@ -141,9 +141,9 @@ export default function RegistrePhytoPage() {
             <button
               onClick={handleExportPDF}
               disabled={traitements.length === 0}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+              className="hidden sm:flex items-center gap-2 px-4 py-3 min-h-[44px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-colors touch-manipulation"
             >
-              <FileDown className="w-4 h-4" />
+              <FileDown className="w-5 h-5" />
               Export PDF
             </button>
           </div>
@@ -177,7 +177,7 @@ export default function RegistrePhytoPage() {
         <div className="flex gap-3 sm:hidden">
           <button
             onClick={() => setShowForm(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-xl font-semibold transition-colors touch-manipulation"
           >
             <Plus className="w-5 h-5" />
             Nouveau traitement
@@ -185,7 +185,7 @@ export default function RegistrePhytoPage() {
           <button
             onClick={handleExportPDF}
             disabled={traitements.length === 0}
-            className="p-3 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+            className="p-3.5 min-h-[48px] min-w-[48px] bg-slate-700 hover:bg-slate-600 active:bg-slate-500 disabled:bg-slate-800 disabled:cursor-not-allowed text-white rounded-xl transition-colors touch-manipulation"
           >
             <FileDown className="w-5 h-5" />
           </button>
@@ -237,10 +237,10 @@ export default function RegistrePhytoPage() {
                     <button
                       key={type}
                       onClick={() => setFilterType(type)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                      className={`px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold whitespace-nowrap transition-colors touch-manipulation ${
                         filterType === type
                           ? 'bg-emerald-500 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-slate-700 text-slate-200 hover:bg-slate-600 active:bg-slate-500'
                       }`}
                     >
                       {type === 'all' ? 'Tous' : getTypeLabel(type)}
@@ -298,9 +298,9 @@ export default function RegistrePhytoPage() {
 
                         <button
                           onClick={() => handleDeleteTraitement(traitement.id)}
-                          className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 rounded-xl transition-colors touch-manipulation"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
 
@@ -343,7 +343,7 @@ export default function RegistrePhytoPage() {
                 {traitements.length === 0 && (
                   <button
                     onClick={() => setShowForm(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-xl font-semibold transition-colors touch-manipulation"
                   >
                     <Plus className="w-5 h-5" />
                     Premier traitement

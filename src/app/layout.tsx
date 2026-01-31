@@ -20,9 +20,64 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CAPITAL ÉNERGIE | Plateforme IA pour PME",
-  description: "Optimisez vos économies d'énergie grâce à l'intelligence artificielle",
+  title: {
+    default: "CAPITAL ÉNERGIE | Plateforme IA pour PME",
+    template: "%s | CAPITAL ÉNERGIE",
+  },
+  description: "Plateforme IA pour artisans et PME : dossiers CEE, BSD Trackdéchets, registre phytosanitaire. Simplifiez votre conformité réglementaire.",
+  keywords: [
+    "CEE",
+    "certificats économie énergie",
+    "BSD",
+    "Trackdéchets",
+    "registre phytosanitaire",
+    "logiciel artisan",
+    "conformité réglementaire",
+    "PME",
+    "intelligence artificielle",
+  ],
+  authors: [{ name: "CAPITAL ÉNERGIE" }],
+  creator: "CAPITAL ÉNERGIE",
+  publisher: "CAPITAL ÉNERGIE",
   manifest: "/manifest.json",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://capital-energie.fr"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "CAPITAL ÉNERGIE",
+    title: "CAPITAL ÉNERGIE | Plateforme IA pour PME",
+    description: "Simplifiez votre conformité réglementaire : CEE, BSD, registre phyto. Solution IA pour artisans et PME.",
+    images: [
+      {
+        url: "/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "CAPITAL ÉNERGIE - Plateforme IA",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CAPITAL ÉNERGIE | Plateforme IA pour PME",
+    description: "Simplifiez votre conformité réglementaire : CEE, BSD, registre phyto.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "VOTRE_CODE_VERIFICATION_GOOGLE",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
