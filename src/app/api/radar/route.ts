@@ -91,29 +91,120 @@ const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || '';
 // Déterminer le mode de fonctionnement
 const isRealMode = GOOGLE_PLACES_API_KEY && GOOGLE_PLACES_API_KEY.trim().length > 0 && !GOOGLE_PLACES_API_KEY.startsWith('your_');
 
-/**
- * Recherche des établissements via Google Places Text Search
- */
-async function searchGooglePlaces(query: string): Promise<GooglePlaceResult[]> {
-  if (!isRealMode) {
-    console.log('[Radar] Mode SIMULATION - Aucune clé Google Places configurée');
-    return generateMockResults(query);
-  }
-  
-  console.log('[Radar] Mode PRODUCTION - Utilisation de Google Places API');
+// FieldMask requis pour la nouvelle API Places (New)
+const PLACES_FIELD_MASK = [
+  'places.id',
+  'places.displayName',
+  'places.formattedAddress',
+  'places.nationalPhoneNumber',
+  'places.internationalPhoneNumber',
+  'places.websiteUri',
+  'places.rating',
+  'places.userRatingCount',
+  'places.reviews',
+  'places.location',
+  'places.types',
+].join(',');
 
+/**
+ * Recherche via la NOUVELLE API Google Places (New) - Méthode principale
+ * Requiert les en-têtes X-Goog-FieldMask et X-Goog-Api-Key
+ */
+async function searchGooglePlacesNew(query: string): Promise<GooglePlaceResult[]> {
+  console.log('[Radar] Tentative API Places (New) pour:', query);
+  
   try {
-    // Text Search API
+    const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+        'X-Goog-FieldMask': PLACES_FIELD_MASK,
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        languageCode: 'fr',
+        maxResultCount: 10,
+      }),
+    });
+
+    const rawData = await response.json();
+    
+    // LOG DIAGNOSTIC - Réponse brute de Google
+    console.log('[Radar] === RÉPONSE BRUTE GOOGLE PLACES (NEW) ===');
+    console.log('[Radar] Status HTTP:', response.status);
+    console.log('[Radar] Raw response:', JSON.stringify(rawData, null, 2));
+    console.log('[Radar] ==========================================');
+
+    // Vérifier les erreurs d'autorisation
+    if (rawData.error) {
+      console.error('[Radar] ERREUR API:', rawData.error.message || rawData.error.status);
+      console.error('[Radar] Code erreur:', rawData.error.code);
+      console.error('[Radar] Détails:', JSON.stringify(rawData.error.details || []));
+      return [];
+    }
+
+    if (!rawData.places || rawData.places.length === 0) {
+      console.log('[Radar] Aucun résultat retourné par l\'API Places (New)');
+      return [];
+    }
+
+    // Convertir le format Places (New) vers le format legacy
+    return rawData.places.map((place: any) => ({
+      place_id: place.id,
+      name: place.displayName?.text || 'Nom inconnu',
+      formatted_address: place.formattedAddress || '',
+      formatted_phone_number: place.nationalPhoneNumber || place.internationalPhoneNumber || undefined,
+      website: place.websiteUri || undefined,
+      rating: place.rating || undefined,
+      user_ratings_total: place.userRatingCount || 0,
+      reviews: (place.reviews || []).map((r: any) => ({
+        author_name: r.authorAttribution?.displayName || 'Anonyme',
+        rating: r.rating || 3,
+        text: r.text?.text || '',
+        time: r.publishTime ? new Date(r.publishTime).getTime() / 1000 : Date.now() / 1000,
+        relative_time_description: r.relativePublishTimeDescription || '',
+      })),
+      geometry: place.location ? {
+        location: {
+          lat: place.location.latitude,
+          lng: place.location.longitude,
+        }
+      } : undefined,
+      types: place.types || [],
+    }));
+  } catch (error) {
+    console.error('[Radar] Exception API Places (New):', error);
+    return [];
+  }
+}
+
+/**
+ * Recherche via l'ancienne API Google Places (Legacy) - Fallback
+ */
+async function searchGooglePlacesLegacy(query: string): Promise<GooglePlaceResult[]> {
+  console.log('[Radar] Fallback vers API Places Legacy pour:', query);
+  
+  try {
     const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=fr&key=${GOOGLE_PLACES_API_KEY}`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
 
+    // LOG DIAGNOSTIC
+    console.log('[Radar] === RÉPONSE BRUTE GOOGLE PLACES (LEGACY) ===');
+    console.log('[Radar] Status:', searchData.status);
+    console.log('[Radar] Nombre de résultats:', searchData.results?.length || 0);
+    if (searchData.error_message) {
+      console.error('[Radar] Error message:', searchData.error_message);
+    }
+    console.log('[Radar] =============================================');
+
     if (searchData.status !== 'OK' || !searchData.results) {
-      console.error('[Radar] Erreur Google Places:', searchData.status);
+      console.error('[Radar] Erreur Google Places Legacy:', searchData.status, searchData.error_message);
       return [];
     }
 
-    // Récupérer les détails de chaque établissement (avec reviews)
+    // Récupérer les détails de chaque établissement
     const detailedResults: GooglePlaceResult[] = [];
 
     for (const place of searchData.results.slice(0, 10)) {
@@ -132,9 +223,85 @@ async function searchGooglePlaces(query: string): Promise<GooglePlaceResult[]> {
 
     return detailedResults;
   } catch (error) {
-    console.error('[Radar] Erreur recherche Google Places:', error);
+    console.error('[Radar] Erreur recherche Google Places Legacy:', error);
     return [];
   }
+}
+
+/**
+ * Scinde une requête multi-termes et effectue des recherches séparées
+ * Ex: "Électricien Plombier Romilly" -> ["Électricien Romilly", "Plombier Romilly"]
+ */
+function splitSearchTerms(metier: string, localisation: string): string[] {
+  // Liste des métiers connus pour scinder intelligemment
+  const knownMetiers = [
+    'électricien', 'electricien', 'plombier', 'chauffagiste', 'couvreur',
+    'menuisier', 'maçon', 'macon', 'peintre', 'carreleur', 'plaquiste',
+    'climaticien', 'frigoriste', 'serrurier', 'vitrier', 'charpentier',
+    'isolation', 'isolateur', 'pompe à chaleur', 'pac', 'rge',
+  ];
+  
+  const metierLower = metier.toLowerCase();
+  const foundMetiers: string[] = [];
+  
+  for (const m of knownMetiers) {
+    if (metierLower.includes(m)) {
+      foundMetiers.push(m.charAt(0).toUpperCase() + m.slice(1));
+    }
+  }
+  
+  // Si plusieurs métiers détectés, créer des requêtes séparées
+  if (foundMetiers.length > 1) {
+    console.log(`[Radar] Détection multi-métiers: ${foundMetiers.join(', ')}`);
+    return foundMetiers.map(m => `${m} ${localisation}`);
+  }
+  
+  // Sinon, requête unique
+  return [`${metier} ${localisation}`];
+}
+
+/**
+ * Recherche des établissements via Google Places (avec fallback et split)
+ */
+async function searchGooglePlaces(query: string, metier?: string, localisation?: string): Promise<GooglePlaceResult[]> {
+  if (!isRealMode) {
+    console.log('[Radar] Mode SIMULATION - Aucune clé Google Places configurée');
+    return generateMockResults(query);
+  }
+  
+  console.log('[Radar] Mode PRODUCTION - Utilisation de Google Places API');
+
+  // Déterminer les requêtes à effectuer
+  const queries = metier && localisation 
+    ? splitSearchTerms(metier, localisation)
+    : [query];
+  
+  const allResults: GooglePlaceResult[] = [];
+  const seenPlaceIds = new Set<string>();
+
+  for (const q of queries) {
+    console.log(`[Radar] Recherche: "${q}"`);
+    
+    // Essayer d'abord la nouvelle API
+    let results = await searchGooglePlacesNew(q);
+    
+    // Fallback vers l'ancienne API si aucun résultat
+    if (results.length === 0) {
+      console.log('[Radar] Nouvelle API sans résultat, tentative API Legacy...');
+      results = await searchGooglePlacesLegacy(q);
+    }
+    
+    // Dédupliquer par place_id
+    for (const place of results) {
+      if (!seenPlaceIds.has(place.place_id)) {
+        seenPlaceIds.add(place.place_id);
+        allResults.push(place);
+      }
+    }
+  }
+
+  console.log(`[Radar] Total après déduplication: ${allResults.length} établissements`);
+  return allResults;
 }
 
 /**
@@ -258,8 +425,8 @@ export async function POST(request: NextRequest) {
     const searchQuery = `${metier} ${localisation}`;
     console.log(`[Radar] Recherche: "${searchQuery}"`);
 
-    // Recherche Google Places
-    const places = await searchGooglePlaces(searchQuery);
+    // Recherche Google Places (avec split multi-métiers et fallback API)
+    const places = await searchGooglePlaces(searchQuery, metier, localisation);
     console.log(`[Radar] ${places.length} établissements trouvés`);
 
     // Récupérer les place_ids existants pour logique upsert
