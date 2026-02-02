@@ -21,7 +21,8 @@ import {
   Leaf,
   Grape,
   RefreshCw,
-  Timer
+  Timer,
+  Target
 } from 'lucide-react';
 import RadarModal from '@/components/modals/RadarModal';
 import { useToast } from '@/components/ui/Toast';
@@ -37,6 +38,22 @@ const INDUSTRY_CONFIG: Record<ClientIndustry, { label: string; icon: React.React
 
 // Type pour les filtres industrie
 type IndustryFilter = 'tous' | ClientIndustry;
+
+// Type pour les prospects du Radar (localStorage)
+interface RadarProspectItem {
+  place_id: string;
+  raison_sociale: string;
+  adresse?: string;
+  ville?: string;
+  telephone?: string;
+  site_web?: string;
+  note_google?: number;
+  nombre_avis?: number;
+  pain_score: number;
+  urgency_level?: string;
+  pain_summary?: string;
+  top_issues?: string[];
+}
 
 function StatutBadge({ statut }: { statut: string }) {
   const config = {
@@ -83,28 +100,57 @@ function ClientsPageContent() {
   const [filterIndustry, setFilterIndustry] = useState<IndustryFilter>('tous');
   const [isRadarOpen, setIsRadarOpen] = useState(false);
   const [radarProspectsCount, setRadarProspectsCount] = useState(0);
+  const [radarProspects, setRadarProspects] = useState<RadarProspectItem[]>([]);
   const { showToast } = useToast();
+
+  // Fonction pour rafraîchir les prospects depuis localStorage
+  const refreshRadarCount = () => {
+    try {
+      const storedProspects = localStorage.getItem('radar_prospects');
+      const prospects: RadarProspectItem[] = storedProspects ? JSON.parse(storedProspects) : [];
+      const count = prospects.length;
+      console.log('%c[Tour de Contrôle] Lecture localStorage:', 'background: #3b82f6; color: white; padding: 2px 6px;', count, 'prospects');
+      setRadarProspectsCount(count);
+      setRadarProspects(prospects);
+      return count;
+    } catch (e) {
+      console.error('[Tour de Contrôle] Erreur lecture localStorage:', e);
+      return 0;
+    }
+  };
 
   // Charger le compteur de prospects Radar depuis localStorage
   useEffect(() => {
-    const loadRadarCount = () => {
-      const count = localStorage.getItem('radar_total_count');
-      setRadarProspectsCount(count ? parseInt(count, 10) : 0);
-    };
-    
     // Charger au montage
-    loadRadarCount();
+    const initialCount = refreshRadarCount();
+    console.log('%c[Tour de Contrôle] Initialisation:', 'background: #10b981; color: white; padding: 2px 6px;', initialCount, 'prospects');
     
     // Écouter les mises à jour du Radar
     const handleRadarUpdate = (event: CustomEvent) => {
-      console.log('[Tour de Contrôle] Radar mis à jour:', event.detail);
-      setRadarProspectsCount(event.detail.total || 0);
+      console.log('%c[Tour de Contrôle] Événement reçu!', 'background: #f59e0b; color: black; padding: 2px 6px;', event.detail);
+      if (event.detail?.total !== undefined) {
+        setRadarProspectsCount(event.detail.total);
+      } else {
+        // Fallback: relire le localStorage
+        refreshRadarCount();
+      }
     };
     
     window.addEventListener('radar-prospects-updated', handleRadarUpdate as EventListener);
     
+    // Aussi écouter le storage event (pour synchronisation entre onglets)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'radar_prospects' || event.key === 'radar_total_count') {
+        console.log('%c[Tour de Contrôle] Storage modifié!', 'background: #8b5cf6; color: white; padding: 2px 6px;');
+        refreshRadarCount();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       window.removeEventListener('radar-prospects-updated', handleRadarUpdate as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
@@ -141,10 +187,13 @@ function ClientsPageContent() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={refetch}
+                onClick={() => {
+                  refetch();
+                  refreshRadarCount();
+                }}
                 disabled={isLoading}
                 className="p-2.5 border border-slate-600 hover:bg-slate-700 active:bg-slate-600 text-slate-400 rounded-xl transition-colors disabled:opacity-50"
-                title="Actualiser"
+                title="Actualiser (clients + prospects)"
               >
                 <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
@@ -251,12 +300,12 @@ function ClientsPageContent() {
               </div>
             </div>
           </div>
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-2.5 sm:p-4">
+          <div className="bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30 rounded-xl p-2.5 sm:p-4">
             <div className="flex flex-col sm:flex-row items-center sm:gap-3 text-center sm:text-left">
               <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 mb-1 sm:mb-0" />
               <div>
-                <p className="text-xl sm:text-2xl font-bold text-white">{stats.total}</p>
-                <p className="text-slate-400 text-xs sm:text-sm">Total</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats.total + radarProspectsCount}</p>
+                <p className="text-slate-400 text-xs sm:text-sm">Total ({stats.total} clients + {radarProspectsCount} prospects)</p>
               </div>
             </div>
           </div>
@@ -428,6 +477,153 @@ function ClientsPageContent() {
             </div>
           </div>
         )}
+
+        {/* Liste des Prospects Radar */}
+        {radarProspects.length > 0 && (
+          <div className="mt-6 bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/30 rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-purple-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Radar className="w-5 h-5 text-purple-400" />
+                <h2 className="text-lg font-semibold text-white">Prospects Radar</h2>
+              </div>
+              <span className="px-2 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm text-purple-400 font-medium">
+                {radarProspects.length} prospects
+              </span>
+            </div>
+            
+            {/* Vue Desktop (md+) */}
+            <div className="hidden md:block divide-y divide-purple-500/20">
+              {radarProspects.map((prospect) => (
+                <div
+                  key={prospect.place_id}
+                  className="flex items-center justify-between p-4 hover:bg-purple-500/5 transition-colors"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-purple-400 font-bold text-lg">
+                        {prospect.raison_sociale.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-white font-medium truncate max-w-[180px] lg:max-w-[250px]">{prospect.raison_sociale}</h3>
+                        <span className="px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-400 font-medium">
+                          Prospect
+                        </span>
+                        {prospect.pain_score > 40 && (
+                          <span className="px-2 py-0.5 bg-amber-500/20 border border-amber-500/30 rounded-full text-xs text-amber-400 font-medium flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Prioritaire
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+                        {prospect.ville && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {prospect.ville}
+                          </span>
+                        )}
+                        {prospect.telephone && (
+                          <span className="flex items-center gap-1">
+                            <Phone className="w-3 h-3" />
+                            {prospect.telephone}
+                          </span>
+                        )}
+                        {prospect.note_google && (
+                          <span className="flex items-center gap-1 text-amber-400">
+                            ⭐ {prospect.note_google.toFixed(1)} ({prospect.nombre_avis} avis)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    {/* Pain Score */}
+                    <div className="text-right min-w-[80px]">
+                      <p className={`text-lg font-bold ${prospect.pain_score > 60 ? 'text-red-400' : prospect.pain_score > 40 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        {prospect.pain_score}%
+                      </p>
+                      <p className="text-slate-500 text-xs">Pain Score</p>
+                    </div>
+                    
+                    {/* Bouton Fiche Prospect */}
+                    <Link
+                      href={`/admin/prospect/${prospect.place_id}`}
+                      className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-purple-500/20 hover:bg-purple-500/30 active:bg-purple-500/40 border border-purple-500/40 text-purple-400 rounded-xl text-sm font-medium transition-colors touch-manipulation"
+                    >
+                      <Target className="w-4 h-4" />
+                      <span>Fiche</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Vue Mobile (< md) */}
+            <div className="md:hidden p-3 space-y-3">
+              {radarProspects.map((prospect) => (
+                <div
+                  key={prospect.place_id}
+                  className="bg-slate-800/60 border border-purple-500/30 rounded-2xl p-4"
+                >
+                  {/* Header */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-purple-400 font-bold text-lg">
+                        {prospect.raison_sociale.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-white font-semibold truncate max-w-[150px]">{prospect.raison_sociale}</h3>
+                        <span className="px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-400 font-medium">
+                          Prospect
+                        </span>
+                      </div>
+                      {prospect.ville && (
+                        <p className="text-slate-400 text-sm flex items-center gap-1 mt-1">
+                          <MapPin className="w-3 h-3" />
+                          {prospect.ville}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between py-3 border-t border-b border-slate-700/50 mb-3">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <p className={`text-lg font-bold ${prospect.pain_score > 60 ? 'text-red-400' : prospect.pain_score > 40 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {prospect.pain_score}%
+                        </p>
+                        <p className="text-slate-500 text-xs">Pain Score</p>
+                      </div>
+                      {prospect.note_google && (
+                        <>
+                          <div className="w-px h-8 bg-slate-700"></div>
+                          <div className="text-center">
+                            <p className="text-amber-400 font-bold">⭐ {prospect.note_google.toFixed(1)}</p>
+                            <p className="text-slate-500 text-xs">{prospect.nombre_avis} avis</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <Link
+                    href={`/admin/prospect/${prospect.place_id}`}
+                    className="flex items-center justify-center gap-2 py-3.5 min-h-[48px] bg-purple-500/20 border border-purple-500/40 text-purple-400 rounded-xl font-semibold touch-manipulation active:bg-purple-500/30"
+                  >
+                    <Target className="w-5 h-5" />
+                    <span>Voir la Fiche Prospect</span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Radar Modal */}
@@ -436,10 +632,13 @@ function ClientsPageContent() {
         onClose={() => setIsRadarOpen(false)}
         onComplete={(newCount) => {
           setIsRadarOpen(false);
+          // Forcer le rafraîchissement du compteur immédiatement
+          const updatedCount = refreshRadarCount();
+          console.log('%c[Tour de Contrôle] onComplete - Compteur rafraîchi:', 'background: #10b981; color: white; padding: 2px 6px;', updatedCount);
           showToast({
             type: 'success',
             title: 'Radar terminé',
-            message: `${newCount} nouveaux prospects identifiés.`,
+            message: `${newCount} nouveaux prospects ajoutés. Total: ${updatedCount}`,
             duration: 6000,
           });
           refetch();

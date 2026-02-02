@@ -141,11 +141,15 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
       console.log('[RADAR] Total prospects:', totalCount, '| Haut potentiel:', totalHighPotential);
 
       // Déclencher un événement pour rafraîchir la Tour de Contrôle
+      console.log('%c[RADAR] Envoi événement radar-prospects-updated...', 'background: #f59e0b; color: black; padding: 4px 8px;');
       window.dispatchEvent(new CustomEvent('radar-prospects-updated', {
         detail: { total: totalCount, highPotential: totalHighPotential, newCount: newProspects.length }
       }));
 
-      // Succès - fermer le modal
+      // Petit délai pour laisser le temps à l'événement d'être traité
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Succès - fermer le modal et appeler onComplete
       setIsSaving(false);
       onComplete(newProspects.length, highPotentialCount);
       handleClose();
