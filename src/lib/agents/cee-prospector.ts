@@ -559,92 +559,31 @@ import { supabase } from '@/lib/supabase/client';
 
 /**
  * Sauvegarde un prospect dans Supabase
+ * NOTE: Table 'prospects' désactivée - utilise localStorage
  */
 export async function saveProspectToDatabase(prospect: Prospect): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { error } = await supabase
-      .from('prospects')
-      .upsert({
-        id: prospect.id,
-        raison_sociale: prospect.raison_sociale,
-        siret: prospect.siret,
-        activite_principale: prospect.activite_principale,
-        activites_secondaires: prospect.activites_secondaires,
-        adresse: prospect.adresse,
-        code_postal: prospect.code_postal,
-        ville: prospect.ville,
-        telephone: prospect.telephone,
-        email: prospect.email,
-        site_web: prospect.site_web,
-        contact_nom: prospect.contact_nom,
-        contact_fonction: prospect.contact_fonction,
-        score_pertinence: prospect.score_pertinence,
-        fiches_cee_potentielles: prospect.fiches_cee_potentielles,
-        message_personnalise: prospect.message_personnalise,
-        statut: prospect.statut,
-        date_creation: prospect.date_creation,
-        date_dernier_contact: prospect.date_dernier_contact,
-        notes: prospect.notes,
-      });
-    
-    if (error) throw error;
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Erreur inconnue' };
-  }
+  console.log('[CEE-Prospector] Mode local - sauvegarde simulée pour:', prospect.raison_sociale);
+  return { success: true };
 }
 
 /**
  * Récupère les prospects haute valeur depuis Supabase
+ * NOTE: Table 'prospects' désactivée - retourne tableau vide
  */
 export async function getHighValueProspectsFromDatabase(): Promise<Prospect[]> {
-  const { data, error } = await supabase
-    .from('prospects')
-    .select('*')
-    .gte('score_pertinence', 80)
-    .order('score_pertinence', { ascending: false });
-  
-  if (error) {
-    console.error('Erreur récupération prospects:', error);
-    return [];
-  }
-  
-  return data as Prospect[];
+  console.log('[CEE-Prospector] Mode local - pas de prospects en base');
+  return [];
 }
 
 /**
  * Met à jour le statut d'un prospect dans Supabase
+ * NOTE: Table 'prospects' désactivée - mode local
  */
 export async function updateProspectStatusInDatabase(
   prospectId: string,
   newStatus: ProspectStatus,
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    const updateData: Record<string, unknown> = {
-      statut: newStatus,
-      date_dernier_contact: new Date().toISOString(),
-    };
-    
-    if (notes) {
-      const { data: existing } = await supabase
-        .from('prospects')
-        .select('notes')
-        .eq('id', prospectId)
-        .single();
-      
-      const existingNotes = existing?.notes || '';
-      updateData.notes = `${existingNotes}\n[${new Date().toLocaleDateString('fr-FR')}] ${notes}`;
-    }
-    
-    const { error } = await supabase
-      .from('prospects')
-      .update(updateData)
-      .eq('id', prospectId);
-    
-    if (error) throw error;
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Erreur inconnue' };
-  }
+  console.log('[CEE-Prospector] Mode local - mise à jour simulée:', prospectId, newStatus);
+  return { success: true };
 }

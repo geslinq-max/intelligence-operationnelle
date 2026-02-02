@@ -432,15 +432,9 @@ export async function sendEmail(
   
   await supabase.from('email_logs').insert(emailLog);
   
-  // Mise à jour du prospect
+  // Mise à jour du prospect (désactivé - table prospects n'existe pas)
   if (resendResult) {
-    await supabase
-      .from('prospects')
-      .update({
-        statut: 'contacte',
-        date_dernier_contact: new Date().toISOString(),
-      })
-      .eq('id', prospect.id);
+    console.log('[CEE-Mailer] Mode local - mise à jour prospect simulée:', prospect.id);
   }
   
   return {
@@ -523,18 +517,9 @@ export async function runDripCampaign(
     return { processed: 0, sent: 0, skipped: 0, errors: ['Limite quotidienne atteinte'] };
   }
   
-  // Récupérer les prospects éligibles
-  const { data: prospects, error } = await supabase
-    .from('prospects')
-    .select('*')
-    .in('statut', ['nouveau', 'a_contacter', 'contacte'])
-    .not('email', 'is', null)
-    .order('score_pertinence', { ascending: false })
-    .limit(stats.remaining);
-  
-  if (error || !prospects) {
-    return { processed: 0, sent: 0, skipped: 0, errors: [error?.message || 'Erreur BDD'] };
-  }
+  // Table 'prospects' désactivée - mode local
+  console.log('[CEE-Mailer] Mode local - pas de prospects en base');
+  const prospects: Prospect[] = [];
   
   let sent = 0;
   let skipped = 0;
@@ -617,20 +602,11 @@ export async function trackEmailClick(trackingId: string, link: string): Promise
 
 /**
  * Récupère les prospects "chauds" (avec ouvertures récentes)
+ * NOTE: Table 'prospects' désactivée - retourne tableau vide
  */
 export async function getHotProspects(minOpens: number = 2): Promise<Prospect[]> {
-  const { data, error } = await supabase
-    .from('prospects')
-    .select('*')
-    .gte('nombre_ouvertures', minOpens)
-    .order('derniere_ouverture', { ascending: false })
-    .limit(20);
-  
-  if (error) {
-    return [];
-  }
-  
-  return data as Prospect[];
+  console.log('[CEE-Mailer] Mode local - pas de prospects chauds en base');
+  return [];
 }
 
 // ============================================================================

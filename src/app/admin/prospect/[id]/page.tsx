@@ -479,15 +479,13 @@ export default function ProspectDetailPage() {
         return;
       }
 
-      // Sinon, essayer de charger depuis Supabase
+      // Essayer de charger depuis localStorage (mode local)
       try {
-        const { data, error } = await supabase
-          .from('prospects')
-          .select('*')
-          .eq('id', prospectId)
-          .single();
+        const storedProspects = localStorage.getItem('radar_prospects');
+        const prospects = storedProspects ? JSON.parse(storedProspects) : [];
+        const data = prospects.find((p: { place_id: string }) => p.place_id === prospectId);
 
-        if (error) throw error;
+        if (!data) throw new Error('Prospect non trouvé dans localStorage');
 
         setProspect(data);
 

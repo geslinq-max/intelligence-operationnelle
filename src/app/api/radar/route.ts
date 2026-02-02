@@ -409,14 +409,38 @@ function extractVille(address: string): string {
 // API HANDLER
 // ============================================================================
 
+// RAD-008 FIX: Fonction de sanitization pour prévenir les injections
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  // Supprimer les caractères dangereux pour SQL et XSS
+  return input
+    .replace(/[<>'";`\\]/g, '') // Caractères SQL/XSS dangereux
+    .replace(/--/g, '')          // Commentaires SQL
+    .replace(/\/\*/g, '')        // Commentaires SQL multi-lignes
+    .replace(/\*\//g, '')
+    .trim()
+    .slice(0, 200);              // Limiter la longueur
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { metier, localisation } = body;
+    const { metier: rawMetier, localisation: rawLocalisation } = body;
+
+    if (!rawMetier || !rawLocalisation) {
+      return NextResponse.json(
+        { error: 'Métier et localisation requis' },
+        { status: 400 }
+      );
+    }
+
+    // RAD-008 FIX: Sanitization des entrées utilisateur
+    const metier = sanitizeInput(rawMetier);
+    const localisation = sanitizeInput(rawLocalisation);
 
     if (!metier || !localisation) {
       return NextResponse.json(
-        { error: 'Métier et localisation requis' },
+        { error: 'Paramètres invalides après sanitization' },
         { status: 400 }
       );
     }
@@ -429,19 +453,10 @@ export async function POST(request: NextRequest) {
     const places = await searchGooglePlaces(searchQuery, metier, localisation);
     console.log(`[Radar] ${places.length} établissements trouvés`);
 
-    // Récupérer les place_ids existants pour logique upsert
-    const placeIds = places.map(p => p.place_id);
-    const { data: existingProspects } = await supabase
-      .from('prospects')
-      .select('id, place_id')
-      .in('place_id', placeIds);
-
-    const existingPlaceIds = new Set(existingProspects?.map(p => p.place_id) || []);
-
-    // Traitement de chaque établissement
+    // MODE LOCAL: Pas d'appel à la base de données pour éviter les erreurs 404
+    // La table 'prospects' n'existe pas encore - traitement purement en mémoire
     const results: RadarProspect[] = [];
     let newCount = 0;
-    let updatedCount = 0;
 
     for (const place of places) {
       // Analyse Pain Signals
@@ -449,43 +464,8 @@ export async function POST(request: NextRequest) {
       const reviewData = convertToReviewData(reviews);
       const insight = PainSignalsEngine.calculatePainScore(reviewData);
 
-      const isNew = !existingPlaceIds.has(place.place_id);
-      
-      // Préparer les données prospect
-      const prospectData = {
-        place_id: place.place_id,
-        raison_sociale: place.name,
-        activite_principale: metier,
-        activites_secondaires: [],
-        adresse: place.formatted_address,
-        ville: extractVille(place.formatted_address),
-        telephone: place.formatted_phone_number || null,
-        site_web: place.website || null,
-        note_google: place.rating || null,
-        nombre_avis: place.user_ratings_total || 0,
-        pain_score: insight.painScore,
-        urgency_level: insight.urgencyLevel,
-        pain_summary: insight.summary,
-        top_issues: insight.topIssues,
-        score_pertinence: Math.min(100, 50 + insight.painScore * 0.5),
-        fiches_cee_potentielles: [],
-        statut: 'nouveau' as const,
-        date_creation: new Date().toISOString(),
-        latitude: place.geometry?.location.lat,
-        longitude: place.geometry?.location.lng,
-      };
-
-      // Upsert dans Supabase
-      const { error } = await supabase
-        .from('prospects')
-        .upsert(prospectData, { onConflict: 'place_id' });
-
-      if (error) {
-        console.error(`[Radar] Erreur upsert ${place.place_id}:`, error);
-      } else {
-        if (isNew) newCount++;
-        else updatedCount++;
-      }
+      // Tous les résultats sont considérés comme nouveaux (pas de persistance)
+      newCount++;
 
       // Ajouter au résultat pour affichage
       results.push({
@@ -501,7 +481,7 @@ export async function POST(request: NextRequest) {
         urgency_level: insight.urgencyLevel,
         pain_summary: insight.summary,
         top_issues: insight.topIssues,
-        is_new: isNew,
+        is_new: true,
         // Nouvelles données pour scripts de vente personnalisés
         real_quotes: insight.realQuotes,
         script_hooks: insight.scriptHooks,
@@ -516,7 +496,7 @@ export async function POST(request: NextRequest) {
       query: searchQuery,
       total: results.length,
       new_count: newCount,
-      updated_count: updatedCount,
+      updated_count: 0,
       high_potential_count: results.filter(r => r.pain_score > 40).length,
       prospects: results,
       mode: isRealMode ? 'PRODUCTION' : 'SIMULATION',

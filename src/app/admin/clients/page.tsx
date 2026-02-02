@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components';
 import { ProtectedRoute } from '@/contexts/AuthContext';
@@ -82,7 +82,31 @@ function ClientsPageContent() {
   const [filterStatut, setFilterStatut] = useState<string>('tous');
   const [filterIndustry, setFilterIndustry] = useState<IndustryFilter>('tous');
   const [isRadarOpen, setIsRadarOpen] = useState(false);
+  const [radarProspectsCount, setRadarProspectsCount] = useState(0);
   const { showToast } = useToast();
+
+  // Charger le compteur de prospects Radar depuis localStorage
+  useEffect(() => {
+    const loadRadarCount = () => {
+      const count = localStorage.getItem('radar_total_count');
+      setRadarProspectsCount(count ? parseInt(count, 10) : 0);
+    };
+    
+    // Charger au montage
+    loadRadarCount();
+    
+    // Écouter les mises à jour du Radar
+    const handleRadarUpdate = (event: CustomEvent) => {
+      console.log('[Tour de Contrôle] Radar mis à jour:', event.detail);
+      setRadarProspectsCount(event.detail.total || 0);
+    };
+    
+    window.addEventListener('radar-prospects-updated', handleRadarUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('radar-prospects-updated', handleRadarUpdate as EventListener);
+    };
+  }, []);
 
   // Filtrer les clients
   const filteredClients = clients.filter(client => {
@@ -111,7 +135,7 @@ function ClientsPageContent() {
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">Tour de Contrôle</h1>
                 <p className="text-emerald-400 text-xs sm:text-sm font-medium">
-                  {stats.total} clients inscrits • {stats.totalHeuresGagnees.toFixed(1)}h économisées
+                  {stats.total} clients • {radarProspectsCount} prospects • {stats.totalHeuresGagnees.toFixed(1)}h économisées
                 </p>
               </div>
             </div>

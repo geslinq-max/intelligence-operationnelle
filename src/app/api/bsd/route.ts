@@ -145,9 +145,17 @@ export async function POST(request: NextRequest) {
     const body: BSDCreateRequest = await request.json();
     
     // Validation des champs requis
-    if (!body.chantierNom || !body.producteurNom || !body.tonnageEstime) {
+    if (!body.chantierNom || !body.producteurNom) {
       return NextResponse.json(
-        { error: 'Champs requis manquants: chantierNom, producteurNom, tonnageEstime' },
+        { error: 'Champs requis manquants: chantierNom, producteurNom' },
+        { status: 400 }
+      );
+    }
+
+    // CONF-006 FIX: Validation stricte du tonnage (doit être > 0)
+    if (typeof body.tonnageEstime !== 'number' || body.tonnageEstime <= 0) {
+      return NextResponse.json(
+        { error: 'Le tonnage estimé doit être un nombre supérieur à 0' },
         { status: 400 }
       );
     }

@@ -14,6 +14,7 @@ import {
   Star,
   Activity,
   CheckCircle,
+  Check,
   RefreshCw,
   Users,
   TrendingUp
@@ -65,10 +66,96 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
   const [metier, setMetier] = useState('');
   const [localisation, setLocalisation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [results, setResults] = useState<RadarProspect[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState<{ total: number; newCount: number; highPotential: number; mode?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(0);
+
+  // Toggle sélection d'un prospect - VERSION DEBUG
+  const toggleSelection = useCallback((placeId: string, prospectName?: string) => {
+    console.log('%c[RADAR CLICK] ' + (prospectName || placeId), 'background: #10b981; color: white; padding: 4px 8px; border-radius: 4px;');
+    
+    setSelectedIds(prevIds => {
+      const newSet = new Set(prevIds);
+      if (newSet.has(placeId)) {
+        newSet.delete(placeId);
+        console.log('%c[RADAR] Désélectionné: ' + (prospectName || placeId), 'color: #f59e0b;');
+      } else {
+        newSet.add(placeId);
+        console.log('%c[RADAR] Sélectionné: ' + (prospectName || placeId), 'color: #10b981;');
+      }
+      console.log('%c[RADAR] Total sélectionnés: ' + newSet.size, 'color: #3b82f6; font-weight: bold;');
+      return newSet;
+    });
+  }, []);
+
+  // Sélectionner/Désélectionner tous
+  const toggleSelectAll = () => {
+    if (selectedIds.size === results.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(results.map(p => p.place_id)));
+    }
+  };
+
+  // Enregistrer les prospects sélectionnés dans localStorage
+  const handleSaveSelected = async () => {
+    if (selectedIds.size === 0) {
+      setError('Veuillez sélectionner au moins un prospect');
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      // Filtrer les prospects sélectionnés
+      const selectedProspects = results.filter(p => selectedIds.has(p.place_id));
+      const highPotentialCount = selectedProspects.filter(p => p.pain_score > 40).length;
+
+      // Log pour debug
+      console.log('%c[RADAR] Enregistrement de ' + selectedProspects.length + ' prospects...', 'background: #10b981; color: white; padding: 4px 8px;');
+
+      // Récupérer les prospects existants du localStorage
+      const existingData = localStorage.getItem('radar_prospects');
+      const existingProspects: typeof selectedProspects = existingData ? JSON.parse(existingData) : [];
+
+      // Fusionner avec les nouveaux (éviter les doublons par place_id)
+      const existingIds = new Set(existingProspects.map(p => p.place_id));
+      const newProspects = selectedProspects.filter(p => !existingIds.has(p.place_id));
+      const mergedProspects = [...existingProspects, ...newProspects];
+
+      // Sauvegarder dans localStorage
+      localStorage.setItem('radar_prospects', JSON.stringify(mergedProspects));
+      localStorage.setItem('radar_last_update', new Date().toISOString());
+
+      // Mettre à jour le compteur global
+      const totalCount = mergedProspects.length;
+      const totalHighPotential = mergedProspects.filter(p => p.pain_score > 40).length;
+      localStorage.setItem('radar_total_count', String(totalCount));
+      localStorage.setItem('radar_high_potential_count', String(totalHighPotential));
+
+      console.log('%c[RADAR] ✓ Sauvegarde réussie!', 'background: #10b981; color: white; padding: 4px 8px;');
+      console.log('[RADAR] Total prospects:', totalCount, '| Haut potentiel:', totalHighPotential);
+
+      // Déclencher un événement pour rafraîchir la Tour de Contrôle
+      window.dispatchEvent(new CustomEvent('radar-prospects-updated', {
+        detail: { total: totalCount, highPotential: totalHighPotential, newCount: newProspects.length }
+      }));
+
+      // Succès - fermer le modal
+      setIsSaving(false);
+      onComplete(newProspects.length, highPotentialCount);
+      handleClose();
+
+    } catch (err) {
+      console.error('[RADAR] Erreur sauvegarde:', err);
+      setError('Erreur lors de l\'enregistrement');
+      setIsSaving(false);
+    }
+  };
 
   // Pré-remplir le métier selon le contexte métier actif
   useEffect(() => {
@@ -134,12 +221,10 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
   };
 
   const handleClose = () => {
-    if (stats) {
-      onComplete(stats.newCount, stats.highPotential);
-    }
     setMetier('');
     setLocalisation('');
     setResults([]);
+    setSelectedIds(new Set());
     setStats(null);
     setError(null);
     onClose();
@@ -305,7 +390,7 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
         )}
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ pointerEvents: 'auto' }}>
           {isSearching && (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="relative">
@@ -325,100 +410,187 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
             </div>
           )}
 
+          {/* Barre de sélection avec compteur visible */}
+          {results.length > 0 && (
+            <div className="flex items-center justify-between mb-3 px-1 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
+              <button
+                onClick={() => {
+                  console.log('[TOUT SÉLECTIONNER] Clic');
+                  toggleSelectAll();
+                }}
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-emerald-400 transition-colors px-2"
+              >
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                  selectedIds.size === results.length 
+                    ? 'bg-emerald-500 border-emerald-500' 
+                    : 'border-slate-600 hover:border-emerald-500'
+                }`}>
+                  {selectedIds.size === results.length && <Check className="w-3 h-3 text-white" />}
+                </div>
+                {selectedIds.size === results.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+              </button>
+              <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                selectedIds.size > 0 
+                  ? 'bg-emerald-500 text-white' 
+                  : 'bg-slate-700 text-slate-400'
+              }`}>
+                {selectedIds.size} / {results.length}
+              </div>
+            </div>
+          )}
+
           {results.slice(0, visibleCount).map((prospect, index) => {
             const urgencyConfig = getUrgencyConfig(prospect.urgency_level);
+            const isSelected = selectedIds.has(prospect.place_id);
             
             return (
               <div
                 key={prospect.place_id}
-                className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 transition-all duration-300 hover:border-emerald-500/50"
+                className={`relative rounded-xl p-4 transition-all duration-200 ${
+                  isSelected 
+                    ? 'bg-emerald-500/20 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20' 
+                    : 'bg-slate-800/50 border-2 border-slate-700'
+                }`}
                 style={{
                   animation: 'fadeSlideIn 0.3s ease-out forwards',
                   animationDelay: `${index * 50}ms`,
                 }}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-white font-medium truncate max-w-[180px] sm:max-w-none">{prospect.raison_sociale}</h3>
-                      {prospect.is_new && (
-                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full border border-emerald-500/30">
-                          Nouveau
-                        </span>
-                      )}
-                      {!prospect.is_new && (
-                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30 flex items-center gap-1">
-                          <RefreshCw className="w-3 h-3" />
-                          Mis à jour
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-slate-400 flex-wrap">
-                      <span className="flex items-center gap-1 truncate">
-                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span className="truncate max-w-[100px] sm:max-w-none">{prospect.ville}</span>
+                {/* ========== BOUTON SÉLECTION PRINCIPAL ========== */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('[CLICK] Bouton cliqué pour:', prospect.raison_sociale);
+                    toggleSelection(prospect.place_id, prospect.raison_sociale);
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('[MOUSEDOWN] Bouton pressé pour:', prospect.raison_sociale);
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    console.log('[TOUCH] Bouton touché pour:', prospect.raison_sociale);
+                    toggleSelection(prospect.place_id, prospect.raison_sociale);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    width: '48px',
+                    height: '48px',
+                    zIndex: 9999,
+                    cursor: 'pointer',
+                    pointerEvents: 'auto',
+                    touchAction: 'manipulation',
+                  }}
+                  className={`rounded-xl border-2 flex items-center justify-center transition-all ${
+                    isSelected 
+                      ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg' 
+                      : 'bg-slate-700 border-slate-500 text-slate-300 hover:bg-emerald-600 hover:border-emerald-500 hover:text-white'
+                  }`}
+                  aria-pressed={isSelected}
+                  aria-label={isSelected ? `Désélectionner ${prospect.raison_sociale}` : `Sélectionner ${prospect.raison_sociale}`}
+                >
+                  {isSelected ? (
+                    <Check className="w-6 h-6" />
+                  ) : (
+                    <span className="text-2xl font-bold">+</span>
+                  )}
+                </button>
+
+                {/* Contenu de la carte */}
+                <div className="pr-14">
+                  {/* Header avec nom */}
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <h3 className={`font-semibold text-base ${
+                      isSelected ? 'text-emerald-300' : 'text-white'
+                    }`}>
+                      {prospect.raison_sociale}
+                    </h3>
+                    {prospect.is_new && (
+                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full border border-emerald-500/30">
+                        Nouveau
                       </span>
-                      {prospect.telephone && (
-                        <span className="flex items-center gap-1">
-                          <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                          <span className="truncate">{prospect.telephone}</span>
-                        </span>
-                      )}
-                      {prospect.site_web && (
-                        <a 
-                          href={prospect.site_web} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="hidden sm:flex items-center gap-1 text-emerald-400 hover:underline"
-                        >
-                          <Globe className="w-3.5 h-3.5" />
-                          Site web
-                        </a>
-                      )}
-                    </div>
-                    
-                    {prospect.note_google && (
-                      <div className="flex items-center gap-1 mt-2 text-sm">
-                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="text-white font-medium">{prospect.note_google.toFixed(1)}</span>
-                        <span className="text-slate-500">({prospect.nombre_avis} avis)</span>
-                      </div>
+                    )}
+                    {!prospect.is_new && (
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30 flex items-center gap-1">
+                        <RefreshCw className="w-3 h-3" />
+                        Mis à jour
+                      </span>
                     )}
                   </div>
-
-                  {/* Pain Score Badge */}
-                  <div className={`flex-shrink-0 p-3 rounded-xl border ${urgencyConfig.bg} ${urgencyConfig.border}`}>
-                    <div className="flex items-center gap-2">
-                      <Activity className={`w-4 h-4 ${urgencyConfig.text}`} />
-                      <span className={`text-lg font-bold ${urgencyConfig.text}`}>
-                        {prospect.pain_score}
+                  
+                  {/* Infos localisation et contact */}
+                  <div className="flex items-center gap-3 text-sm text-slate-400 flex-wrap mb-2">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      {prospect.ville}
+                    </span>
+                    {prospect.telephone && (
+                      <span 
+                        className="flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Phone className="w-4 h-4 flex-shrink-0" />
+                        {prospect.telephone}
                       </span>
-                    </div>
-                    <p className={`text-xs ${urgencyConfig.text} opacity-80 mt-0.5`}>
-                      {urgencyConfig.label}
-                    </p>
+                    )}
+                    {prospect.site_web && (
+                      <a 
+                        href={prospect.site_web} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 text-emerald-400 hover:underline"
+                      >
+                        <Globe className="w-4 h-4" />
+                        Site
+                      </a>
+                    )}
                   </div>
+                  
+                  {/* Note Google */}
+                  {prospect.note_google && (
+                    <div className="flex items-center gap-1 text-sm mb-2">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-white font-medium">{prospect.note_google.toFixed(1)}</span>
+                      <span className="text-slate-500">({prospect.nombre_avis} avis)</span>
+                    </div>
+                  )}
+
+                  {/* Pain Score inline */}
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${urgencyConfig.bg} ${urgencyConfig.border} border`}>
+                    <Activity className={`w-4 h-4 ${urgencyConfig.text}`} />
+                    <span className={`font-bold ${urgencyConfig.text}`}>
+                      Score: {prospect.pain_score}
+                    </span>
+                    <span className={`text-xs ${urgencyConfig.text} opacity-80`}>
+                      ({urgencyConfig.label})
+                    </span>
+                  </div>
+
+                  {/* Pain Summary */}
+                  {prospect.pain_score > 0 && prospect.pain_summary && (
+                    <div className="mt-3 pt-3 border-t border-slate-700/50">
+                      <p className="text-slate-400 text-sm">{prospect.pain_summary}</p>
+                      {prospect.top_issues.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {prospect.top_issues.map((issue, i) => (
+                            <span 
+                              key={i}
+                              className="px-2 py-0.5 bg-slate-700/50 text-slate-400 text-xs rounded"
+                            >
+                              {issue}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                {/* Pain Summary */}
-                {prospect.pain_score > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-700/50 overflow-hidden">
-                    <p className="text-slate-400 text-xs sm:text-sm break-words">{prospect.pain_summary}</p>
-                    {prospect.top_issues.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {prospect.top_issues.map((issue, i) => (
-                          <span 
-                            key={i}
-                            className="px-2 py-0.5 bg-slate-700/50 text-slate-400 text-xs rounded"
-                          >
-                            {issue}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}
@@ -426,12 +598,39 @@ export default function RadarModal({ isOpen, onClose, onComplete }: RadarModalPr
 
         {/* Footer */}
         {stats && (
-          <div className="p-4 border-t border-slate-700 flex-shrink-0">
+          <div className="p-4 border-t border-slate-700 flex-shrink-0 space-y-2">
+            {error && (
+              <p className="text-red-400 text-sm text-center mb-2">{error}</p>
+            )}
+            <button
+              onClick={handleSaveSelected}
+              disabled={isSaving || selectedIds.size === 0}
+              className={`w-full px-4 py-3 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                selectedIds.size > 0
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  {selectedIds.size > 0 
+                    ? `Ajouter ${selectedIds.size} prospect${selectedIds.size > 1 ? 's' : ''} sélectionné${selectedIds.size > 1 ? 's' : ''}`
+                    : '0 ajoutés - Sélectionnez des prospects'
+                  }
+                </>
+              )}
+            </button>
             <button
               onClick={handleClose}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
+              className="w-full px-4 py-2 text-slate-400 hover:text-white text-sm transition-colors"
             >
-              Terminer - {stats.newCount} nouveaux prospects ajoutés
+              Fermer sans enregistrer
             </button>
           </div>
         )}
