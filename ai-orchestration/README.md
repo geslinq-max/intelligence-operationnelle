@@ -32,4 +32,4 @@ Les architectures présentes ici sont optimisées pour les environnements suivan
 * **Modèles** : Claude 3.5 Sonnet & Gemini 1.5 Pro.
 
 ---
-**Contact :** [Lien vers ton profil LinkedIn]
+**Contact :** (https://www.linkedin.com/in/quentin-geslin-38a7733b7/)
