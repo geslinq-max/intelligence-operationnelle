@@ -1,4 +1,4 @@
-Proposition de README "Orchestrateur"
+"Orchestrateur"
 ⚡ Intelligence Opérationnelle : Automatisation Administrative CEE
 Orchestration de systèmes automatisés pour l'optimisation des flux administratifs et énergétiques des PME.
 
