@@ -1,90 +1,60 @@
-# Intelligence Opérationnelle du Monde Physique
+"Orchestrateur"
+⚡ Intelligence Opérationnelle : Automatisation Administrative CEE
+Orchestration de systèmes automatisés pour l'optimisation des flux administratifs et énergétiques des PME.
 
-Plateforme d'IA agentique pour optimiser l'énergie et la logistique des PME industrielles.
+🧭 Vision & Approche
+Ce projet n'est pas issu d'un développement traditionnel. Il a été conçu et déployé selon une approche de "Software Orchestration".
 
-## Vision
+En tant qu'architecte de la solution, j'ai piloté des outils de nouvelle génération (Google Gemini, Windsurf, Cursor) pour transformer des besoins métier complexes en un système fonctionnel et modulaire. Ma valeur réside dans la conception de la logique, de l'architecture et du pilotage des agents IA pour produire un outil prêt à l'emploi.
 
-Transformer les PME industrielles en organisations ultra-efficientes grâce à une armée d'agents IA spécialisés.
+🤖 L'Architecture du Système
+Le logiciel s'appuie sur plusieurs "agents" spécialisés qui collaborent pour traiter un dossier de A à Z :
 
-## Architecture - L'Armée d'Agents
+Agent	Fichier Source	Rôle & Expertise
+Inbound	agent-inbound.js	Surveillance de flux (emails/dossiers) et réception des pièces.
+Reader	lecteur-devis.js	Extraction de données structurées depuis des PDF via Regex & Logique IA.
+Compliance	conformite-cee.js	Système expert vérifiant la conformité réglementaire (BAR-TH-104, etc.).
+Router	agent-routeur.js	Automatisation de la prospection et reporting client personnalisé.
+Pipeline	pipeline-admin.js	Orchestrateur central liant tous les modules entre eux.
 
-| Agent | Rôle |
-|-------|------|
-| **Scout** | Reconnaissance et collecte de données (énergie, logistique) |
-| **Architect** | Conception de plans d'optimisation et calcul du ROI |
-| **Compliance** | Vérification de conformité (ISO 14001, 50001, RGPD) |
-| **Outreach** | Identification et acquisition de clients PME |
+Exporter vers Sheets
 
-## Stack Technique
+🛠 Stack Technique
+Framework : Next.js 16 (App Router) + React 19 + TypeScript
 
-- **Frontend**: Next.js 15 + React + TypeScript + Tailwind CSS
-- **Backend**: Supabase (PostgreSQL + Auth + Storage)
-- **Déploiement**: Vercel
-- **Architecture**: Hybride (Option C)
+UI/UX : Tailwind CSS + Lucide React + Recharts (Dashboards)
 
-## Installation
+Backend & Sécurité : Supabase (PostgreSQL, Auth, SSR)
 
-```bash
-# 1. Cloner le projet
-git clone https://github.com/TON-USERNAME/intelligence-operationnelle.git
+Paiements & Billing : Stripe Integration
+
+Méthodologie : AI-Assisted Engineering (Windsurf / Gemini Antigravity)
+
+🚀 Fonctionnalités Clés
+Parsing Intelligent : Transformation de documents non-structurés en données exploitables.
+
+Scoring de Sécurité : Calcul automatique d'un indice de fiabilité (0-100%) pour chaque dossier.
+
+Alertes de Trésorerie : Détection automatique des points bloquants avant le dépôt des primes.
+
+Prospection Automatisée : Génération d'emails personnalisés basés sur l'analyse de données prospects.
+
+⚙️ Installation & Test
+1. Cloner le projet
+Bash
+
+git clone https://github.com/geslinq-max/intelligence-operationnelle.git
 cd intelligence-operationnelle
+2. Installer les dépendances
+Bash
 
-# 2. Installer les dépendances
 npm install
+3. Lancer un test de l'agent (Mode Sorcier)
+Pour tester la logique d'analyse sans interface :
 
-# 3. Configurer l'environnement
-copy env.example .env.local
-# Puis éditer .env.local avec tes clés Supabase
+Bash
 
-# 4. Lancer le serveur de développement
-npm run dev
-```
-
-Ouvrir [http://localhost:3000](http://localhost:3000) dans ton navigateur.
-
-## Configuration Supabase
-
-1. Créer un projet sur [supabase.com](https://supabase.com)
-2. Aller dans **Settings > API**
-3. Copier `Project URL` et `anon public key`
-4. Les coller dans ton fichier `.env.local`
-
-## Structure du Projet
-
-```
-src/
-├── agents/           # L'Armée d'Agents IA
-│   ├── scout/        # Agent de reconnaissance
-│   ├── architect/    # Agent de conception
-│   ├── compliance/   # Agent de conformité
-│   ├── outreach/     # Agent d'acquisition
-│   └── index.ts      # Orchestrateur central
-├── app/              # Pages Next.js (App Router)
-├── lib/
-│   └── supabase/     # Configuration base de données
-└── components/       # Composants React (à créer)
-```
-
-## Roadmap
-
-- [x] QG Numérique - Initialisation du projet
-- [ ] Base de données Supabase
-- [ ] Interface utilisateur de base
-- [ ] Agent Scout - MVP
-- [ ] Agent Architect - MVP
-- [ ] Agent Compliance - MVP
-- [ ] Agent Outreach - MVP
-- [ ] Déploiement Vercel
-
-## Déploiement
-
-```bash
-# Via Vercel CLI
-npx vercel
-```
-
-Ou connecter le repo GitHub à [vercel.com](https://vercel.com) pour un déploiement automatique.
-
-## Licence
-
-Projet privé - Tous droits réservés.
+node agent-inbound.js test
+📄 Licence & Note
+Ce projet est une Preuve de Concept (PoC) avancée démontrant l'efficacité de l'automatisation par IA dans le secteur de l'énergie.
+Développé en mode R&D indépendant par Max Geslin.
